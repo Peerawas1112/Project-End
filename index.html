@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Anatomy AR Learning System</title>
+
+<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+:root { --primary: #ff4757; --bg: #020617; --glass: rgba(15, 23, 42, 0.9); --border: rgba(255, 255, 255, 0.1); }
+body{ margin:0; font-family:Kanit,sans-serif; background:var(--bg); color:white; height:100vh; overflow:hidden; }
+
+/* UI Layout */
+.app-header { height: 55px; display: none; align-items: center; justify-content: space-between; padding: 0 16px; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); z-index: 500; }
+.home, .quiz-page { position:fixed; inset:0; display:flex; justify-content:center; align-items:center; background:var(--bg); z-index:1000; overflow-y: auto; }
+.quiz-page { display:none; }
+.box { width:90%; max-width:480px; background:var(--glass); border-radius:28px; padding:30px; text-align:center; border: 1px solid var(--border); box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+
+/* Input & Buttons */
+input[type="text"] { width: 100%; padding: 12px; margin-bottom: 20px; border-radius: 12px; border: 1px solid var(--border); background: rgba(255,255,255,0.05); color: white; text-align: center; font-family: Kanit; font-size: 1rem; box-sizing: border-box; }
+button { padding:12px 20px; border:none; border-radius:16px; background:var(--primary); color:white; font-size:1rem; cursor:pointer; transition: 0.3s; font-family: Kanit; }
+button:disabled { background: #475569; opacity: 0.5; cursor: not-allowed; }
+
+/* Quiz Styles */
+.choice { background:#1e293b; padding:14px; border-radius:16px; margin:10px 0; cursor:pointer; text-align: left; border: 1px solid transparent; transition: 0.2s; }
+.choice.correct { background:#16a34a !important; border-color: #4ade80; }
+.choice.wrong { background:#dc2626 !important; border-color: #f87171; }
+.choice.disabled { pointer-events: none; }
+
+/* Timer */
+.timer-container { width: 100%; height: 6px; background: #1e293b; border-radius: 10px; margin: 15px 0; overflow: hidden; }
+#timerBar { width: 100%; height: 100%; background: var(--primary); transition: width 1s linear; }
+
+/* Result Table */
+.result-table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.85rem; }
+.result-table th, .result-table td { padding: 8px; border-bottom: 1px solid var(--border); text-align: left; }
+.grade-text { font-size: 4rem; font-weight: bold; color: var(--primary); margin: 10px 0; }
+
+/* Viewer Elements */
+.tabs, .menu { display:none; gap:10px; padding:10px; overflow-x:auto; background: rgba(0,0,0,0.3); }
+.tab-btn, .menu-item { padding:8px 16px; border-radius:16px; border:1px solid var(--border); cursor:pointer; white-space: nowrap; }
+.tab-btn.active, .menu-item.active { background:var(--primary); }
+.main { height:calc(100vh - 110px); position:relative; display: none; }
+model-viewer { width:100%; height:100%; }
+.info-panel { position:absolute; bottom:80px; left:50%; transform:translateX(-50%); width:90%; max-width:420px; background:var(--glass); border-radius:20px; padding:16px; border: 1px solid var(--border); pointer-events: none; }
+</style>
+</head>
+
+<body>
+
+<div id="home" class="home">
+  <div class="box">
+    <h1 style="margin-bottom: 10px;">Human Anatomy AR</h1>
+    <p id="loadingText" style="color: #fbbf24; margin-bottom: 25px;">กำลังโหลดข้อมูลบทเรียน...</p>
+    <input type="text" id="studentName" placeholder="ชื่อ-นามสกุล นักเรียน" />
+    <button id="btnLearn" onclick="startLearning()" style="width: 100%;" disabled>📚 เข้าบทเรียน</button>
+    <div style="display: flex; gap: 10px; margin-top: 15px;">
+        <button id="btnPre" onclick="openQuiz('ก่อนเรียน')" style="flex: 1;" disabled>📝 ทดสอบก่อนเรียน</button>
+        <button id="btnPost" onclick="openQuiz('หลังเรียน')" style="flex: 1;" disabled>📝 ทดสอบหลังเรียน</button>
+    </div>
+  </div>
+</div>
+
+<div id="quizPage" class="quiz-page">
+  <div class="box" id="quizBox">
+    <div id="quizHeader">
+        <div id="quizType" style="color:var(--primary); font-weight:500;"></div>
+        <div style="font-size: 0.9rem; margin-bottom: 10px;" id="displayUserName"></div>
+        <div class="timer-container"><div id="timerBar"></div></div>
+    </div>
+    
+    <div id="quizBody">
+        <h2 id="qTitle" style="font-size: 1.1rem; min-height: 50px;"></h2>
+        <div id="qChoices"></div>
+        <p id="qProgress" style="font-size: 0.8rem; color: #94a3b8; margin-top: 15px;"></p>
+    </div>
+    <button id="exitQuizBtn" onclick="closeQuiz()" style="background:none; border:1px solid #4b5563; color:#94a3b8; margin-top:10px;">ยกเลิก</button>
+  </div>
+</div>
+
+<header class="app-header" id="appHeader">
+    <span id="learnUser" style="font-size: 0.8rem; color: #94a3b8;"></span>
+    <button onclick="backToHome()" style="background:none; border:1px solid var(--border); font-size: 0.8rem;">🏠 กลับหน้าหลัก</button>
+</header>
+<nav class="tabs" id="tabs"></nav>
+<main class="main" id="mainArea">
+  <model-viewer id="viewer" ar ar-modes="webxr scene-viewer quick-look" camera-controls auto-rotate shadow-intensity="1"></model-viewer>
+  <div class="info-panel">
+    <h3 id="title" style="margin:0; color:var(--primary);">เลือกอวัยวะ</h3>
+    <p id="desc" style="margin:5px 0 0 0; font-size:0.85rem; color:#cbd5e1;"></p>
+  </div>
+</main>
+<footer class="menu" id="menu"></footer>
+
+<script>
+// Variables
+let data = [], currentQuizData = [], qIndex = 0, score = 0, isAnswered = false;
+let timerInterval, timeLeft = 15;
+let studentName = "";
+const maxTime = 15;
+const delayNext = 2000;
+let currentCorrectText = ""; 
+
+// Elements
+const home = document.getElementById("home");
+const quizPage = document.getElementById("quizPage");
+const viewer = document.getElementById("viewer");
+const tabs = document.getElementById("tabs");
+const menu = document.getElementById("menu");
+const title = document.getElementById("title");
+const desc = document.getElementById("desc");
+const qTitle = document.getElementById("qTitle");
+const qChoices = document.getElementById("qChoices");
+const qProgress = document.getElementById("qProgress");
+const timerBar = document.getElementById("timerBar");
+const loadingText = document.getElementById("loadingText");
+const btnLearn = document.getElementById("btnLearn");
+const btnPre = document.getElementById("btnPre");
+const btnPost = document.getElementById("btnPost");
+
+// 1. Fetch Data
+fetch("anatomy_data.json")
+.then(r => {
+    if (!r.ok) throw new Error("Network response was not ok");
+    return r.json();
+})
+.then(j => {
+    data = j.systems;
+    renderTabs();
+    if (data.length > 0) loadSystem(0);
+    
+    // Enable buttons and clear loading text
+    loadingText.textContent = "กรุณาระบุชื่อ";
+    loadingText.style.color = "#94a3b8";
+    btnLearn.disabled = false;
+    btnPre.disabled = false;
+    btnPost.disabled = false;
+})
+.catch(err => {
+    console.error("Error loading data:", err);
+    loadingText.textContent = "เกิดข้อผิดพลาดในการโหลดข้อมูล กรุณารีเฟรชหน้าเว็บ";
+    loadingText.style.color = "#ef4444";
+});
+
+/* --- ฟังก์ชันช่วยสุ่มลำดับอาเรย์ --- */
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
+function renderTabs() {
+    tabs.innerHTML = data.map((s, i) => `<div class="tab-btn" id="t${i}" onclick="loadSystem(${i})">${s.category}</div>`).join("");
+}
+
+function loadSystem(i) {
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+    const activeTab = document.getElementById("t" + i);
+    if(activeTab) activeTab.classList.add("active");
+    
+    if (data[i].items && data[i].items.length > 0) {
+        menu.innerHTML = data[i].items.map((o, j) => `<div class="menu-item" id="m${i}${j}" onclick="selectOrgan(${i},${j})">${o.name}</div>`).join("");
+        selectOrgan(i, 0);
+    } else {
+        menu.innerHTML = "";
+    }
+}
+
+function selectOrgan(i, j) {
+    document.querySelectorAll(".menu-item").forEach(m => m.classList.remove("active"));
+    const activeMenu = document.getElementById(`m${i}${j}`);
+    if(activeMenu) activeMenu.classList.add("active");
+
+    const o = data[i].items[j];
+    viewer.src = o.model_file;
+    title.textContent = o.name;
+    desc.textContent = o.description;
+    
+    currentQuizData = o.quiz ? shuffleArray([...o.quiz]) : [];
+}
+
+/* Navigation Logic */
+function checkName() {
+    studentName = document.getElementById("studentName").value.trim();
+    if (!studentName) {
+        alert("กรุณาใส่ชื่อนักเรียนก่อนเข้าสู่ระบบครับ");
+        return false;
+    }
+    return true;
+}
+
+function startLearning() {
+    if (!checkName()) return;
+    home.style.display = "none";
+    appHeader.style.display = "flex";
+    mainArea.style.display = "block";
+    tabs.style.display = "flex";
+    menu.style.display = "flex";
+    document.getElementById("learnUser").textContent = "👤 " + studentName;
+}
+
+function backToHome() {
+    appHeader.style.display = "none";
+    mainArea.style.display = "none";
+    tabs.style.display = "none";
+    menu.style.display = "none";
+    home.style.display = "flex";
+}
+
+/* Quiz Logic */
+function openQuiz(type) {
+    if (!checkName()) return;
+
+    let allQuestions = [];
+    data.forEach(system => {
+        if(system.items) {
+            system.items.forEach(item => {
+                if (item.quiz) allQuestions = allQuestions.concat(item.quiz);
+            });
+        }
+    });
+
+    if (allQuestions.length === 0) {
+        alert("ยังไม่มีคำถามในระบบครับ");
+        return;
+    }
+
+    // สุ่มคำถามทั้งหมดแล้วเลือกมาสูงสุด 10 ข้อ (ถ้ามีน้อยกว่า 10 ก็เอาเท่าที่มี)
+    const questionCount = Math.min(allQuestions.length, 10);
+    currentQuizData = shuffleArray([...allQuestions]).slice(0, questionCount);
+
+    document.getElementById("quizType").textContent = "แบบทดสอบ" + type;
+    document.getElementById("displayUserName").textContent = "นักเรียน: " + studentName;
+    home.style.display = "none";
+    quizPage.style.display = "flex";
+    qIndex = 0; score = 0;
+    showQuestion();
+}
+
+function showQuestion() {
+    isAnswered = false;
+    if (qIndex >= currentQuizData.length) {
+        showResult();
+        return;
+    }
+    const q = currentQuizData[qIndex];
+    currentCorrectText = q.choices[q.answer];
+    
+    const shuffledChoices = shuffleArray([...q.choices]);
+
+    qTitle.textContent = q.question;
+    qChoices.innerHTML = shuffledChoices.map((choiceText) => 
+        `<div class="choice" onclick="answer(this)">${choiceText}</div>`
+    ).join("");
+    
+    qProgress.textContent = `ข้อที่ ${qIndex + 1} / ${currentQuizData.length}`;
+    startTimer();
+}
+
+function startTimer() {
+    clearInterval(timerInterval);
+    timeLeft = maxTime;
+    timerBar.style.width = "100%";
+    timerInterval = setInterval(() => {
+        timeLeft--;
+        timerBar.style.width = (timeLeft / maxTime) * 100 + "%";
+        if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            answer(null);
+        }
+    }, 1000);
+}
+
+function answer(element) {
+    if (isAnswered) return;
+    isAnswered = true;
+    clearInterval(timerInterval);
+
+    const choices = document.querySelectorAll(".choice");
+    const selectedText = element ? element.textContent : "";
+
+    choices.forEach((c) => {
+        c.classList.add("disabled");
+        if (c.textContent === currentCorrectText) {
+            c.classList.add("correct");
+        }
+        if (element && c === element && selectedText !== currentCorrectText) {
+            c.classList.add("wrong");
+        }
+    });
+
+    if (selectedText === currentCorrectText) {
+        score++;
+    }
+
+    setTimeout(() => { qIndex++; showQuestion(); }, delayNext);
+}
+
+function calculateGrade(p) {
+    if(p >= 80) return "A";
+    if(p >= 70) return "B";
+    if(p >= 60) return "C";
+    if(p >= 50) return "D";
+    return "F";
+}
+
+function showResult() {
+    const percent = (score / currentQuizData.length) * 100;
+    const grade = calculateGrade(percent);
+    
+    qTitle.textContent = "สรุปผลการทดสอบ";
+    qChoices.innerHTML = `
+        <div style="font-size: 0.9rem; color: #94a3b8;">เกรดที่ได้</div>
+        <div class="grade-text">${grade}</div>
+        <div class="summary-score">${score} / ${currentQuizData.length}</div>
+        <p>${percent >= 50 ? 'ผ่านเกณฑ์ ยินดีด้วยครับ! ✨' : 'ทบทวนอีกครั้งนะครับ 📚'}</p>
+        <button onclick="closeQuiz()" style="width:100%; margin-top:10px;">เสร็จสิ้น</button>
+    `;
+    qProgress.textContent = "";
+    document.getElementById("timerBar").parentElement.style.display = "none";
+}
+
+function closeQuiz() {
+    clearInterval(timerInterval);
+    document.getElementById("timerBar").parentElement.style.display = "block";
+    quizPage.style.display = "none";
+    home.style.display = "flex";
+}
+</script>
+</body>
+</html>
