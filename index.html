@@ -39,12 +39,40 @@ button:disabled { background: #475569; opacity: 0.5; cursor: not-allowed; }
 .grade-text { font-size: 4rem; font-weight: bold; color: var(--primary); margin: 10px 0; }
 
 /* Viewer Elements */
-.tabs, .menu { display:none; gap:10px; padding:10px; overflow-x:auto; background: rgba(0,0,0,0.3); }
-.tab-btn, .menu-item { padding:8px 16px; border-radius:16px; border:1px solid var(--border); cursor:pointer; white-space: nowrap; }
-.tab-btn.active, .menu-item.active { background:var(--primary); }
 .main { height:calc(100vh - 110px); position:relative; display: none; }
 model-viewer { width:100%; height:100%; }
-.info-panel { position:absolute; bottom:80px; left:50%; transform:translateX(-50%); width:90%; max-width:420px; background:var(--glass); border-radius:20px; padding:16px; border: 1px solid var(--border); pointer-events: none; }
+.info-panel { position:absolute; bottom:80px; left:50%; transform:translateX(-50%); width:90%; max-width:420px; background:var(--glass); border-radius:20px; padding:16px; border: 1px solid var(--border); pointer-events: none; z-index: 10;}
+
+/* เมนูหลัก (รายชื่อระบบต่างๆ ด้านบน) */
+.tabs { display:none; gap:10px; padding:10px; overflow-x:auto; background: rgba(0,0,0,0.3); }
+.tab-btn { padding:8px 16px; border-radius:16px; border:1px solid var(--border); cursor:pointer; white-space: nowrap; }
+.tab-btn.active { background:var(--primary); }
+
+/* เมนูย่อย (เลือกอวัยวะ ลอยอยู่ด้านขวา) */
+.menu { 
+    display: none; 
+    flex-direction: column; 
+    gap: 10px; 
+    padding: 10px; 
+    background: transparent; 
+    position: absolute; 
+    right: 16px; 
+    top: 50%; 
+    transform: translateY(-50%);
+    z-index: 100;
+}
+.menu-item { 
+    padding:10px 16px; 
+    border-radius:12px; 
+    border:1px solid var(--border); 
+    cursor:pointer; 
+    white-space: nowrap; 
+    background: rgba(15, 23, 42, 0.8);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+    color: white;
+    transition: 0.2s;
+}
+.menu-item.active { background:var(--primary); border-color: var(--primary); }
 </style>
 </head>
 
@@ -85,21 +113,22 @@ model-viewer { width:100%; height:100%; }
     <button onclick="backToHome()" style="background:none; border:1px solid var(--border); font-size: 0.8rem;">🏠 กลับหน้าหลัก</button>
 </header>
 <nav class="tabs" id="tabs"></nav>
+
 <main class="main" id="mainArea">
   <model-viewer id="viewer" ar ar-modes="webxr scene-viewer quick-look" camera-controls auto-rotate shadow-intensity="1">
-      
       <button slot="ar-button" style="background-color: var(--primary); color: white; border-radius: 12px; border: none; position: absolute; top: 16px; right: 16px; padding: 10px 16px; font-family: Kanit; font-size: 1rem; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
           📱 ดูแบบ AR
       </button>
-
   </model-viewer>
   
   <div class="info-panel">
     <h3 id="title" style="margin:0; color:var(--primary);">เลือกอวัยวะ</h3>
     <p id="desc" style="margin:5px 0 0 0; font-size:0.85rem; color:#cbd5e1;"></p>
   </div>
+
+  <footer class="menu" id="menu"></footer>
 </main>
-<footer class="menu" id="menu"></footer>
+
 
 <script>
 // Variables
@@ -206,7 +235,8 @@ function startLearning() {
     appHeader.style.display = "flex";
     mainArea.style.display = "block";
     tabs.style.display = "flex";
-    menu.style.display = "flex";
+    // เปลี่ยนเป็น flex เพื่อให้แสดงผลแนวตั้ง
+    menu.style.display = "flex"; 
     document.getElementById("learnUser").textContent = "👤 " + studentName;
 }
 
@@ -236,7 +266,6 @@ function openQuiz(type) {
         return;
     }
 
-    // สุ่มคำถามทั้งหมดแล้วเลือกมาสูงสุด 10 ข้อ (ถ้ามีน้อยกว่า 10 ก็เอาเท่าที่มี)
     const questionCount = Math.min(allQuestions.length, 10);
     currentQuizData = shuffleArray([...allQuestions]).slice(0, questionCount);
 
