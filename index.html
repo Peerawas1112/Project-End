@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<title>Anatomy AR Learning System DEMO</title>
+<title>Anatomy AR Learning System</title>
 
 <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500&display=swap" rel="stylesheet">
@@ -45,50 +45,37 @@ button:disabled { background: #475569; opacity: 0.5; cursor: not-allowed; }
 model-viewer { width:100%; height:100%; --poster-color: transparent; }
 .info-panel { position:absolute; bottom:30px; left:50%; transform:translateX(-50%); width:90%; max-width:450px; background:var(--glass); border-radius:24px; padding:20px; border: 1px solid var(--border); pointer-events: none; z-index: 10; backdrop-filter: blur(10px); }
 
-/* เมนูหลัก (Tabs) */
-.tabs { display:none; gap:12px; padding:15px 20px; overflow-x:auto; background: rgba(0,0,0,0.5); position: absolute; top: 60px; width: 100%; z-index: 100; box-sizing: border-box; }
+/* เมนูหลัก (Tabs) - ลบพื้นหลังสีดำออกตรงนี้ */
+.tabs { display:none; gap:12px; padding:15px 20px; overflow-x:auto; background: transparent; position: absolute; top: 60px; width: 100%; z-index: 100; box-sizing: border-box; pointer-events: none; }
 .tabs::-webkit-scrollbar { display: none; }
-.tab-btn { padding:10px 20px; border-radius:20px; border:1px solid var(--border); cursor:pointer; white-space: nowrap; background: rgba(15, 23, 42, 0.8); transition: 0.3s; }
+.tab-btn { padding:10px 20px; border-radius:20px; border:1px solid var(--border); cursor:pointer; white-space: nowrap; background: rgba(15, 23, 42, 0.8); transition: 0.3s; pointer-events: auto; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
 .tab-btn.active { background:var(--primary); border-color: var(--primary); font-weight: 500; }
 
 /* เมนูย่อย (Right Menu) */
-.menu { display: none; flex-direction: column; gap: 12px; padding: 10px; position: absolute; right: 20px; top: 55%; transform: translateY(-50%); z-index: 100; }
-.menu-item { padding:14px 24px; border-radius:18px; border:1px solid var(--border); cursor:pointer; white-space: nowrap; background: rgba(15, 23, 42, 0.9); box-shadow: 0 4px 15px rgba(0,0,0,0.5); transition: 0.3s; }
+.menu { display: none; flex-direction: column; gap: 12px; padding: 10px; position: absolute; right: 20px; top: 55%; transform: translateY(-50%); z-index: 100; pointer-events: none; }
+.menu-item { padding:14px 24px; border-radius:18px; border:1px solid var(--border); cursor:pointer; white-space: nowrap; background: rgba(15, 23, 42, 0.9); box-shadow: 0 4px 15px rgba(0,0,0,0.5); transition: 0.3s; pointer-events: auto; }
 .menu-item.active { background:var(--primary); border-color: var(--primary); font-weight: 500; }
 
 /* =========================================
-   แก้ไข Layout สำหรับหน้าจอมือถือ (Mobile Responsive)
+   Mobile Responsive
    ========================================= */
 @media (max-width: 768px) {
-    /* 1. จัดแถบบนให้โปร่งใส ไม่มีแถบดำคาด และให้ปุ่มลอยสวยๆ */
     .tabs {
-        top: 70px !important;
         justify-content: center !important;
-        width: 100% !important;
-        left: 0 !important;
-        padding: 0 !important;
-        background: transparent !important; /* ลบแถบสีดำคาดหน้าจอออก */
-        pointer-events: none !important; /* ให้ทะลุไปหมุนโมเดลได้ */
+        padding: 10px !important;
+        top: 65px !important;
     }
     .tab-btn {
-        padding: 8px 20px !important;
         font-size: 0.95rem !important;
-        pointer-events: auto !important;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.5) !important; /* เพิ่มเงาให้ปุ่มลอยเด่นขึ้น */
     }
-    
-    /* 2. เมนูขวา */
     .menu {
-        top: 45% !important; 
+        top: 30% !important; 
         right: 15px !important;
-        gap: 10px !important;
     }
     .menu-item {
-        padding: 10px 16px !important;
-        font-size: 0.85rem !important;
+        padding: 10px 18px !important;
+        font-size: 0.9rem !important;
     }
-    
-    /* 3. กล่องข้อความล่าง */
     .info-panel {
         bottom: 15px !important;
         padding: 15px !important;
@@ -96,11 +83,13 @@ model-viewer { width:100%; height:100%; --poster-color: transparent; }
         overflow-y: auto !important;
         width: 85% !important;
     }
-    
-    /* 4. ปุ่ม AR ตรงกลางเด่นๆ */
+    #title { font-size: 1.1rem !important; }
+    #desc { font-size: 0.85rem !important; line-height: 1.4 !important; }
+
+    /* ย้ายปุ่ม AR มาตรงกลาง */
     model-viewer > button[slot="ar-button"] {
         top: auto !important;
-        bottom: 180px !important; 
+        bottom: 185px !important; 
         left: 50% !important;
         transform: translateX(-50%) !important;
         padding: 12px 24px !important;
@@ -170,14 +159,12 @@ model-viewer { width:100%; height:100%; --poster-color: transparent; }
 </main>
 
 <script>
-// Variables
 let data = [], currentQuizData = [], qIndex = 0, score = 0, isAnswered = false;
 let timerInterval, timeLeft = 15;
 let studentName = "";
 const maxTime = 15;
 let currentCorrectText = ""; 
 
-// Elements
 const home = document.getElementById("home");
 const quizPage = document.getElementById("quizPage");
 const viewer = document.getElementById("viewer");
@@ -186,7 +173,6 @@ const menu = document.getElementById("menu");
 const loadBar = document.getElementById("load-bar");
 const loadShell = document.getElementById("load-shell");
 
-// Model Loading Progress
 viewer.addEventListener('progress', (e) => {
     loadShell.style.display = "block";
     loadBar.style.width = (e.detail.totalProgress * 100) + "%";
@@ -195,7 +181,6 @@ viewer.addEventListener('progress', (e) => {
     }
 });
 
-// Fetch Data
 fetch("anatomy_data.json")
 .then(r => r.json())
 .then(j => {
@@ -222,10 +207,7 @@ function renderTabs() {
 function loadSystem(i) {
     document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
     const activeTab = document.getElementById("t" + i);
-    if(activeTab) {
-        activeTab.classList.add("active");
-        activeTab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-    }
+    if(activeTab) activeTab.classList.add("active");
     
     if (data[i].items && data[i].items.length > 0) {
         menu.innerHTML = data[i].items.map((o, j) => `<div class="menu-item" id="m${i}${j}" onclick="selectOrgan(${i},${j})">${o.name}</div>`).join("");
@@ -273,7 +255,6 @@ function backToHome() {
     home.style.display = "flex";
 }
 
-// --- Quiz Logic ---
 function shuffleArray(array) {
     for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -284,22 +265,16 @@ function shuffleArray(array) {
 
 function openQuiz(type) {
     if (!checkName()) return;
-
     let allQuestions = [];
     data.forEach(system => {
         if(system.items) {
-            system.items.forEach(item => {
-                if (item.quiz) allQuestions = allQuestions.concat(item.quiz);
-            });
+            system.items.forEach(item => { if (item.quiz) allQuestions = allQuestions.concat(item.quiz); });
         }
     });
 
     if (allQuestions.length === 0) return alert("ยังไม่มีคำถามในระบบครับ");
 
-    // ดึงมาทดสอบแค่ 5 ข้อ (สุ่ม)
-    const questionCount = Math.min(allQuestions.length, 5);
-    currentQuizData = shuffleArray([...allQuestions]).slice(0, questionCount);
-
+    currentQuizData = shuffleArray([...allQuestions]).slice(0, 5);
     document.getElementById("quizType").textContent = "แบบทดสอบ" + type;
     document.getElementById("displayUserName").textContent = "ผู้ทำแบบทดสอบ: " + studentName;
     home.style.display = "none";
@@ -352,32 +327,17 @@ function answer(element) {
 
     choices.forEach((c) => {
         c.classList.add("disabled");
-        // ไฮไลต์ข้อที่ถูกด้วยสีเขียว
-        if (c.textContent === currentCorrectText) {
-            c.classList.add("correct");
-        }
-        // ถ้าตอบผิด ให้ไฮไลต์ข้อที่เลือกด้วยสีแดง
-        if (element && c === element && selectedText !== currentCorrectText) {
-            c.classList.add("wrong");
-        }
+        if (c.textContent === currentCorrectText) c.classList.add("correct");
+        if (element && c === element && selectedText !== currentCorrectText) c.classList.add("wrong");
     });
 
     if (selectedText === currentCorrectText) score++;
-
-    setTimeout(() => { qIndex++; showQuestion(); }, 2000); // หน่วงเวลา 2 วิให้เด็กดูเฉลย
-}
-
-function calculateGrade(p) {
-    if(p >= 80) return "A";
-    if(p >= 70) return "B";
-    if(p >= 60) return "C";
-    if(p >= 50) return "D";
-    return "F";
+    setTimeout(() => { qIndex++; showQuestion(); }, 2000);
 }
 
 function showResult() {
     const percent = (score / currentQuizData.length) * 100;
-    const grade = calculateGrade(percent);
+    const grade = percent >= 80 ? "A" : percent >= 70 ? "B" : percent >= 60 ? "C" : percent >= 50 ? "D" : "F";
     
     document.getElementById("qTitle").textContent = "🎉 สรุปผลการทดสอบ";
     document.getElementById("qChoices").innerHTML = `
