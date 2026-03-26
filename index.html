@@ -55,6 +55,50 @@ model-viewer { width:100%; height:100%; --poster-color: transparent; }
 .menu { display: none; flex-direction: column; gap: 12px; padding: 10px; position: absolute; right: 20px; top: 55%; transform: translateY(-50%); z-index: 100; }
 .menu-item { padding:14px 24px; border-radius:18px; border:1px solid var(--border); cursor:pointer; white-space: nowrap; background: rgba(15, 23, 42, 0.9); box-shadow: 0 4px 15px rgba(0,0,0,0.5); transition: 0.3s; }
 .menu-item.active { background:var(--primary); border-color: var(--primary); font-weight: 500; }
+
+/* =========================================
+   แก้ไข Layout สำหรับหน้าจอมือถือ (Mobile Responsive)
+   ========================================= */
+@media (max-width: 768px) {
+    .tabs {
+        top: 60px;
+        padding: 10px;
+        justify-content: center;
+    }
+    .tab-btn {
+        padding: 8px 16px;
+        font-size: 0.9rem;
+    }
+    .menu {
+        top: 35%; 
+        right: 10px;
+        gap: 8px;
+    }
+    .menu-item {
+        padding: 10px 15px;
+        font-size: 0.85rem;
+    }
+    .info-panel {
+        bottom: 15px;
+        padding: 15px;
+        max-height: 160px;
+        overflow-y: auto;
+        width: 85%;
+    }
+    #title { font-size: 1.1rem !important; }
+    #desc { font-size: 0.85rem !important; line-height: 1.4 !important; }
+
+    /* ย้ายปุ่ม AR มาตรงกลาง เหนือกล่องข้อความ */
+    model-viewer > button[slot="ar-button"] {
+        top: auto !important;
+        bottom: 200px !important; 
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        padding: 10px 24px !important;
+        font-size: 1rem !important;
+        width: max-content;
+    }
+}
 </style>
 </head>
 
