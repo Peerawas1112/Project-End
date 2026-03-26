@@ -60,43 +60,54 @@ model-viewer { width:100%; height:100%; --poster-color: transparent; }
    แก้ไข Layout สำหรับหน้าจอมือถือ (Mobile Responsive)
    ========================================= */
 @media (max-width: 768px) {
+    /* 1. จัดแถบบนให้โปร่งใส ไม่มีแถบดำคาด และให้ปุ่มลอยสวยๆ */
     .tabs {
-        top: 60px;
-        padding: 10px;
-        justify-content: center;
+        top: 70px !important;
+        justify-content: center !important;
+        width: 100% !important;
+        left: 0 !important;
+        padding: 0 !important;
+        background: transparent !important; /* ลบแถบสีดำคาดหน้าจอออก */
+        pointer-events: none !important; /* ให้ทะลุไปหมุนโมเดลได้ */
     }
     .tab-btn {
-        padding: 8px 16px;
-        font-size: 0.9rem;
+        padding: 8px 20px !important;
+        font-size: 0.95rem !important;
+        pointer-events: auto !important;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.5) !important; /* เพิ่มเงาให้ปุ่มลอยเด่นขึ้น */
     }
+    
+    /* 2. เมนูขวา */
     .menu {
-        top: 35%; 
-        right: 10px;
-        gap: 8px;
+        top: 45% !important; 
+        right: 15px !important;
+        gap: 10px !important;
     }
     .menu-item {
-        padding: 10px 15px;
-        font-size: 0.85rem;
+        padding: 10px 16px !important;
+        font-size: 0.85rem !important;
     }
+    
+    /* 3. กล่องข้อความล่าง */
     .info-panel {
-        bottom: 15px;
-        padding: 15px;
-        max-height: 160px;
-        overflow-y: auto;
-        width: 85%;
+        bottom: 15px !important;
+        padding: 15px !important;
+        max-height: 150px !important;
+        overflow-y: auto !important;
+        width: 85% !important;
     }
-    #title { font-size: 1.1rem !important; }
-    #desc { font-size: 0.85rem !important; line-height: 1.4 !important; }
-
-    /* ย้ายปุ่ม AR มาตรงกลาง เหนือกล่องข้อความ */
+    
+    /* 4. ปุ่ม AR ตรงกลางเด่นๆ */
     model-viewer > button[slot="ar-button"] {
         top: auto !important;
-        bottom: 200px !important; 
+        bottom: 180px !important; 
         left: 50% !important;
         transform: translateX(-50%) !important;
-        padding: 10px 24px !important;
+        padding: 12px 24px !important;
         font-size: 1rem !important;
-        width: max-content;
+        width: max-content !important;
+        z-index: 200 !important;
+        display: block !important;
     }
 }
 </style>
