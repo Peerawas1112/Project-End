@@ -112,6 +112,40 @@ model-viewer > button[slot="ar-button"] { position: absolute; background: var(--
     .box { padding: 20px; }
     #qTitle { min-height: 40px; }
     .choice { padding: 10px; margin: 6px 0; }
+    /* =========================================
+   สไตล์สำหรับจุด Hotspot บนโมเดล 3D
+   ========================================= */
+.Hotspot {
+    background: rgba(255, 71, 87, 0.9); /* สีแดง primary ของเรา */
+    border-radius: 50%;
+    border: 2px solid white;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+    cursor: pointer;
+    height: 18px;
+    width: 18px;
+    position: relative;
+    transition: 0.3s;
+}
+.Hotspot:focus { outline: none; transform: scale(1.2); }
+
+.HotspotAnnotation {
+    background: rgba(15, 23, 42, 0.9);
+    backdrop-filter: blur(5px);
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.2);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    color: white;
+    font-family: 'Kanit', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    left: calc(100% + 12px);
+    padding: 6px 12px;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: max-content;
+    pointer-events: none; /* ไม่ให้ไปขัดจังหวะการหมุนโมเดล */
+}
 }
 </style>
 </head>
@@ -238,7 +272,30 @@ function selectOrgan(i, j) {
     const o = data[i].items[j];
     viewer.src = o.model_file;
     document.getElementById("title").textContent = o.name;
-    document.getElementById("desc").innerHTML = o.description;
+    document.getElementById("desc").innerHTML = o.description; // ใช้ innerHTML เพื่อให้รองรับตัวหนา/ขึ้นบรรทัดใหม่
+
+    // เก็บปุ่ม AR ไว้ แล้วล้าง Hotspot เก่าออก
+    const arButton = viewer.querySelector('[slot="ar-button"]');
+    viewer.innerHTML = ''; 
+    viewer.appendChild(arButton);
+
+    // สร้าง Hotspot ใหม่จาก JSON
+    if (o.hotspots) {
+        o.hotspots.forEach((hs, index) => {
+            const btn = document.createElement('button');
+            btn.className = 'Hotspot';
+            btn.setAttribute('slot', `hotspot-${index}`);
+            btn.setAttribute('data-position', hs.position);
+            btn.setAttribute('data-normal', hs.normal);
+            
+            const annotation = document.createElement('div');
+            annotation.className = 'HotspotAnnotation';
+            annotation.textContent = hs.name;
+            
+            btn.appendChild(annotation);
+            viewer.appendChild(btn);
+        });
+    }
 }
 
 
