@@ -82,20 +82,21 @@ model-viewer > button[slot="ar-button"] { position: absolute; background: var(--
 }
 
 /* =========================================
-   สไตล์สำหรับจุด Hotspot บนโมเดล 3D
+   ปรับปรุงสไตล์จุด Hotspot (ให้เล็กลงและเนี้ยบขึ้น)
    ========================================= */
 .Hotspot {
-    background: rgba(255, 71, 87, 0.9);
+    background: rgba(255, 71, 87, 0.9); /* สีแดง primary ของแอป */
     border-radius: 50%;
-    border: 2px solid white;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+    border: 1px solid white; /* ลดความหนาของขอบเหลือ 1px */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4); /* ลดขนาดเงาลงเล็กน้อย */
     cursor: pointer;
-    height: 18px;
-    width: 18px;
+    height: 12px; /* <--- นี่คือความสูงหลักที่ลดลง (เดิม 18px) */
+    width: 12px;  /* <--- นี่คือความกว้างหลักที่ลดลง (เดิม 18px) */
     position: relative;
     transition: 0.3s;
+    outline: none; /* เอาเส้นขอบเน้นออกเพื่อความสะอาดตา */
 }
-.Hotspot:focus { outline: none; transform: scale(1.2); }
+.Hotspot:focus { transform: scale(1.15); } /* ลดเอฟเฟกต์การขยายตอนโฟกัส */
 
 .HotspotAnnotation {
     background: rgba(15, 23, 42, 0.9);
@@ -107,7 +108,7 @@ model-viewer > button[slot="ar-button"] { position: absolute; background: var(--
     font-family: 'Kanit', sans-serif;
     font-size: 0.85rem;
     font-weight: 500;
-    left: calc(100% + 12px);
+    left: calc(100% + 12px); /* ปรับระยะห่างป้ายกำกับตามขนาดปุ่มที่ลดลง */
     padding: 6px 12px;
     position: absolute;
     top: 50%;
