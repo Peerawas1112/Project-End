@@ -2,28 +2,34 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
 <title>Anatomy AR Learning System</title>
 
 <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500&display=swap" rel="stylesheet">
 
 <style>
-:root { --primary: #ff4757; --bg: #020617; --glass: rgba(15, 23, 42, 0.9); --border: rgba(255, 255, 255, 0.1); }
-body{ margin:0; font-family:Kanit,sans-serif; background:var(--bg); color:white; height:100vh; overflow:hidden; }
+/* =========================================
+   1. Base & Reset
+   ========================================= */
+:root { --primary: #ff4757; --bg: #020617; --glass: rgba(15, 23, 42, 0.85); --border: rgba(255, 255, 255, 0.15); }
+body{ margin:0; padding:0; font-family:Kanit,sans-serif; background:var(--bg); color:white; height:100vh; width: 100vw; overflow:hidden; }
+* { box-sizing: border-box; }
 
 /* Progress Bar Custom */
 #load-shell { position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: #1e293b; z-index: 2000; display: none; }
 #load-bar { height: 100%; background: var(--primary); width: 0%; transition: width 0.3s; }
 
-/* UI Layout */
-.app-header { height: 60px; display: none; align-items: center; justify-content: space-between; padding: 0 20px; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); z-index: 500; }
-.home, .quiz-page { position:fixed; inset:0; display:flex; justify-content:center; align-items:center; background:var(--bg); z-index:1000; overflow-y: auto; }
+/* =========================================
+   2. Home & Quiz Pages
+   ========================================= */
+.home, .quiz-page { position:fixed; inset:0; display:flex; justify-content:center; align-items:center; background:var(--bg); z-index:1000; padding: 20px; }
 .quiz-page { display:none; }
-.box { width:90%; max-width:480px; background:var(--glass); border-radius:28px; padding:35px; text-align:center; border: 1px solid var(--border); box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+.box { width:100%; max-width:480px; max-height: 90vh; overflow-y: auto; background:var(--glass); border-radius:28px; padding:35px; text-align:center; border: 1px solid var(--border); box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+.box::-webkit-scrollbar { display: none; }
 
 /* Input & Buttons */
-input[type="text"] { width: 100%; padding: 14px; margin-bottom: 20px; border-radius: 12px; border: 1px solid var(--border); background: rgba(255,255,255,0.05); color: white; text-align: center; font-family: Kanit; font-size: 1rem; box-sizing: border-box; outline:none; transition: 0.3s; }
+input[type="text"] { width: 100%; padding: 14px; margin-bottom: 20px; border-radius: 12px; border: 1px solid var(--border); background: rgba(255,255,255,0.05); color: white; text-align: center; font-family: Kanit; font-size: 1rem; outline:none; transition: 0.3s; }
 input[type="text"]:focus { border-color: var(--primary); background: rgba(255,255,255,0.1); }
 button { padding:14px 20px; border:none; border-radius:16px; background:var(--primary); color:white; font-size:1rem; cursor:pointer; transition: 0.2s; font-family: Kanit; font-weight: 500; }
 button:active { transform: scale(0.95); }
@@ -35,89 +41,79 @@ button:disabled { background: #475569; opacity: 0.5; cursor: not-allowed; }
 .choice.wrong { background:#dc2626 !important; border-color: #f87171; }
 .choice.disabled { pointer-events: none; }
 .grade-text { font-size: 4rem; font-weight: bold; color: var(--primary); margin: 10px 0; }
-
-/* Timer */
 .timer-container { width: 100%; height: 6px; background: #1e293b; border-radius: 10px; margin: 15px 0; overflow: hidden; }
 #timerBar { width: 100%; height: 100%; background: var(--primary); transition: width 1s linear; }
 
-/* Viewer Elements */
-.main { height:calc(100vh - 60px); position:relative; display: none; }
-model-viewer { width:100%; height:100%; --poster-color: transparent; }
-.info-panel { position:absolute; bottom:30px; left:50%; transform:translateX(-50%); width:90%; max-width:450px; background:var(--glass); border-radius:24px; padding:20px; border: 1px solid var(--border); pointer-events: none; z-index: 10; backdrop-filter: blur(10px); }
+/* =========================================
+   3. Main AR Workspace
+   ========================================= */
+.main { position:fixed; top:0; left:0; width:100vw; height:100vh; display: none; z-index: 1; }
+model-viewer { width:100%; height:100%; --poster-color: transparent; outline: none; }
 
-/* เมนูหลัก (Tabs) - ลบพื้นหลังสีดำออกตรงนี้ */
-.tabs { display:none; gap:12px; padding:15px 20px; overflow-x:auto; background: transparent; position: absolute; top: 60px; width: 100%; z-index: 100; box-sizing: border-box; pointer-events: none; }
-.tabs::-webkit-scrollbar { display: none; }
-.tab-btn { padding:10px 20px; border-radius:20px; border:1px solid var(--border); cursor:pointer; white-space: nowrap; background: rgba(15, 23, 42, 0.8); transition: 0.3s; pointer-events: auto; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
-.tab-btn.active { background:var(--primary); border-color: var(--primary); font-weight: 500; }
+/* Header */
+.app-header { position: absolute; top:0; left:0; width:100%; height: 60px; display: none; align-items: center; justify-content: space-between; padding: 0 max(20px, env(safe-area-inset-left)) 0 max(20px, env(safe-area-inset-right)); background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); z-index: 500; }
 
-/* เมนูย่อย (Right Menu) */
-.menu { display: none; flex-direction: column; gap: 12px; padding: 10px; position: absolute; right: 20px; top: 55%; transform: translateY(-50%); z-index: 100; pointer-events: none; }
-.menu-item { padding:14px 24px; border-radius:18px; border:1px solid var(--border); cursor:pointer; white-space: nowrap; background: rgba(15, 23, 42, 0.9); box-shadow: 0 4px 15px rgba(0,0,0,0.5); transition: 0.3s; pointer-events: auto; }
-.menu-item.active { background:var(--primary); border-color: var(--primary); font-weight: 500; }
+/* UI Overlays (Pointer events none allows interacting with 3D model through empty space) */
+.tabs, .menu { position: absolute; display: none; gap: 10px; z-index: 100; pointer-events: none; }
+.tab-btn, .menu-item { pointer-events: auto; background: rgba(15, 23, 42, 0.9); border: 1px solid var(--border); border-radius: 16px; color: white; cursor: pointer; text-align: center; transition: 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
+.tab-btn.active, .menu-item.active { background: var(--primary); border-color: var(--primary); font-weight: 500; }
+
+.info-panel { position: absolute; background: var(--glass); border-radius: 24px; border: 1px solid var(--border); pointer-events: auto; z-index: 10; backdrop-filter: blur(10px); }
+model-viewer > button[slot="ar-button"] { position: absolute; background: var(--primary); color: white; border: none; border-radius: 12px; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.5); z-index: 200; font-family: Kanit; font-weight: 500; }
+
 
 /* =========================================
-   Mobile Responsive - ล็อกขนาดและจัดเรียงใหม่ให้เป๊ะ 100%
+   4. Layout: Desktop & Tablets
    ========================================= */
-@media (max-width: 768px) {
-    /* 1. แถบระบบ (บนสุด) */
-    .tabs {
-        top: 65px !important;
-        justify-content: center !important;
-        padding: 10px !important;
-        background: transparent !important;
-    }
-    .tab-btn {
-        font-size: 0.95rem !important;
-    }
+@media (min-width: 769px) {
+    .tabs { top: 80px; left: 50%; transform: translateX(-50%); flex-direction: row; }
+    .tab-btn { padding: 10px 24px; font-size: 1rem; }
+    .menu { right: 30px; top: 50%; transform: translateY(-50%); flex-direction: column; }
+    .menu-item { padding: 14px 24px; font-size: 1rem; }
+    .info-panel { bottom: 40px; left: 50%; transform: translateX(-50%); width: 450px; padding: 24px; }
+    #title { font-size: 1.4rem; margin:0; color:var(--primary); }
+    #desc { font-size: 0.95rem; line-height: 1.5; color:#cbd5e1; margin: 8px 0 0 0;}
+    model-viewer > button[slot="ar-button"] { top: 80px; left: 30px; padding: 12px 24px; font-size: 1.1rem; }
+}
 
-    /* 2. เมนูย่อย (ภาพรวม / เจาะลึกหัวใจ) - ล็อกไม่ให้ยืดเป็นสี่เหลี่ยมใหญ่ */
-    .menu {
-        top: auto !important; 
-        bottom: 250px !important; /* ให้อยู่เหนือปุ่ม AR */
-        left: 50% !important;
-        right: auto !important;
-        transform: translateX(-50%) !important;
-        flex-direction: row !important; /* เรียงแนวนอน */
-        width: max-content !important; /* ขนาดกล่องพอดีกับปุ่ม */
-        gap: 12px !important;
-        align-items: center !important; /* บังคับไม่ให้ยืดความสูง */
-        padding: 0 !important;
-    }
-    .menu-item {
-        padding: 10px 20px !important;
-        font-size: 0.9rem !important;
-        height: max-content !important; /* ล็อกความสูงให้พอดีตัวหนังสือ */
-        width: max-content !important;
-    }
+/* =========================================
+   5. Layout: Mobile Portrait (แนวตั้ง)
+   ========================================= */
+@media (max-width: 768px) and (orientation: portrait) {
+    .tabs { top: 75px; left: 0; width: 100%; justify-content: center; padding: 0 10px; flex-direction: row; }
+    .tab-btn { padding: 8px 18px; font-size: 0.9rem; }
+    
+    .menu { bottom: 180px; left: 0; width: 100%; flex-direction: row; justify-content: center; padding: 0 15px; }
+    .menu-item { flex: 1; min-width: 120px; max-width: 160px; padding: 10px 12px; font-size: 0.85rem; white-space: normal; line-height: 1.2; }
+    
+    .info-panel { bottom: max(15px, env(safe-area-inset-bottom)); left: 5%; width: 90%; padding: 16px; max-height: 140px; overflow-y: auto; }
+    #title { font-size: 1.1rem; margin:0; color:var(--primary); }
+    #desc { font-size: 0.85rem; line-height: 1.4; color:#cbd5e1; margin: 6px 0 0 0;}
+    
+    model-viewer > button[slot="ar-button"] { bottom: 250px; left: 50%; transform: translateX(-50%); padding: 12px 24px; font-size: 1rem; width: max-content; }
+}
 
-    /* 3. ปุ่ม AR - บังคับให้อยู่ตรงกลางเหนือกล่องข้อความ */
-    model-viewer > button[slot="ar-button"] {
-        top: auto !important;
-        bottom: 190px !important; 
-        left: 50% !important;
-        right: auto !important;
-        transform: translateX(-50%) !important;
-        padding: 12px 24px !important;
-        font-size: 1rem !important;
-        width: max-content !important;
-        z-index: 200 !important;
-        display: block !important;
-    }
-
-    /* 4. กล่องข้อความล่างสุด */
-    .info-panel {
-        bottom: 15px !important;
-        left: 50% !important;
-        transform: translateX(-50%) !important;
-        padding: 15px !important;
-        max-height: 140px !important;
-        overflow-y: auto !important;
-        width: 85% !important;
-    }
-    #title { font-size: 1.1rem !important; }
-    #desc { font-size: 0.85rem !important; line-height: 1.4 !important; 
-    }
+/* =========================================
+   6. Layout: Mobile Landscape (แนวนอน)
+   ========================================= */
+@media (max-width: 950px) and (max-height: 500px) and (orientation: landscape) {
+    .app-header { height: 45px; }
+    .tabs { top: 55px; left: max(10px, env(safe-area-inset-left)); flex-direction: column; gap: 8px; }
+    .tab-btn { padding: 8px 16px; font-size: 0.85rem; }
+    
+    .menu { top: 55px; right: max(10px, env(safe-area-inset-right)); flex-direction: column; gap: 8px; }
+    .menu-item { padding: 8px 16px; font-size: 0.85rem; }
+    
+    .info-panel { bottom: max(10px, env(safe-area-inset-bottom)); left: max(10px, env(safe-area-inset-left)); width: 45%; max-width: 350px; padding: 12px; max-height: 110px; overflow-y: auto; }
+    #title { font-size: 1rem; margin:0; color:var(--primary); }
+    #desc { font-size: 0.8rem; line-height: 1.3; color:#cbd5e1; margin: 4px 0 0 0;}
+    
+    model-viewer > button[slot="ar-button"] { bottom: max(15px, env(safe-area-inset-bottom)); right: max(15px, env(safe-area-inset-right)); padding: 10px 20px; font-size: 0.9rem; }
+    
+    /* ปรับ Quiz สำหรับแนวนอน */
+    .box { padding: 20px; }
+    #qTitle { min-height: 40px; }
+    .choice { padding: 10px; margin: 6px 0; }
 }
 </style>
 </head>
@@ -150,29 +146,29 @@ model-viewer { width:100%; height:100%; --poster-color: transparent; }
     <div id="quizBody">
         <h2 id="qTitle" style="font-size: 1.1rem; min-height: 60px; line-height: 1.4;"></h2>
         <div id="qChoices"></div>
-        <p id="qProgress" style="font-size: 0.8rem; color: #94a3b8; margin-top: 20px;"></p>
+        <p id="qProgress" style="font-size: 0.8rem; color: #94a3b8; margin-top: 15px;"></p>
     </div>
     <button id="exitQuizBtn" onclick="closeQuiz()" style="background:none; border:1px solid #4b5563; color:#94a3b8; margin-top:15px; width: 100%;">ยกเลิก / กลับหน้าหลัก</button>
   </div>
 </div>
 
-<header class="app-header" id="appHeader">
+<div class="app-header" id="appHeader">
     <span id="learnUser" style="font-size: 0.9rem; color: #cbd5e1;"></span>
-    <button onclick="backToHome()" style="background:none; border:1px solid var(--border); font-size: 0.85rem; padding: 8px 16px;">🏠 กลับหน้าหลัก</button>
-</header>
+    <button onclick="backToHome()" style="background:none; border:1px solid var(--border); font-size: 0.85rem; padding: 6px 14px;">🏠 กลับหน้าหลัก</button>
+</div>
 
 <main class="main" id="mainArea">
   <nav class="tabs" id="tabs"></nav>
   
   <model-viewer id="viewer" ar ar-modes="webxr scene-viewer quick-look" camera-controls auto-rotate shadow-intensity="1" exposure="1.2" environment-image="neutral">
-      <button slot="ar-button" style="background-color: var(--primary); color: white; border-radius: 12px; border: none; position: absolute; top: 80px; left: 20px; padding: 12px 20px; font-family: Kanit; font-size: 1rem; box-shadow: 0 4px 15px rgba(0,0,0,0.5); cursor: pointer;">
+      <button slot="ar-button">
           📱 ดูแบบ AR ทะลุจอ
       </button>
   </model-viewer>
   
   <div class="info-panel">
-    <h3 id="title" style="margin:0; color:var(--primary); font-size: 1.3rem;"></h3>
-    <p id="desc" style="margin:8px 0 0 0; font-size:0.95rem; color:#cbd5e1; line-height: 1.5;"></p>
+    <h3 id="title"></h3>
+    <p id="desc"></p>
   </div>
 
   <footer class="menu" id="menu"></footer>
