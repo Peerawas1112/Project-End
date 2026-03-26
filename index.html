@@ -28,9 +28,7 @@ body{ margin:0; padding:0; font-family:Kanit,sans-serif; background:var(--bg); c
 .box { width:100%; max-width:480px; max-height: 90vh; overflow-y: auto; background:var(--glass); border-radius:28px; padding:35px; text-align:center; border: 1px solid var(--border); box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
 .box::-webkit-scrollbar { display: none; }
 
-/* Input & Buttons */
-input[type="text"] { width: 100%; padding: 14px; margin-bottom: 20px; border-radius: 12px; border: 1px solid var(--border); background: rgba(255,255,255,0.05); color: white; text-align: center; font-family: Kanit; font-size: 1rem; outline:none; transition: 0.3s; }
-input[type="text"]:focus { border-color: var(--primary); background: rgba(255,255,255,0.1); }
+/* Buttons */
 button { padding:14px 20px; border:none; border-radius:16px; background:var(--primary); color:white; font-size:1rem; cursor:pointer; transition: 0.2s; font-family: Kanit; font-weight: 500; }
 button:active { transform: scale(0.95); }
 button:disabled { background: #475569; opacity: 0.5; cursor: not-allowed; }
@@ -126,7 +124,7 @@ model-viewer > button[slot="ar-button"] { position: absolute; background: var(--
   <div class="box">
     <h1 style="margin-bottom: 5px;">Human Anatomy AR</h1>
     <p id="loadingText" style="color: #fbbf24; margin-bottom: 25px;">กำลังโหลดข้อมูลบทเรียน...</p>
-    <input type="text" id="studentName" placeholder="ชื่อ-นามสกุล นักเรียน" />
+    
     <button id="btnLearn" onclick="startLearning()" style="width: 100%;" disabled>📚 เข้าบทเรียน AR</button>
     <button onclick="window.location.href='scanner.html'" style="width: 100%; margin-top: 10px; background: #3b82f6;">📷 สแกนรูปภาพใบงาน</button>
     <div style="display: flex; gap: 10px; margin-top: 15px;">
@@ -139,8 +137,7 @@ model-viewer > button[slot="ar-button"] { position: absolute; background: var(--
 <div id="quizPage" class="quiz-page">
   <div class="box" id="quizBox">
     <div id="quizHeader">
-        <div id="quizType" style="color:var(--primary); font-weight:500; font-size: 1.2rem;"></div>
-        <div style="font-size: 0.9rem; margin-bottom: 10px; color: #94a3b8;" id="displayUserName"></div>
+        <div id="quizType" style="color:var(--primary); font-weight:500; font-size: 1.2rem; margin-bottom: 10px;"></div>
         <div class="timer-container" id="timerContainer"><div id="timerBar"></div></div>
     </div>
     
@@ -154,7 +151,7 @@ model-viewer > button[slot="ar-button"] { position: absolute; background: var(--
 </div>
 
 <div class="app-header" id="appHeader">
-    <span id="learnUser" style="font-size: 0.9rem; color: #cbd5e1;"></span>
+    <span style="font-size: 1rem; color: #cbd5e1; font-weight: 500;">Anatomy AR</span>
     <button onclick="backToHome()" style="background:none; border:1px solid var(--border); font-size: 0.85rem; padding: 6px 14px;">🏠 กลับหน้าหลัก</button>
 </div>
 
@@ -178,7 +175,6 @@ model-viewer > button[slot="ar-button"] { position: absolute; background: var(--
 <script>
 let data = [], currentQuizData = [], qIndex = 0, score = 0, isAnswered = false;
 let timerInterval, timeLeft = 15;
-let studentName = "";
 const maxTime = 15;
 let currentCorrectText = ""; 
 
@@ -205,8 +201,8 @@ fetch("anatomy_data.json")
     renderTabs();
     if (data.length > 0) loadSystem(0);
     
-    document.getElementById("loadingText").textContent = "กรุณาระบุชื่อเพื่อเริ่มเรียน";
-    document.getElementById("loadingText").style.color = "#94a3b8";
+    document.getElementById("loadingText").textContent = "ระบบพร้อมใช้งานแล้ว";
+    document.getElementById("loadingText").style.color = "#4ade80"; // เปลี่ยนเป็นสีเขียวเมื่อโหลดเสร็จ
     document.getElementById("btnLearn").disabled = false;
     document.getElementById("btnPre").disabled = false;
     document.getElementById("btnPost").disabled = false;
@@ -245,23 +241,13 @@ function selectOrgan(i, j) {
     document.getElementById("desc").textContent = o.description;
 }
 
-function checkName() {
-    studentName = document.getElementById("studentName").value.trim();
-    if (!studentName) {
-        alert("กรุณาใส่ชื่อนักเรียนก่อนครับ");
-        return false;
-    }
-    return true;
-}
 
 function startLearning() {
-    if (!checkName()) return;
     home.style.display = "none";
     document.getElementById("appHeader").style.display = "flex";
     document.getElementById("mainArea").style.display = "block";
     tabs.style.display = "flex";
     menu.style.display = "flex"; 
-    document.getElementById("learnUser").textContent = "👤 " + studentName;
 }
 
 function backToHome() {
@@ -281,7 +267,6 @@ function shuffleArray(array) {
 }
 
 function openQuiz(type) {
-    if (!checkName()) return;
     let allQuestions = [];
     data.forEach(system => {
         if(system.items) {
@@ -293,7 +278,6 @@ function openQuiz(type) {
 
     currentQuizData = shuffleArray([...allQuestions]).slice(0, 5);
     document.getElementById("quizType").textContent = "แบบทดสอบ" + type;
-    document.getElementById("displayUserName").textContent = "ผู้ทำแบบทดสอบ: " + studentName;
     home.style.display = "none";
     quizPage.style.display = "flex";
     document.getElementById("timerContainer").style.display = "block";
