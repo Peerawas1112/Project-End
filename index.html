@@ -238,7 +238,7 @@ function selectOrgan(i, j) {
     const o = data[i].items[j];
     viewer.src = o.model_file;
     document.getElementById("title").textContent = o.name;
-    document.getElementById("desc").textContent = o.description;
+    document.getElementById("desc").innerHTML = o.description;
 }
 
 
