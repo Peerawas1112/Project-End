@@ -128,6 +128,7 @@ model-viewer > button[slot="ar-button"] { position: absolute; background: var(--
     <p id="loadingText" style="color: #fbbf24; margin-bottom: 25px;">กำลังโหลดข้อมูลบทเรียน...</p>
     <input type="text" id="studentName" placeholder="ชื่อ-นามสกุล นักเรียน" />
     <button id="btnLearn" onclick="startLearning()" style="width: 100%;" disabled>📚 เข้าบทเรียน AR</button>
+    <button onclick="window.location.href='scanner.html'" style="width: 100%; margin-top: 10px; background: #3b82f6;">📷 สแกนรูปภาพใบงาน</button>
     <div style="display: flex; gap: 10px; margin-top: 15px;">
         <button id="btnPre" onclick="openQuiz('ก่อนเรียน')" style="flex: 1;" disabled>📝 ทดสอบก่อนเรียน</button>
         <button id="btnPost" onclick="openQuiz('หลังเรียน')" style="flex: 1;" disabled>📝 ทดสอบหลังเรียน</button>
