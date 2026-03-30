@@ -167,7 +167,7 @@ model-viewer > button[slot="ar-button"] { position: absolute; background: var(--
     #title { font-size: 1.1rem; margin:0; color:var(--primary); }
     #desc { font-size: 0.85rem; line-height: 1.4; color:#cbd5e1; margin: 6px 0 0 0;}
     model-viewer > button[slot="ar-button"] { bottom: 250px; left: 50%; transform: translateX(-50%); padding: 12px 24px; font-size: 1rem; width: max-content; }
-    .toggle-mode-btn { top: 125px; right: 15px; padding: 8px 14px; font-size: 0.85rem; } /* ตำแหน่งปุ่มสลับโหมดบนมือถือ */
+    .toggle-mode-btn { top: 125px; right: 15px; padding: 8px 14px; font-size: 0.85rem; } 
 }
 
 /* =========================================
@@ -186,7 +186,7 @@ model-viewer > button[slot="ar-button"] { position: absolute; background: var(--
     .box { padding: 20px; }
     #qTitle { min-height: 40px; }
     .choice { padding: 10px; margin: 6px 0; }
-    .toggle-mode-btn { top: 55px; right: 160px; } /* ขยับหลบเมนูแนวนอน */
+    .toggle-mode-btn { top: 55px; right: 160px; } 
 }
 </style>
 </head>
@@ -330,6 +330,48 @@ function loadSystem(i) {
     }
 }
 
+// ---------------------------------------------------------
+// ฟังก์ชันใหม่: โหลดข้อมูลอวัยวะ (เพื่อเคลียร์ของเก่าออกก่อน)
+// ---------------------------------------------------------
+function loadModelData(dataObj) {
+    // ล้างโมเดลเก่าทิ้งชั่วคราว เพื่อเคลียร์ RAM
+    viewer.src = ""; 
+    
+    // หน่วงเวลาเล็กน้อยแล้วค่อยใส่ข้อมูลใหม่
+    setTimeout(() => {
+        viewer.src = dataObj.model_file;
+        document.getElementById("title").textContent = dataObj.name;
+        document.getElementById("desc").innerHTML = dataObj.description; 
+
+        // ลบ Hotspot เก่าทั้งหมดทิ้ง
+        viewer.querySelectorAll('.Hotspot').forEach(hs => hs.remove());
+
+        // สร้าง Hotspot ชุดใหม่ตามข้อมูลที่ส่งมา
+        if (dataObj.hotspots) {
+            dataObj.hotspots.forEach((hs, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'Hotspot';
+                btn.setAttribute('slot', `hotspot-${index}`);
+                btn.setAttribute('data-position', hs.position);
+                btn.setAttribute('data-normal', hs.normal);
+                
+                const annotation = document.createElement('div');
+                annotation.className = 'HotspotAnnotation';
+                annotation.textContent = hs.name;
+                
+                btn.onclick = () => {
+                    document.getElementById('modalTitle').textContent = hs.name;
+                    document.getElementById('modalDesc').innerHTML = hs.info || "ไม่มีข้อมูลรายละเอียดเพิ่มเติม"; 
+                    hotspotModal.style.display = 'flex';
+                };
+                
+                btn.appendChild(annotation);
+                viewer.appendChild(btn);
+            });
+        }
+    }, 100); 
+}
+
 function selectOrgan(i, j) {
     document.querySelectorAll(".menu-item").forEach(m => m.classList.remove("active"));
     const activeMenu = document.getElementById(`m${i}${j}`);
@@ -339,60 +381,50 @@ function selectOrgan(i, j) {
     currentOrganData = o;
     isAltMode = false; // รีเซ็ตโหมดทุกครั้งที่เปลี่ยนอวัยวะ
 
-    viewer.src = o.model_file;
-    document.getElementById("title").textContent = o.name;
-    document.getElementById("desc").innerHTML = o.description; 
-
-    // เช็คว่ามีโมเดลสำรอง (โปร่งแสง) ไหม ถ้ามีให้แสดงปุ่ม
-    if (o.alt_model_file) {
+    // เช็คว่ามีข้อมูล alt_mode แบบแยกก้อนหรือไม่
+    if (o.alt_mode) {
         toggleBtn.style.display = "flex";
         toggleBtn.innerHTML = "👁️ ดูแบบโปร่งแสง";
     } else {
         toggleBtn.style.display = "none";
     }
 
-    // ลบ Hotspot เก่า และสร้างใหม่
-    viewer.querySelectorAll('.Hotspot').forEach(hs => hs.remove());
-
-    if (o.hotspots) {
-        o.hotspots.forEach((hs, index) => {
-            const btn = document.createElement('button');
-            btn.className = 'Hotspot';
-            btn.setAttribute('slot', `hotspot-${index}`);
-            btn.setAttribute('data-position', hs.position);
-            btn.setAttribute('data-normal', hs.normal);
-            
-            const annotation = document.createElement('div');
-            annotation.className = 'HotspotAnnotation';
-            annotation.textContent = hs.name;
-            
-            btn.onclick = () => {
-                document.getElementById('modalTitle').textContent = hs.name;
-                document.getElementById('modalDesc').innerHTML = hs.info || "ไม่มีข้อมูลรายละเอียดเพิ่มเติม"; 
-                hotspotModal.style.display = 'flex';
-            };
-            
-            btn.appendChild(annotation);
-            viewer.appendChild(btn);
-        });
-    }
+    // เรียกใช้งานฟังก์ชันโหลดข้อมูลหลัก
+    loadModelData(currentOrganData);
 }
 
-// ฟังก์ชันสลับโหมดโมเดล
+// ---------------------------------------------------------
+// ฟังก์ชันอัปเดต: สลับโหมดโดยใช้ข้อมูลที่แยกก้อนกัน
+// ---------------------------------------------------------
 function toggleModelMode() {
-    if (!currentOrganData || !currentOrganData.alt_model_file) return;
+    if (!currentOrganData || !currentOrganData.alt_mode) return;
+
+    // โชว์หลอดดาวน์โหลดเพื่อไม่ให้คิดว่าแอปค้าง
+    loadShell.style.display = "block";
+    loadBar.style.width = "20%";
+
+    // ปิดปุ่มไว้ชั่วคราว
+    toggleBtn.style.pointerEvents = "none";
+    toggleBtn.style.opacity = "0.5";
 
     if (isAltMode) {
-        // กลับไปโหมดปกติ
-        viewer.src = currentOrganData.model_file;
-        toggleBtn.innerHTML = "👁️ ดูแบบโปร่งแสง";
+        // เปลี่ยนกลับเป็นโหมดปกติ
         isAltMode = false;
+        toggleBtn.innerHTML = "👁️ ดูแบบโปร่งแสง";
+        loadModelData(currentOrganData);
     } else {
-        // สลับเป็นโหมดโปร่งแสง
-        viewer.src = currentOrganData.alt_model_file;
-        toggleBtn.innerHTML = "🫀 กลับสู่โหมดปกติ";
+        // เปลี่ยนเป็นโหมดโปร่งแสง (โหลดข้อมูลแยกก้อน)
         isAltMode = true;
+        toggleBtn.innerHTML = "🫀 กลับสู่โหมดปกติ";
+        loadModelData(currentOrganData.alt_mode);
     }
+
+    // รอให้โมเดลโหลดเสร็จแล้วค่อยเปิดปุ่มคืน
+    viewer.addEventListener('load', function onViewerLoad() {
+        toggleBtn.style.pointerEvents = "auto";
+        toggleBtn.style.opacity = "1";
+        viewer.removeEventListener('load', onViewerLoad); 
+    });
 }
 
 function closeHotspotModal() {
