@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
 <title>Anatomy AR Learning System</title>
 
-<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
+<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js" defer></script>
 <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500&display=swap" rel="stylesheet">
 
 <style>
@@ -35,6 +35,7 @@ button:disabled { background: #475569; opacity: 0.5; cursor: not-allowed; }
 
 /* Quiz Styles */
 .choice { background:#1e293b; padding:16px; border-radius:16px; margin:12px 0; cursor:pointer; text-align: left; border: 1px solid transparent; transition: 0.2s; }
+.choice:hover { background: #334155; }
 .choice.correct { background:#16a34a !important; border-color: #4ade80; }
 .choice.wrong { background:#dc2626 !important; border-color: #f87171; }
 .choice.disabled { pointer-events: none; }
@@ -56,8 +57,30 @@ model-viewer { width:100%; height:100%; --poster-color: transparent; outline: no
 .tab-btn, .menu-item { pointer-events: auto; background: rgba(15, 23, 42, 0.9); border: 1px solid var(--border); border-radius: 16px; color: white; cursor: pointer; text-align: center; transition: 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
 .tab-btn.active, .menu-item.active { background: var(--primary); border-color: var(--primary); font-weight: 500; }
 
-.info-panel { position: absolute; background: var(--glass); border-radius: 24px; border: 1px solid var(--border); pointer-events: auto; z-index: 10; backdrop-filter: blur(10px); }
+.info-panel { position: absolute; background: var(--glass); border-radius: 24px; border: 1px solid var(--border); pointer-events: auto; z-index: 10; backdrop-filter: blur(10px); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
 model-viewer > button[slot="ar-button"] { position: absolute; background: var(--primary); color: white; border: none; border-radius: 12px; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.5); z-index: 200; font-family: Kanit; font-weight: 500; }
+
+/* =========================================
+   ปุ่มสลับโหมด (Toggle Mode Button)
+   ========================================= */
+.toggle-mode-btn {
+    position: absolute;
+    top: 80px; 
+    right: 20px;
+    background: rgba(15, 23, 42, 0.9);
+    color: white;
+    border: 1px solid var(--primary);
+    border-radius: 12px;
+    padding: 10px 16px;
+    font-size: 0.9rem;
+    z-index: 200;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    display: none; 
+    align-items: center;
+    transition: 0.3s;
+}
+.toggle-mode-btn:hover { background: var(--primary); }
 
 /* =========================================
    สไตล์สำหรับหน้าต่างป๊อปอัป (Hotspot Modal)
@@ -73,48 +96,49 @@ model-viewer > button[slot="ar-button"] { position: absolute; background: var(--
     background: var(--glass); border: 1px solid var(--border); border-radius: 24px;
     padding: 25px; width: 100%; max-width: 400px; text-align: center; color: white;
     box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+    transform: scale(0.95); animation: popUp 0.3s forwards ease-out;
 }
+@keyframes popUp { to { transform: scale(1); } }
+
 .modal-title { color: var(--primary); font-size: 1.3rem; margin: 0 0 12px 0; }
 .modal-desc { font-size: 0.95rem; color: #cbd5e1; line-height: 1.5; margin-bottom: 20px; text-align: left; }
-.close-modal-btn {
-    background: var(--primary); color: white; border: none; padding: 12px 20px;
-    border-radius: 12px; cursor: pointer; font-family: 'Kanit'; width: 100%; font-size: 1rem;
-}
+.close-modal-btn { background: var(--primary); color: white; border: none; padding: 12px 20px; border-radius: 12px; cursor: pointer; font-family: 'Kanit'; width: 100%; font-size: 1rem; }
 
 /* =========================================
-   ปรับปรุงสไตล์จุด Hotspot (ให้เล็กลงและเนี้ยบขึ้น)
+   ปรับปรุงสไตล์จุด Hotspot (ให้กดง่ายขึ้นบนมือถือ)
    ========================================= */
 .Hotspot {
-    background: rgba(255, 71, 87, 0.9); /* สีแดง primary ของแอป */
-    border-radius: 50%;
-    border: 1px solid white; /* ลดความหนาของขอบเหลือ 1px */
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4); /* ลดขนาดเงาลงเล็กน้อย */
+    background: transparent; 
+    border: none;
+    width: 36px; 
+    height: 36px;
     cursor: pointer;
-    height: 1px; /* <--- นี่คือความสูงหลักที่ลดลง (เดิม 18px) */
-    width: 1px;  /* <--- นี่คือความกว้างหลักที่ลดลง (เดิม 18px) */
     position: relative;
-    transition: 0.3s;
-    outline: none; /* เอาเส้นขอบเน้นออกเพื่อความสะอาดตา */
+    outline: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
-.Hotspot:focus { transform: scale(1.15); } /* ลดเอฟเฟกต์การขยายตอนโฟกัส */
+.Hotspot::after {
+    content: '';
+    display: block;
+    width: 10px;
+    height: 10px;
+    background: rgba(255, 71, 87, 0.9);
+    border: 2px solid white;
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    transition: transform 0.2s;
+}
+.Hotspot:focus::after { transform: scale(1.3); } 
 
 .HotspotAnnotation {
-    background: rgba(15, 23, 42, 0.9);
-    backdrop-filter: blur(5px);
-    border-radius: 8px;
-    border: 1px solid rgba(255,255,255,0.2);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-    color: white;
-    font-family: 'Kanit', sans-serif;
-    font-size: 0.85rem;
-    font-weight: 500;
-    left: calc(100% + 12px); /* ปรับระยะห่างป้ายกำกับตามขนาดปุ่มที่ลดลง */
-    padding: 6px 12px;
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    width: max-content;
-    pointer-events: none;
+    background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(5px);
+    border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    color: white; font-family: 'Kanit', sans-serif; font-size: 0.85rem; font-weight: 500;
+    left: calc(100% + 2px); 
+    padding: 6px 12px; position: absolute; top: 50%; transform: translateY(-50%);
+    width: max-content; pointer-events: none;
 }
 
 /* =========================================
@@ -137,15 +161,13 @@ model-viewer > button[slot="ar-button"] { position: absolute; background: var(--
 @media (max-width: 768px) and (orientation: portrait) {
     .tabs { top: 75px; left: 0; width: 100%; justify-content: center; padding: 0 10px; flex-direction: row; }
     .tab-btn { padding: 8px 18px; font-size: 0.9rem; }
-    
-    .menu { bottom: 180px; left: 0; width: 100%; flex-direction: row; justify-content: center; padding: 0 15px; }
+    .menu { bottom: 180px; left: 0; width: 100%; flex-direction: row; justify-content: center; padding: 0 15px; flex-wrap: wrap;}
     .menu-item { flex: 1; min-width: 120px; max-width: 160px; padding: 10px 12px; font-size: 0.85rem; white-space: normal; line-height: 1.2; }
-    
     .info-panel { bottom: max(15px, env(safe-area-inset-bottom)); left: 5%; width: 90%; padding: 16px; max-height: 140px; overflow-y: auto; }
     #title { font-size: 1.1rem; margin:0; color:var(--primary); }
     #desc { font-size: 0.85rem; line-height: 1.4; color:#cbd5e1; margin: 6px 0 0 0;}
-    
     model-viewer > button[slot="ar-button"] { bottom: 250px; left: 50%; transform: translateX(-50%); padding: 12px 24px; font-size: 1rem; width: max-content; }
+    .toggle-mode-btn { top: 125px; right: 15px; padding: 8px 14px; font-size: 0.85rem; } /* ตำแหน่งปุ่มสลับโหมดบนมือถือ */
 }
 
 /* =========================================
@@ -155,19 +177,16 @@ model-viewer > button[slot="ar-button"] { position: absolute; background: var(--
     .app-header { height: 45px; }
     .tabs { top: 55px; left: max(10px, env(safe-area-inset-left)); flex-direction: column; gap: 8px; }
     .tab-btn { padding: 8px 16px; font-size: 0.85rem; }
-    
     .menu { top: 55px; right: max(10px, env(safe-area-inset-right)); flex-direction: column; gap: 8px; }
     .menu-item { padding: 8px 16px; font-size: 0.85rem; }
-    
     .info-panel { bottom: max(10px, env(safe-area-inset-bottom)); left: max(10px, env(safe-area-inset-left)); width: 45%; max-width: 350px; padding: 12px; max-height: 110px; overflow-y: auto; }
     #title { font-size: 1rem; margin:0; color:var(--primary); }
     #desc { font-size: 0.8rem; line-height: 1.3; color:#cbd5e1; margin: 4px 0 0 0;}
-    
     model-viewer > button[slot="ar-button"] { bottom: max(15px, env(safe-area-inset-bottom)); right: max(15px, env(safe-area-inset-right)); padding: 10px 20px; font-size: 0.9rem; }
-    
     .box { padding: 20px; }
     #qTitle { min-height: 40px; }
     .choice { padding: 10px; margin: 6px 0; }
+    .toggle-mode-btn { top: 55px; right: 160px; } /* ขยับหลบเมนูแนวนอน */
 }
 </style>
 </head>
@@ -222,11 +241,15 @@ model-viewer > button[slot="ar-button"] { position: absolute; background: var(--
 <main class="main" id="mainArea">
   <nav class="tabs" id="tabs"></nav>
   
-  <model-viewer id="viewer" ar ar-modes="webxr scene-viewer quick-look" camera-controls auto-rotate shadow-intensity="1" exposure="1.2" environment-image="neutral">
+  <model-viewer id="viewer" autoplay ar ar-modes="webxr scene-viewer quick-look" ar-scale="auto" camera-controls auto-rotate shadow-intensity="1" exposure="1.2" environment-image="neutral">
       <button slot="ar-button">
           📱 ดูแบบ AR ทะลุจอ
       </button>
   </model-viewer>
+  
+  <button id="toggleModeBtn" class="toggle-mode-btn" onclick="toggleModelMode()">
+      👁️ ดูแบบโปร่งแสง
+  </button>
   
   <div class="info-panel">
     <h3 id="title"></h3>
@@ -241,6 +264,8 @@ let data = [], currentQuizData = [], qIndex = 0, score = 0, isAnswered = false;
 let timerInterval, timeLeft = 15;
 const maxTime = 15;
 let currentCorrectText = ""; 
+let currentOrganData = null; // เก็บข้อมูลอวัยวะที่เปิดอยู่
+let isAltMode = false;       // เก็บสถานะว่าเปิดโหมดโปร่งแสงอยู่หรือไม่
 
 const home = document.getElementById("home");
 const quizPage = document.getElementById("quizPage");
@@ -249,6 +274,13 @@ const tabs = document.getElementById("tabs");
 const menu = document.getElementById("menu");
 const loadBar = document.getElementById("load-bar");
 const loadShell = document.getElementById("load-shell");
+const hotspotModal = document.getElementById("hotspotModal");
+const toggleBtn = document.getElementById("toggleModeBtn");
+
+// ปิด Modal เมื่อคลิกพื้นที่ว่างด้านนอก (Overlay)
+hotspotModal.addEventListener('click', function(e) {
+    if (e.target === this) closeHotspotModal();
+});
 
 viewer.addEventListener('progress', (e) => {
     loadShell.style.display = "block";
@@ -258,8 +290,12 @@ viewer.addEventListener('progress', (e) => {
     }
 });
 
-fetch("anatomy_data.json")
-.then(r => r.json())
+// ดึงข้อมูล JSON
+fetch("anatomy_data.json?v=" + new Date().getTime())
+.then(r => {
+    if(!r.ok) throw new Error("ไม่สามารถโหลดไฟล์ข้อมูลได้");
+    return r.json();
+})
 .then(j => {
     data = j.systems;
     renderTabs();
@@ -273,7 +309,7 @@ fetch("anatomy_data.json")
 })
 .catch(err => {
     console.error("Error:", err);
-    document.getElementById("loadingText").textContent = "ไม่พบไฟล์ JSON กรุณาตรวจสอบไฟล์";
+    document.getElementById("loadingText").textContent = "ไม่พบไฟล์ฐานข้อมูล (JSON)";
     document.getElementById("loadingText").style.color = "#ef4444";
 });
 
@@ -300,16 +336,24 @@ function selectOrgan(i, j) {
     if(activeMenu) activeMenu.classList.add("active");
 
     const o = data[i].items[j];
+    currentOrganData = o;
+    isAltMode = false; // รีเซ็ตโหมดทุกครั้งที่เปลี่ยนอวัยวะ
+
     viewer.src = o.model_file;
     document.getElementById("title").textContent = o.name;
     document.getElementById("desc").innerHTML = o.description; 
 
-    // เก็บปุ่ม AR ไว้ แล้วล้าง Hotspot เก่าออก
-    const arButton = viewer.querySelector('[slot="ar-button"]');
-    viewer.innerHTML = ''; 
-    viewer.appendChild(arButton);
+    // เช็คว่ามีโมเดลสำรอง (โปร่งแสง) ไหม ถ้ามีให้แสดงปุ่ม
+    if (o.alt_model_file) {
+        toggleBtn.style.display = "flex";
+        toggleBtn.innerHTML = "👁️ ดูแบบโปร่งแสง";
+    } else {
+        toggleBtn.style.display = "none";
+    }
 
-    // สร้าง Hotspot ใหม่จาก JSON
+    // ลบ Hotspot เก่า และสร้างใหม่
+    viewer.querySelectorAll('.Hotspot').forEach(hs => hs.remove());
+
     if (o.hotspots) {
         o.hotspots.forEach((hs, index) => {
             const btn = document.createElement('button');
@@ -322,11 +366,10 @@ function selectOrgan(i, j) {
             annotation.className = 'HotspotAnnotation';
             annotation.textContent = hs.name;
             
-            // เมื่อกดที่จุด Hotspot ให้เปิดป๊อปอัป
             btn.onclick = () => {
                 document.getElementById('modalTitle').textContent = hs.name;
                 document.getElementById('modalDesc').innerHTML = hs.info || "ไม่มีข้อมูลรายละเอียดเพิ่มเติม"; 
-                document.getElementById('hotspotModal').style.display = 'flex';
+                hotspotModal.style.display = 'flex';
             };
             
             btn.appendChild(annotation);
@@ -335,9 +378,25 @@ function selectOrgan(i, j) {
     }
 }
 
-// ฟังก์ชันปิดกล่องป๊อปอัป
+// ฟังก์ชันสลับโหมดโมเดล
+function toggleModelMode() {
+    if (!currentOrganData || !currentOrganData.alt_model_file) return;
+
+    if (isAltMode) {
+        // กลับไปโหมดปกติ
+        viewer.src = currentOrganData.model_file;
+        toggleBtn.innerHTML = "👁️ ดูแบบโปร่งแสง";
+        isAltMode = false;
+    } else {
+        // สลับเป็นโหมดโปร่งแสง
+        viewer.src = currentOrganData.alt_model_file;
+        toggleBtn.innerHTML = "🫀 กลับสู่โหมดปกติ";
+        isAltMode = true;
+    }
+}
+
 function closeHotspotModal() {
-    document.getElementById('hotspotModal').style.display = 'none';
+    hotspotModal.style.display = 'none';
 }
 
 function startLearning() {
