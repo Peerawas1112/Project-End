@@ -89,7 +89,7 @@
         },
         {
           "name": "โครงสร้างหลอดเลือด",
-          "model_file": "models/blood_vessels.glb", 
+          "model_file": "models/Blood vessels.glb", 
           "description": "<b>หลอดเลือด (Blood Vessels):</b> เส้นทางคมนาคมหลักของร่างกาย แบ่งออกเป็น 3 ชนิดหลัก ได้แก่ หลอดเลือดแดง หลอดเลือดดำ และหลอดเลือดฝอย",
           "click_parts": [
             { 
@@ -107,7 +107,7 @@
         },
         {
           "name": "องค์ประกอบของเลือด",
-          "model_file": "models/blood_cells.glb",
+          "model_file": "models/Blood cells.glb",
           "description": "<b>เลือด (Blood):</b> ของเหลวที่ทำหน้าที่ลำเลียงสารอาหารและก๊าซ ประกอบด้วยพลาสมาและเซลล์เม็ดเลือดชนิดต่างๆ",
           "click_parts": [
             { 
