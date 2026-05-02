@@ -211,6 +211,17 @@ let currentOrganData = null;
 let isAltMode = false;       
 let currentActiveModelUrl = ""; // เก็บ URL โมเดลปัจจุบันสำหรับทำ QR Code
 
+// 🌟 ตัวแปรเก็บชิ้นส่วนที่กำลังไฮไลต์อยู่
+let lastHighlightedMaterial = null; 
+
+// 🌟 ฟังก์ชันสำหรับปิดไฟไฮไลต์กลับเป็นปกติ
+function resetHighlight() {
+    if (lastHighlightedMaterial) {
+        lastHighlightedMaterial.setEmissiveFactor([0, 0, 0]); // คืนค่าแสงเป็น 0 (มืดปกติ)
+        lastHighlightedMaterial = null;
+    }
+}
+
 const home = document.getElementById("home");
 const quizPage = document.getElementById("quizPage");
 const viewer = document.getElementById("viewer");
@@ -232,6 +243,7 @@ document.querySelectorAll('.modal-overlay').forEach(modal => {
 function closeModals() {
     infoModal.style.display = 'none';
     qrModal.style.display = 'none';
+    resetHighlight(); // 🌟 ปิด Modal ปุ๊บ ให้ไฟไฮไลต์ดับปั๊บ
 }
 
 viewer.addEventListener('progress', (e) => {
@@ -302,6 +314,8 @@ function selectOrgan(i, j) {
 }
 
 function loadModelData(dataObj) {
+    resetHighlight(); // 🌟 ปิดไฟเคลียร์ค่าเดิมก่อนโหลดโมเดลใหม่
+    
     loadShell.style.display = "block";
     loadBar.style.width = "10%";
     viewer.src = ""; 
@@ -338,26 +352,36 @@ function toggleModelMode() {
 }
 
 // ---------------------------------------------------------
-// ระบบ Mesh Picking: เช็ค Material ที่ถูกคลิก
+// ระบบ Mesh Picking: เช็ค Material ที่ถูกคลิก + ไฮไลต์ 🌟
 // ---------------------------------------------------------
 viewer.addEventListener('click', (event) => {
-    // ฟังก์ชันนี้จะดึงชื่อ Material ตรงจุดที่เมาส์คลิกโดน
+    // ดึงข้อมูล Material ที่เมาส์คลิกโดน
     const material = viewer.materialFromPoint(event.clientX, event.clientY);
     
     if (material != null) {
-        // เช็คว่ามีข้อมูล click_parts ใน JSON หรือไม่ (ใช้ข้อมูลอ้างอิงจากโหมดปัจจุบัน)
         const partsData = isAltMode ? currentOrganData.alt_mode.click_parts : currentOrganData.click_parts;
         
         if (partsData) {
-            // ค้นหาชิ้นส่วนที่มี material_name ตรงกับที่คลิกโดน
             const clickedPart = partsData.find(p => p.material_name === material.name);
             
             if (clickedPart) {
+                // 🌟 1. ดับไฟชิ้นเก่าที่เคยไฮไลต์ไว้ (ถ้ามี)
+                resetHighlight();
+
+                // 🌟 2. เปิดไฟไฮไลต์ให้ชิ้นใหม่
+                // ค่า [0.4, 0.4, 0.4] คือการบวกแสงสีขาวเข้าไป ทำให้ดูสว่างขึ้น
+                material.setEmissiveFactor([0.4, 0.4, 0.4]); 
+                lastHighlightedMaterial = material; // จำไว้ว่าชิ้นนี้สว่างอยู่
+
+                // 3. แสดง Modal ข้อมูล
                 document.getElementById('modalTitle').textContent = clickedPart.name;
                 document.getElementById('modalDesc').innerHTML = clickedPart.info || "ไม่มีข้อมูลรายละเอียดเพิ่มเติม"; 
                 infoModal.style.display = 'flex';
             }
         }
+    } else {
+        // 🌟 ถ้าคลิกโดนความว่างเปล่า (ไม่ได้โดนโมเดล) ให้ปิดหน้าต่างและปิดไฟ
+        closeModals();
     }
 });
 
