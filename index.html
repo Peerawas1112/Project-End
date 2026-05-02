@@ -3,9 +3,11 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-<title>Anatomy AR Learning System</title>
+<title>Anatomy Learning System (Desktop)</title>
 
 <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js" defer></script>
+<!-- ไลบรารีสำหรับสร้าง QR Code -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500&display=swap" rel="stylesheet">
 
 <style>
@@ -16,7 +18,6 @@
 body{ margin:0; padding:0; font-family:Kanit,sans-serif; background:var(--bg); color:white; height:100vh; width: 100vw; overflow:hidden; }
 * { box-sizing: border-box; }
 
-/* Progress Bar Custom */
 #load-shell { position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: #1e293b; z-index: 2000; display: none; }
 #load-bar { height: 100%; background: var(--primary); width: 0%; transition: width 0.3s; }
 
@@ -28,12 +29,10 @@ body{ margin:0; padding:0; font-family:Kanit,sans-serif; background:var(--bg); c
 .box { width:100%; max-width:480px; max-height: 90vh; overflow-y: auto; background:var(--glass); border-radius:28px; padding:35px; text-align:center; border: 1px solid var(--border); box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
 .box::-webkit-scrollbar { display: none; }
 
-/* Buttons */
 button { padding:14px 20px; border:none; border-radius:16px; background:var(--primary); color:white; font-size:1rem; cursor:pointer; transition: 0.2s; font-family: Kanit; font-weight: 500; }
 button:active { transform: scale(0.95); }
 button:disabled { background: #475569; opacity: 0.5; cursor: not-allowed; }
 
-/* Quiz Styles */
 .choice { background:#1e293b; padding:16px; border-radius:16px; margin:12px 0; cursor:pointer; text-align: left; border: 1px solid transparent; transition: 0.2s; }
 .choice:hover { background: #334155; }
 .choice.correct { background:#16a34a !important; border-color: #4ade80; }
@@ -44,161 +43,60 @@ button:disabled { background: #475569; opacity: 0.5; cursor: not-allowed; }
 #timerBar { width: 100%; height: 100%; background: var(--primary); transition: width 1s linear; }
 
 /* =========================================
-   3. Main AR Workspace
+   3. Main Workspace
    ========================================= */
 .main { position:fixed; top:0; left:0; width:100vw; height:100vh; display: none; z-index: 1; }
-model-viewer { width:100%; height:100%; --poster-color: transparent; outline: none; }
+model-viewer { width:100%; height:100%; --poster-color: transparent; outline: none; cursor: crosshair; }
 
-/* Header */
-.app-header { position: absolute; top:0; left:0; width:100%; height: 60px; display: none; align-items: center; justify-content: space-between; padding: 0 max(20px, env(safe-area-inset-left)) 0 max(20px, env(safe-area-inset-right)); background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); z-index: 500; }
+.app-header { position: absolute; top:0; left:0; width:100%; height: 60px; display: none; align-items: center; justify-content: space-between; padding: 0 20px; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); z-index: 500; }
 
-/* UI Overlays */
 .tabs, .menu { position: absolute; display: none; gap: 10px; z-index: 100; pointer-events: none; }
-.tab-btn, .menu-item { pointer-events: auto; background: rgba(15, 23, 42, 0.9); border: 1px solid var(--border); border-radius: 16px; color: white; cursor: pointer; text-align: center; transition: 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
-.tab-btn.active, .menu-item.active { background: var(--primary); border-color: var(--primary); font-weight: 500; }
+.tab-btn, .menu-item { pointer-events: auto; background: rgba(15, 23, 42, 0.9); border: 1px solid var(--border); border-radius: 16px; color: white; cursor: pointer; text-align: center; transition: 0.3s; padding: 10px 24px; box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
+.tab-btn.active, .menu-item.active { background: var(--primary); border-color: var(--primary); }
 
-.info-panel { position: absolute; background: var(--glass); border-radius: 24px; border: 1px solid var(--border); pointer-events: auto; z-index: 10; backdrop-filter: blur(10px); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-model-viewer > button[slot="ar-button"] { position: absolute; background: var(--primary); color: white; border: none; border-radius: 12px; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.5); z-index: 200; font-family: Kanit; font-weight: 500; }
+.info-panel { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); width: 450px; background: var(--glass); border-radius: 24px; border: 1px solid var(--border); pointer-events: auto; z-index: 10; padding: 24px; backdrop-filter: blur(10px); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+#title { font-size: 1.4rem; margin:0; color:var(--primary); }
+#desc { font-size: 0.95rem; line-height: 1.5; color:#cbd5e1; margin: 8px 0 15px 0;}
 
-/* =========================================
-   ปุ่มสลับโหมด (Toggle Mode Button)
-   ========================================= */
-.toggle-mode-btn {
-    position: absolute;
-    top: 80px; 
-    right: 20px;
-    background: rgba(15, 23, 42, 0.9);
-    color: white;
-    border: 1px solid var(--primary);
-    border-radius: 12px;
-    padding: 10px 16px;
-    font-size: 0.9rem;
-    z-index: 200;
-    cursor: pointer;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-    display: none; 
-    align-items: center;
-    transition: 0.3s;
-}
+.tabs { top: 80px; left: 50%; transform: translateX(-50%); flex-direction: row; }
+.menu { right: 30px; top: 50%; transform: translateY(-50%); flex-direction: column; }
+
+/* Toggle Mode Button */
+.toggle-mode-btn { position: absolute; top: 80px; right: 20px; background: rgba(15, 23, 42, 0.9); color: white; border: 1px solid var(--primary); border-radius: 12px; padding: 10px 16px; z-index: 200; cursor: pointer; display: none; transition: 0.3s; }
 .toggle-mode-btn:hover { background: var(--primary); }
 
 /* =========================================
-   สไตล์สำหรับหน้าต่างป๊อปอัป (Hotspot Modal)
+   4. Modals (Info & QR)
    ========================================= */
-.modal-overlay {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px);
-    display: none; justify-content: center; align-items: center; z-index: 3000; padding: 20px;
-    opacity: 0; animation: fadeIn 0.3s forwards;
-}
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center; z-index: 3000; padding: 20px; opacity: 0; animation: fadeIn 0.3s forwards; }
 @keyframes fadeIn { to { opacity: 1; } }
-
-.modal-box {
-    background: var(--glass); border: 1px solid var(--border); border-radius: 24px;
-    padding: 25px; width: 100%; max-width: 400px; text-align: center; color: white;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.8);
-    transform: scale(0.95); animation: popUp 0.3s forwards ease-out;
-}
+.modal-box { background: var(--glass); border: 1px solid var(--border); border-radius: 24px; padding: 25px; width: 100%; max-width: 400px; text-align: center; color: white; transform: scale(0.95); animation: popUp 0.3s forwards ease-out; }
 @keyframes popUp { to { transform: scale(1); } }
-
 .modal-title { color: var(--primary); font-size: 1.3rem; margin: 0 0 12px 0; }
 .modal-desc { font-size: 0.95rem; color: #cbd5e1; line-height: 1.5; margin-bottom: 20px; text-align: left; }
 .close-modal-btn { background: var(--primary); color: white; border: none; padding: 12px 20px; border-radius: 12px; cursor: pointer; font-family: 'Kanit'; width: 100%; font-size: 1rem; }
-
-/* =========================================
-   ปรับปรุงสไตล์จุด Hotspot (ให้กดง่ายขึ้นบนมือถือ)
-   ========================================= */
-.Hotspot {
-    background: transparent; 
-    border: none;
-    width: 36px; 
-    height: 36px;
-    cursor: pointer;
-    position: relative;
-    outline: none;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-.Hotspot::after {
-    content: '';
-    display: block;
-    width: 10px;
-    height: 10px;
-    background: rgba(255, 71, 87, 0.9);
-    border: 2px solid white;
-    border-radius: 50%;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
-    transition: transform 0.2s;
-}
-.Hotspot:focus::after { transform: scale(1.3); } 
-
-.HotspotAnnotation {
-    background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(5px);
-    border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-    color: white; font-family: 'Kanit', sans-serif; font-size: 0.85rem; font-weight: 500;
-    left: calc(100% + 2px); 
-    padding: 6px 12px; position: absolute; top: 50%; transform: translateY(-50%);
-    width: max-content; pointer-events: none;
-}
-
-/* =========================================
-   4. Layout: Desktop & Tablets
-   ========================================= */
-@media (min-width: 769px) {
-    .tabs { top: 80px; left: 50%; transform: translateX(-50%); flex-direction: row; }
-    .tab-btn { padding: 10px 24px; font-size: 1rem; }
-    .menu { right: 30px; top: 50%; transform: translateY(-50%); flex-direction: column; }
-    .menu-item { padding: 14px 24px; font-size: 1rem; }
-    .info-panel { bottom: 40px; left: 50%; transform: translateX(-50%); width: 450px; padding: 24px; }
-    #title { font-size: 1.4rem; margin:0; color:var(--primary); }
-    #desc { font-size: 0.95rem; line-height: 1.5; color:#cbd5e1; margin: 8px 0 0 0;}
-    model-viewer > button[slot="ar-button"] { top: 80px; left: 30px; padding: 12px 24px; font-size: 1.1rem; }
-}
-
-/* =========================================
-   5. Layout: Mobile Portrait (แนวตั้ง)
-   ========================================= */
-@media (max-width: 768px) and (orientation: portrait) {
-    .tabs { top: 75px; left: 0; width: 100%; justify-content: center; padding: 0 10px; flex-direction: row; }
-    .tab-btn { padding: 8px 18px; font-size: 0.9rem; }
-    .menu { bottom: 180px; left: 0; width: 100%; flex-direction: row; justify-content: center; padding: 0 15px; flex-wrap: wrap;}
-    .menu-item { flex: 1; min-width: 120px; max-width: 160px; padding: 10px 12px; font-size: 0.85rem; white-space: normal; line-height: 1.2; }
-    .info-panel { bottom: max(15px, env(safe-area-inset-bottom)); left: 5%; width: 90%; padding: 16px; max-height: 140px; overflow-y: auto; }
-    #title { font-size: 1.1rem; margin:0; color:var(--primary); }
-    #desc { font-size: 0.85rem; line-height: 1.4; color:#cbd5e1; margin: 6px 0 0 0;}
-    model-viewer > button[slot="ar-button"] { bottom: 250px; left: 50%; transform: translateX(-50%); padding: 12px 24px; font-size: 1rem; width: max-content; }
-    .toggle-mode-btn { top: 125px; right: 15px; padding: 8px 14px; font-size: 0.85rem; } 
-}
-
-/* =========================================
-   6. Layout: Mobile Landscape (แนวนอน)
-   ========================================= */
-@media (max-width: 950px) and (max-height: 500px) and (orientation: landscape) {
-    .app-header { height: 45px; }
-    .tabs { top: 55px; left: max(10px, env(safe-area-inset-left)); flex-direction: column; gap: 8px; }
-    .tab-btn { padding: 8px 16px; font-size: 0.85rem; }
-    .menu { top: 55px; right: max(10px, env(safe-area-inset-right)); flex-direction: column; gap: 8px; }
-    .menu-item { padding: 8px 16px; font-size: 0.85rem; }
-    .info-panel { bottom: max(10px, env(safe-area-inset-bottom)); left: max(10px, env(safe-area-inset-left)); width: 45%; max-width: 350px; padding: 12px; max-height: 110px; overflow-y: auto; }
-    #title { font-size: 1rem; margin:0; color:var(--primary); }
-    #desc { font-size: 0.8rem; line-height: 1.3; color:#cbd5e1; margin: 4px 0 0 0;}
-    model-viewer > button[slot="ar-button"] { bottom: max(15px, env(safe-area-inset-bottom)); right: max(15px, env(safe-area-inset-right)); padding: 10px 20px; font-size: 0.9rem; }
-    .box { padding: 20px; }
-    #qTitle { min-height: 40px; }
-    .choice { padding: 10px; margin: 6px 0; }
-    .toggle-mode-btn { top: 55px; right: 160px; } 
-}
 </style>
 </head>
 
 <body>
 
-<div id="hotspotModal" class="modal-overlay">
+<!-- Modal แสดงข้อมูลชิ้นส่วนเมื่อถูกคลิก -->
+<div id="infoModal" class="modal-overlay">
   <div class="modal-box">
     <h3 id="modalTitle" class="modal-title">ชื่อส่วนประกอบ</h3>
     <div id="modalDesc" class="modal-desc">รายละเอียด...</div>
-    <button class="close-modal-btn" onclick="closeHotspotModal()">ปิดหน้าต่าง</button>
+    <button class="close-modal-btn" onclick="closeModals()">ปิดหน้าต่าง</button>
   </div>
+</div>
+
+<!-- Modal แสดง QR Code สำหรับมือถือ -->
+<div id="qrModal" class="modal-overlay">
+    <div class="modal-box">
+      <h3 class="modal-title">📱 สแกนเพื่อดูแบบ AR</h3>
+      <div id="qrcode" style="display:flex; justify-content:center; margin: 20px 0; background: white; padding: 15px; border-radius: 10px;"></div>
+      <p style="font-size: 0.85rem; color: #cbd5e1; margin-bottom: 15px;">ใช้กล้องมือถือสแกนเพื่อโชว์โมเดล 3 มิติแบบทะลุจอบนโต๊ะเรียน</p>
+      <button class="close-modal-btn" onclick="closeModals()" style="background: #475569;">ปิดหน้าต่าง</button>
+    </div>
 </div>
 
 <div id="load-shell"><div id="load-bar"></div></div>
@@ -208,8 +106,7 @@ model-viewer > button[slot="ar-button"] { position: absolute; background: var(--
     <h1 style="margin-bottom: 5px;">Human Anatomy AR</h1>
     <p id="loadingText" style="color: #fbbf24; margin-bottom: 25px;">กำลังโหลดข้อมูลบทเรียน...</p>
     
-    <button id="btnLearn" onclick="startLearning()" style="width: 100%;" disabled>📚 เข้าบทเรียน AR</button>
-    <button onclick="window.location.href='scanner.html'" style="width: 100%; margin-top: 10px; background: #3b82f6;">📷 สแกนรูปภาพใบงาน</button>
+    <button id="btnLearn" onclick="startLearning()" style="width: 100%;" disabled>📚 เข้าบทเรียนเนื้อหา 3D</button>
     <div style="display: flex; gap: 10px; margin-top: 15px;">
         <button id="btnPre" onclick="openQuiz('ก่อนเรียน')" style="flex: 1;" disabled>📝 ทดสอบก่อนเรียน</button>
         <button id="btnPost" onclick="openQuiz('หลังเรียน')" style="flex: 1;" disabled>📝 ทดสอบหลังเรียน</button>
@@ -223,7 +120,6 @@ model-viewer > button[slot="ar-button"] { position: absolute; background: var(--
         <div id="quizType" style="color:var(--primary); font-weight:500; font-size: 1.2rem; margin-bottom: 10px;"></div>
         <div class="timer-container" id="timerContainer"><div id="timerBar"></div></div>
     </div>
-    
     <div id="quizBody">
         <h2 id="qTitle" style="font-size: 1.1rem; min-height: 60px; line-height: 1.4;"></h2>
         <div id="qChoices"></div>
@@ -234,26 +130,23 @@ model-viewer > button[slot="ar-button"] { position: absolute; background: var(--
 </div>
 
 <div class="app-header" id="appHeader">
-    <span style="font-size: 1rem; color: #cbd5e1; font-weight: 500;">Anatomy AR</span>
+    <span style="font-size: 1rem; color: #cbd5e1; font-weight: 500;">Anatomy 3D Explorer</span>
     <button onclick="backToHome()" style="background:none; border:1px solid var(--border); font-size: 0.85rem; padding: 6px 14px;">🏠 กลับหน้าหลัก</button>
 </div>
 
 <main class="main" id="mainArea">
   <nav class="tabs" id="tabs"></nav>
   
-  <model-viewer id="viewer" autoplay ar ar-modes="webxr scene-viewer quick-look" ar-scale="auto" camera-controls auto-rotate shadow-intensity="1" exposure="1.2" environment-image="neutral">
-      <button slot="ar-button">
-          📱 ดูแบบ AR ทะลุจอ
-      </button>
-  </model-viewer>
+  <model-viewer id="viewer" autoplay camera-controls auto-rotate shadow-intensity="1" exposure="1.2" environment-image="neutral"></model-viewer>
   
   <button id="toggleModeBtn" class="toggle-mode-btn" onclick="toggleModelMode()">
-      👁️ ดูแบบโปร่งแสง
+      👁️ ดูแบบเจาะลึก
   </button>
   
   <div class="info-panel">
     <h3 id="title"></h3>
     <p id="desc"></p>
+    <button onclick="showQRCode()" style="width: 100%; background: #3b82f6; padding: 10px; font-size: 0.9rem;">📱 สแกน QR ดู AR บนมือถือ</button>
   </div>
 
   <footer class="menu" id="menu"></footer>
@@ -264,8 +157,9 @@ let data = [], currentQuizData = [], qIndex = 0, score = 0, isAnswered = false;
 let timerInterval, timeLeft = 15;
 const maxTime = 15;
 let currentCorrectText = ""; 
-let currentOrganData = null; // เก็บข้อมูลอวัยวะที่เปิดอยู่
-let isAltMode = false;       // เก็บสถานะว่าเปิดโหมดโปร่งแสงอยู่หรือไม่
+let currentOrganData = null; 
+let isAltMode = false;       
+let currentActiveModelUrl = ""; // เก็บ URL โมเดลปัจจุบันสำหรับทำ QR Code
 
 const home = document.getElementById("home");
 const quizPage = document.getElementById("quizPage");
@@ -274,13 +168,21 @@ const tabs = document.getElementById("tabs");
 const menu = document.getElementById("menu");
 const loadBar = document.getElementById("load-bar");
 const loadShell = document.getElementById("load-shell");
-const hotspotModal = document.getElementById("hotspotModal");
+const infoModal = document.getElementById("infoModal");
+const qrModal = document.getElementById("qrModal");
 const toggleBtn = document.getElementById("toggleModeBtn");
 
-// ปิด Modal เมื่อคลิกพื้นที่ว่างด้านนอก (Overlay)
-hotspotModal.addEventListener('click', function(e) {
-    if (e.target === this) closeHotspotModal();
+// ปิด Modal เมื่อคลิกพื้นที่ว่างด้านนอก
+document.querySelectorAll('.modal-overlay').forEach(modal => {
+    modal.addEventListener('click', function(e) {
+        if (e.target === this) closeModals();
+    });
 });
+
+function closeModals() {
+    infoModal.style.display = 'none';
+    qrModal.style.display = 'none';
+}
 
 viewer.addEventListener('progress', (e) => {
     loadShell.style.display = "block";
@@ -330,48 +232,6 @@ function loadSystem(i) {
     }
 }
 
-// ---------------------------------------------------------
-// ฟังก์ชันใหม่: โหลดข้อมูลอวัยวะ (เพื่อเคลียร์ของเก่าออกก่อน)
-// ---------------------------------------------------------
-function loadModelData(dataObj) {
-    // ล้างโมเดลเก่าทิ้งชั่วคราว เพื่อเคลียร์ RAM
-    viewer.src = ""; 
-    
-    // หน่วงเวลาเล็กน้อยแล้วค่อยใส่ข้อมูลใหม่
-    setTimeout(() => {
-        viewer.src = dataObj.model_file;
-        document.getElementById("title").textContent = dataObj.name;
-        document.getElementById("desc").innerHTML = dataObj.description; 
-
-        // ลบ Hotspot เก่าทั้งหมดทิ้ง
-        viewer.querySelectorAll('.Hotspot').forEach(hs => hs.remove());
-
-        // สร้าง Hotspot ชุดใหม่ตามข้อมูลที่ส่งมา
-        if (dataObj.hotspots) {
-            dataObj.hotspots.forEach((hs, index) => {
-                const btn = document.createElement('button');
-                btn.className = 'Hotspot';
-                btn.setAttribute('slot', `hotspot-${index}`);
-                btn.setAttribute('data-position', hs.position);
-                btn.setAttribute('data-normal', hs.normal);
-                
-                const annotation = document.createElement('div');
-                annotation.className = 'HotspotAnnotation';
-                annotation.textContent = hs.name;
-                
-                btn.onclick = () => {
-                    document.getElementById('modalTitle').textContent = hs.name;
-                    document.getElementById('modalDesc').innerHTML = hs.info || "ไม่มีข้อมูลรายละเอียดเพิ่มเติม"; 
-                    hotspotModal.style.display = 'flex';
-                };
-                
-                btn.appendChild(annotation);
-                viewer.appendChild(btn);
-            });
-        }
-    }, 100); 
-}
-
 function selectOrgan(i, j) {
     document.querySelectorAll(".menu-item").forEach(m => m.classList.remove("active"));
     const activeMenu = document.getElementById(`m${i}${j}`);
@@ -379,58 +239,102 @@ function selectOrgan(i, j) {
 
     const o = data[i].items[j];
     currentOrganData = o;
-    isAltMode = false; // รีเซ็ตโหมดทุกครั้งที่เปลี่ยนอวัยวะ
+    isAltMode = false;
 
-    // เช็คว่ามีข้อมูล alt_mode แบบแยกก้อนหรือไม่
     if (o.alt_mode) {
-        toggleBtn.style.display = "flex";
-        toggleBtn.innerHTML = "👁️ ดูแบบโปร่งแสง";
+        toggleBtn.style.display = "block";
+        toggleBtn.innerHTML = "👁️ ดูแบบเจาะลึกภายใน";
     } else {
         toggleBtn.style.display = "none";
     }
 
-    // เรียกใช้งานฟังก์ชันโหลดข้อมูลหลัก
     loadModelData(currentOrganData);
 }
 
-// ---------------------------------------------------------
-// ฟังก์ชันอัปเดต: สลับโหมดโดยใช้ข้อมูลที่แยกก้อนกัน
-// ---------------------------------------------------------
+function loadModelData(dataObj) {
+    loadShell.style.display = "block";
+    loadBar.style.width = "10%";
+    viewer.src = ""; 
+
+    document.getElementById("title").textContent = dataObj.name;
+    document.getElementById("desc").innerHTML = dataObj.description; 
+    currentActiveModelUrl = dataObj.model_file; // บันทึก url ไว้ทำ QR Code
+
+    setTimeout(() => { viewer.src = dataObj.model_file; }, 50); 
+}
+
 function toggleModelMode() {
     if (!currentOrganData || !currentOrganData.alt_mode) return;
 
-    // โชว์หลอดดาวน์โหลดเพื่อไม่ให้คิดว่าแอปค้าง
-    loadShell.style.display = "block";
-    loadBar.style.width = "20%";
-
-    // ปิดปุ่มไว้ชั่วคราว
     toggleBtn.style.pointerEvents = "none";
     toggleBtn.style.opacity = "0.5";
 
     if (isAltMode) {
-        // เปลี่ยนกลับเป็นโหมดปกติ
         isAltMode = false;
-        toggleBtn.innerHTML = "👁️ ดูแบบโปร่งแสง";
+        toggleBtn.innerHTML = "👁️ ดูแบบเจาะลึกภายใน";
         loadModelData(currentOrganData);
     } else {
-        // เปลี่ยนเป็นโหมดโปร่งแสง (โหลดข้อมูลแยกก้อน)
         isAltMode = true;
-        toggleBtn.innerHTML = "🫀 กลับสู่โหมดปกติ";
+        toggleBtn.innerHTML = "🫀 กลับสู่โหมดมองภายนอก";
         loadModelData(currentOrganData.alt_mode);
     }
 
-    // รอให้โมเดลโหลดเสร็จแล้วค่อยเปิดปุ่มคืน
-    viewer.addEventListener('load', function onViewerLoad() {
+    const unlockButton = () => {
         toggleBtn.style.pointerEvents = "auto";
         toggleBtn.style.opacity = "1";
-        viewer.removeEventListener('load', onViewerLoad); 
+        viewer.removeEventListener('load', unlockButton); 
+    };
+    viewer.addEventListener('load', unlockButton);
+}
+
+// ---------------------------------------------------------
+// ระบบ Mesh Picking: เช็ค Material ที่ถูกคลิก
+// ---------------------------------------------------------
+viewer.addEventListener('click', (event) => {
+    // ฟังก์ชันนี้จะดึงชื่อ Material ตรงจุดที่เมาส์คลิกโดน
+    const material = viewer.materialFromPoint(event.clientX, event.clientY);
+    
+    if (material != null) {
+        // เช็คว่ามีข้อมูล click_parts ใน JSON หรือไม่ (ใช้ข้อมูลอ้างอิงจากโหมดปัจจุบัน)
+        const partsData = isAltMode ? currentOrganData.alt_mode.click_parts : currentOrganData.click_parts;
+        
+        if (partsData) {
+            // ค้นหาชิ้นส่วนที่มี material_name ตรงกับที่คลิกโดน
+            const clickedPart = partsData.find(p => p.material_name === material.name);
+            
+            if (clickedPart) {
+                document.getElementById('modalTitle').textContent = clickedPart.name;
+                document.getElementById('modalDesc').innerHTML = clickedPart.info || "ไม่มีข้อมูลรายละเอียดเพิ่มเติม"; 
+                infoModal.style.display = 'flex';
+            }
+        }
+    }
+});
+
+// ---------------------------------------------------------
+// ระบบสร้าง QR Code เพื่อเปิด AR บนมือถือ
+// ---------------------------------------------------------
+function showQRCode() {
+    qrModal.style.display = 'flex';
+    const qrcodeContainer = document.getElementById("qrcode");
+    qrcodeContainer.innerHTML = ""; // ล้าง QR Code เก่า
+    
+    // สร้าง URL โดยดึงที่อยู่เว็บปัจจุบัน แล้วต่อท้ายด้วยหน้า ar-viewer และพารามิเตอร์ไฟล์
+    const baseUrl = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
+    const arUrl = `${baseUrl}/ar-viewer.html?model=${encodeURIComponent(currentActiveModelUrl)}`;
+    
+    // สร้าง QR Code
+    new QRCode(qrcodeContainer, {
+        text: arUrl,
+        width: 150,
+        height: 150,
+        colorDark : "#0f172a",
+        colorLight : "#ffffff",
+        correctLevel : QRCode.CorrectLevel.H
     });
 }
 
-function closeHotspotModal() {
-    hotspotModal.style.display = 'none';
-}
-
+// (ส่วนระบบ Quiz ยังคงเดิม ไม่มีการแก้ไข)
 function startLearning() {
     home.style.display = "none";
     document.getElementById("appHeader").style.display = "flex";
@@ -438,7 +342,6 @@ function startLearning() {
     tabs.style.display = "flex";
     menu.style.display = "flex"; 
 }
-
 function backToHome() {
     document.getElementById("appHeader").style.display = "none";
     document.getElementById("mainArea").style.display = "none";
@@ -446,7 +349,6 @@ function backToHome() {
     menu.style.display = "none";
     home.style.display = "flex";
 }
-
 function shuffleArray(array) {
     for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -454,81 +356,55 @@ function shuffleArray(array) {
     }
     return array;
 }
-
 function openQuiz(type) {
     let allQuestions = [];
     data.forEach(system => {
-        if(system.items) {
-            system.items.forEach(item => { if (item.quiz) allQuestions = allQuestions.concat(item.quiz); });
-        }
+        if(system.items) system.items.forEach(item => { if (item.quiz) allQuestions = allQuestions.concat(item.quiz); });
     });
-
     if (allQuestions.length === 0) return alert("ยังไม่มีคำถามในระบบครับ");
-
     currentQuizData = shuffleArray([...allQuestions]).slice(0, 5);
     document.getElementById("quizType").textContent = "แบบทดสอบ" + type;
     home.style.display = "none";
     quizPage.style.display = "flex";
     document.getElementById("timerContainer").style.display = "block";
     document.getElementById("exitQuizBtn").style.display = "block";
-    qIndex = 0; score = 0;
-    showQuestion();
+    qIndex = 0; score = 0; showQuestion();
 }
-
 function showQuestion() {
     isAnswered = false;
     if (qIndex >= currentQuizData.length) return showResult();
-    
     const q = currentQuizData[qIndex];
     currentCorrectText = q.choices[q.answer];
     const shuffledChoices = shuffleArray([...q.choices]);
-
     document.getElementById("qTitle").textContent = q.question;
-    document.getElementById("qChoices").innerHTML = shuffledChoices.map((choiceText) => 
-        `<div class="choice" onclick="answer(this)">${choiceText}</div>`
-    ).join("");
-    
+    document.getElementById("qChoices").innerHTML = shuffledChoices.map(c => `<div class="choice" onclick="answer(this)">${c}</div>`).join("");
     document.getElementById("qProgress").textContent = `ข้อที่ ${qIndex + 1} / ${currentQuizData.length}`;
     startTimer();
 }
-
 function startTimer() {
-    clearInterval(timerInterval);
-    timeLeft = maxTime;
-    const timerBar = document.getElementById("timerBar");
-    timerBar.style.width = "100%";
+    clearInterval(timerInterval); timeLeft = maxTime;
+    const timerBar = document.getElementById("timerBar"); timerBar.style.width = "100%";
     timerInterval = setInterval(() => {
-        timeLeft--;
-        timerBar.style.width = (timeLeft / maxTime) * 100 + "%";
-        if (timeLeft <= 0) {
-            clearInterval(timerInterval);
-            answer(null);
-        }
+        timeLeft--; timerBar.style.width = (timeLeft / maxTime) * 100 + "%";
+        if (timeLeft <= 0) { clearInterval(timerInterval); answer(null); }
     }, 1000);
 }
-
 function answer(element) {
     if (isAnswered) return;
-    isAnswered = true;
-    clearInterval(timerInterval);
-
+    isAnswered = true; clearInterval(timerInterval);
     const choices = document.querySelectorAll(".choice");
     const selectedText = element ? element.textContent : "";
-
-    choices.forEach((c) => {
+    choices.forEach(c => {
         c.classList.add("disabled");
         if (c.textContent === currentCorrectText) c.classList.add("correct");
         if (element && c === element && selectedText !== currentCorrectText) c.classList.add("wrong");
     });
-
     if (selectedText === currentCorrectText) score++;
     setTimeout(() => { qIndex++; showQuestion(); }, 2000);
 }
-
 function showResult() {
     const percent = (score / currentQuizData.length) * 100;
     const grade = percent >= 80 ? "A" : percent >= 70 ? "B" : percent >= 60 ? "C" : percent >= 50 ? "D" : "F";
-    
     document.getElementById("qTitle").textContent = "🎉 สรุปผลการทดสอบ";
     document.getElementById("qChoices").innerHTML = `
         <div style="font-size: 1rem; color: #cbd5e1; margin-top:20px;">เกรดที่ได้</div>
@@ -543,12 +419,7 @@ function showResult() {
     document.getElementById("timerContainer").style.display = "none";
     document.getElementById("exitQuizBtn").style.display = "none";
 }
-
-function closeQuiz() {
-    clearInterval(timerInterval);
-    quizPage.style.display = "none";
-    home.style.display = "flex";
-}
+function closeQuiz() { clearInterval(timerInterval); quizPage.style.display = "none"; home.style.display = "flex"; }
 </script>
 </body>
 </html>

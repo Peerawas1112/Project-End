@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>AR Mode - Anatomy Learning</title>
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body { margin: 0; padding: 0; background-color: #020617; height: 100vh; width: 100vw; overflow: hidden; font-family: 'Kanit', sans-serif; }
+        model-viewer { width: 100%; height: 100%; outline: none; }
+        
+        /* ตกแต่งปุ่มกดดู AR ให้อยู่ตรงกลางด้านล่างและใหญ่สะดุดตา */
+        model-viewer > button[slot="ar-button"] {
+            position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%);
+            background-color: #ff4757; color: white; border: none; border-radius: 20px;
+            padding: 15px 30px; font-size: 1.1rem; font-family: 'Kanit', sans-serif; font-weight: 500;
+            box-shadow: 0 10px 25px rgba(255, 71, 87, 0.5); cursor: pointer;
+        }
+        
+        #error-msg { position: absolute; top: 50%; width: 100%; text-align: center; color: white; display: none; }
+    </style>
+</head>
+<body>
+
+    <model-viewer id="ar-viewer" 
+        ar 
+        ar-modes="webxr scene-viewer quick-look" 
+        ar-scale="auto" 
+        camera-controls 
+        auto-rotate 
+        shadow-intensity="1" 
+        exposure="1.2" 
+        environment-image="neutral">
+        <button slot="ar-button">
+            ✨ โชว์โมเดล AR บนโต๊ะ
+        </button>
+    </model-viewer>
+
+    <div id="error-msg">
+        <h3>ไม่พบข้อมูลโมเดล</h3>
+        <p>กรุณาสแกน QR Code ใหม่อีกครั้ง</p>
+    </div>
+
+    <script>
+        // อ่านค่าพารามิเตอร์ URL ว่าคอมพิวเตอร์ส่งโมเดลชื่ออะไรมา
+        const urlParams = new URLSearchParams(window.location.search);
+        const modelUrl = urlParams.get('model');
+        
+        const viewer = document.getElementById('ar-viewer');
+        const errorMsg = document.getElementById('error-msg');
+
+        if (modelUrl) {
+            // โหลดโมเดลนั้นขึ้นจอ
+            viewer.src = modelUrl;
+        } else {
+            // ถ้าเข้ามาหน้านี้โดยไม่มีลิงก์โมเดล ให้ซ่อน viewer แล้วโชว์ข้อความแจ้งเตือน
+            viewer.style.display = 'none';
+            errorMsg.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
