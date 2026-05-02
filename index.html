@@ -46,7 +46,8 @@ button:disabled { background: #475569; opacity: 0.5; cursor: not-allowed; }
    3. Main Workspace
    ========================================= */
 .main { position:fixed; top:0; left:0; width:100vw; height:100vh; display: none; z-index: 1; }
-model-viewer { width:100%; height:100%; --poster-color: transparent; outline: none; cursor: crosshair; }
+/* แก้ไขความสูงและเพิ่ม margin-top ให้หลบ Header */
+model-viewer { width:100%; height:calc(100vh - 60px); margin-top: 60px; --poster-color: transparent; outline: none; cursor: crosshair; }
 
 .app-header { position: absolute; top:0; left:0; width:100%; height: 60px; display: none; align-items: center; justify-content: space-between; padding: 0 20px; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); z-index: 500; }
 
@@ -54,9 +55,21 @@ model-viewer { width:100%; height:100%; --poster-color: transparent; outline: no
 .tab-btn, .menu-item { pointer-events: auto; background: rgba(15, 23, 42, 0.9); border: 1px solid var(--border); border-radius: 16px; color: white; cursor: pointer; text-align: center; transition: 0.3s; padding: 10px 24px; box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
 .tab-btn.active, .menu-item.active { background: var(--primary); border-color: var(--primary); }
 
-.info-panel { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); width: 450px; background: var(--glass); border-radius: 24px; border: 1px solid var(--border); pointer-events: auto; z-index: 10; padding: 24px; backdrop-filter: blur(10px); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-#title { font-size: 1.4rem; margin:0; color:var(--primary); }
-#desc { font-size: 0.95rem; line-height: 1.5; color:#cbd5e1; margin: 8px 0 15px 0;}
+.info-panel { 
+    position: absolute; 
+    top: 50%; 
+    left: 30px; 
+    transform: translateY(-50%); 
+    width: 380px; 
+    background: var(--glass); 
+    border-radius: 24px; 
+    border: 1px solid var(--border); 
+    pointer-events: auto; 
+    z-index: 10; 
+    padding: 24px; 
+    backdrop-filter: blur(10px); 
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
+}
 
 .tabs { top: 80px; left: 50%; transform: translateX(-50%); flex-direction: row; }
 .menu { right: 30px; top: 50%; transform: translateY(-50%); flex-direction: column; }
@@ -75,6 +88,32 @@ model-viewer { width:100%; height:100%; --poster-color: transparent; outline: no
 .modal-title { color: var(--primary); font-size: 1.3rem; margin: 0 0 12px 0; }
 .modal-desc { font-size: 0.95rem; color: #cbd5e1; line-height: 1.5; margin-bottom: 20px; text-align: left; }
 .close-modal-btn { background: var(--primary); color: white; border: none; padding: 12px 20px; border-radius: 12px; cursor: pointer; font-family: 'Kanit'; width: 100%; font-size: 1rem; }
+
+/* =========================================
+   5. ซ่อน UI (Focus Mode)
+   ========================================= */
+.info-panel, .menu, .tabs, .toggle-mode-btn, .app-header, .app-header span {
+    transition: all 0.3s ease-in-out;
+}
+
+.ui-hidden .info-panel,
+.ui-hidden .menu,
+.ui-hidden .tabs,
+.ui-hidden .toggle-mode-btn {
+    opacity: 0;
+    pointer-events: none;
+    visibility: hidden;
+}
+
+/* ทำให้ Header โปร่งใส และซ่อนชื่อแอป เมื่อกดซ่อน UI */
+.ui-hidden .app-header {
+    background: transparent;
+    backdrop-filter: none;
+    border-bottom: transparent;
+}
+.ui-hidden .app-header span {
+    opacity: 0;
+}
 </style>
 </head>
 
@@ -131,7 +170,18 @@ model-viewer { width:100%; height:100%; --poster-color: transparent; outline: no
 
 <div class="app-header" id="appHeader">
     <span style="font-size: 1rem; color: #cbd5e1; font-weight: 500;">Anatomy 3D Explorer</span>
-    <button onclick="backToHome()" style="background:none; border:1px solid var(--border); font-size: 0.85rem; padding: 6px 14px;">🏠 กลับหน้าหลัก</button>
+    <div style="display: flex; gap: 10px;">
+        <!-- ปุ่มซ่อน/แสดง UI -->
+        <button id="toggleUIBtn" onclick="toggleUI()" style="background:none; border:1px solid var(--border); font-size: 0.85rem; padding: 6px 14px; color: white; transition: 0.3s;">
+            👁️ ซ่อน UI
+        </button>
+        <button id="fullscreenBtn" onclick="toggleFullScreen()" style="background:none; border:1px solid var(--border); font-size: 0.85rem; padding: 6px 14px; color: white;">
+            🔲 ขยายเต็มจอ
+        </button>
+        <button onclick="backToHome()" style="background:none; border:1px solid var(--border); font-size: 0.85rem; padding: 6px 14px; color: white;">
+            🏠 กลับหน้าหลัก
+        </button>
+    </div>
 </div>
 
 <main class="main" id="mainArea">
@@ -420,6 +470,56 @@ function showResult() {
     document.getElementById("exitQuizBtn").style.display = "none";
 }
 function closeQuiz() { clearInterval(timerInterval); quizPage.style.display = "none"; home.style.display = "flex"; }
+
+// ---------------------------------------------------------
+// ระบบขยายเต็มจอ (Full Screen Mode)
+// ---------------------------------------------------------
+function toggleFullScreen() {
+    const doc = document.documentElement;
+    const btn = document.getElementById("fullscreenBtn");
+
+    if (!document.fullscreenElement) {
+        if (doc.requestFullscreen) {
+            doc.requestFullscreen();
+        } else if (doc.webkitRequestFullscreen) { /* Safari */
+            doc.webkitRequestFullscreen();
+        } else if (doc.msRequestFullscreen) { /* IE11 */
+            doc.msRequestFullscreen();
+        }
+        btn.innerHTML = "🗗 ย่อหน้าจอ";
+    } else {
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) { /* Safari */
+            document.webkitExitFullscreen();
+        } else if (document.msExitFullscreen) { /* IE11 */
+            document.msExitFullscreen();
+        }
+        btn.innerHTML = "🔲 ขยายเต็มจอ";
+    }
+}
+
+// ---------------------------------------------------------
+// ระบบ ซ่อน/แสดง UI (Focus Mode)
+// ---------------------------------------------------------
+function toggleUI() {
+    const body = document.body;
+    const btn = document.getElementById("toggleUIBtn");
+    
+    // สลับคลาส ui-hidden ที่ body
+    body.classList.toggle("ui-hidden");
+    
+    // เปลี่ยนข้อความและสีบนปุ่มให้ชัดเจนว่ากำลังเปิดโหมดไหน
+    if (body.classList.contains("ui-hidden")) {
+        btn.innerHTML = "👁️‍🗨️ แสดง UI";
+        btn.style.borderColor = "var(--primary)";
+        btn.style.color = "var(--primary)";
+    } else {
+        btn.innerHTML = "👁️ ซ่อน UI";
+        btn.style.borderColor = "var(--border)";
+        btn.style.color = "white";
+    }
+}
 </script>
 </body>
 </html>
