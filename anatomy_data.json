@@ -26,20 +26,25 @@
           "model_file": "models/New Heart.glb",
           "description": "<b>หน้าที่หลัก:</b> สูบฉีดเลือดไปเลี้ยงส่วนต่างๆ ของร่างกาย และส่งเลือดดำไปฟอกที่ปอด",
           "click_parts": [
-            { "material_name": "Mat_RightAtrium", "name": "<b>หัวใจห้องบนขวา</b><br>(Right Atrium)", "info": "รับเลือดที่มีออกซิเจนต่ำ (เลือดดำ) จากทั่วร่างกาย เพื่อส่งต่อให้ห้องล่างขวา" },
-            { "material_name": "Mat_RightVentricle", "name": "<b>หัวใจห้องล่างขวา</b><br>(Right Ventricle)", "info": "รับเลือดจากห้องบนขวา แล้วสูบฉีดเลือดดำนี้ไปยัง 'ปอด' เพื่อแลกเปลี่ยนก๊าซ" },
-            { "material_name": "Mat_LeftAtrium", "name": "<b>หัวใจห้องบนซ้าย</b><br>(Left Atrium)", "info": "รับเลือดที่มีออกซิเจนสูง (เลือดแดง) ที่ฟอกแล้วจากปอด เพื่อส่งต่อให้ห้องล่างซ้าย" },
+            { "material_name": "Mat_RightAtrium", "name": "<b>หัวใจห้องบนขวา</b><br>(Right Atrium)", "info": "รับเลือดดำ (O2 ต่ำ) ที่ส่งกลับมาจากส่วนต่างๆ ของร่างกาย" },
+            { "material_name": "Mat_RightVentricle", "name": "<b>หัวใจห้องล่างขวา</b><br>(Right Ventricle)", "info": "รับเลือดดำจากห้องบนขวา แล้วบีบตัวส่งเลือดไปฟอกที่ 'ปอด'" },
+            { "material_name": "Mat_LeftAtrium", "name": "<b>หัวใจห้องบนซ้าย</b><br>(Left Atrium)", "info": "รับเลือดแดง (O2 สูง) ที่ฟอกสะอาดแล้ว ส่งกลับมาจากปอด" },
             { "material_name": "Mat_LeftVentricle", "name": "<b>หัวใจห้องล่างซ้าย</b><br>(Left Ventricle)", "info": "มีผนังกล้ามเนื้อหนาที่สุด! ทำหน้าที่สูบฉีดเลือดแดงไปเลี้ยงทั่วร่างกาย" },
-            { "material_name": "Mat_Valve", "name": "<b>ลิ้นหัวใจ</b><br>(Heart Valves)", "info": "ทำหน้าที่เปิด-ปิด ควบคุมทิศทางการไหลของเลือดไม่ให้ไหลย้อนกลับ" },
-            { "material_name": "Mat_Coronary", "name": "<b>หลอดเลือดโคโรนารี</b><br>(Coronary Artery)", "info": "หลอดเลือดที่นำเลือดแดงมาเลี้ยง 'กล้ามเนื้อหัวใจ' โดยตรง หากอุดตันจะทำให้เกิดภาวะกล้ามเนื้อหัวใจตายได้" }
+            { "material_name": "Mat_AorticValve", "name": "<b>ลิ้นหัวใจเอออร์ติก</b><br>(Aortic Valve)", "info": "อยู่ตรงขั้วหลอดเลือดแดงใหญ่ กั้นระหว่างห้องล่างซ้ายกับหลอดเลือด Aorta ป้องกันเลือดไหลย้อนกลับ" },
+            { "material_name": "Mat_PulmonaryValve", "name": "<b>ลิ้นหัวใจพัลโมนารี</b><br>(Pulmonary Valve)", "info": "อยู่ตรงขั้วหลอดเลือดสู่ปอด กั้นระหว่างห้องล่างขวากับหลอดเลือด Pulmonary artery" },
+            { "material_name": "Mat_Coronary", "name": "<b>หลอดเลือดโคโรนารี</b><br>(Coronary Artery)", "info": "เส้นเลือดที่หล่อเลี้ยงกล้ามเนื้อหัวใจ หากอุดตันจะทำให้เกิดภาวะกล้ามเนื้อหัวใจขาดเลือด" }
           ],
           "alt_mode": {
             "name": "ระบบลิ้นหัวใจ",
-            "model_file": "models/InHeart_new.glb",
+            "model_file": "models/In Heart.glb",
             "description": "<b>ลิ้นหัวใจ (Heart Valves):</b> โครงสร้างสำคัญที่ทำหน้าที่เหมือน 'ประตูทางเดียว' ป้องกันไม่ให้เลือดไหลย้อนกลับขณะที่หัวใจบีบตัว",
             "click_parts": [
+              { "material_name": "Mat_RightAtrium", "name": "<b>หัวใจห้องบนขวา</b><br>(Right Atrium)", "info": "รับเลือดดำ (O2 ต่ำ) ที่ส่งกลับมาจากส่วนต่างๆ ของร่างกาย" },
+              { "material_name": "Mat_LeftAtrium", "name": "<b>หัวใจห้องบนซ้าย</b><br>(Left Atrium)", "info": "รับเลือดแดง (O2 สูง) ที่ฟอกสะอาดแล้ว ส่งกลับมาจากปอด" },
               { "material_name": "Mat_MitralValve", "name": "<b>ลิ้นหัวใจไมทรัล</b><br>(Mitral Valve)", "info": "กั้นระหว่างหัวใจห้อง <b>บนซ้าย</b> และ <b>ล่างซ้าย</b> มีลักษณะเป็นแผ่นบางๆ 2 ชิ้น" },
-              { "material_name": "Mat_TricuspidValve", "name": "<b>ลิ้นหัวใจไตรคัสปิด</b><br>(Tricuspid Valve)", "info": "กั้นระหว่างหัวใจห้อง <b>บนขวา</b> และ <b>ล่างขวา</b> มีลักษณะเป็นแผ่นบางๆ 3 ชิ้น" }
+              { "material_name": "Mat_TricuspidValve", "name": "<b>ลิ้นหัวใจไตรคัสปิด</b><br>(Tricuspid Valve)", "info": "กั้นระหว่างหัวใจห้อง <b>บนขวา</b> และ <b>ล่างขวา</b> มีลักษณะเป็นแผ่นบางๆ 3 ชิ้น" },
+              { "material_name": "Mat_AorticValve", "name": "<b>ลิ้นหัวใจเอออร์ติก</b><br>(Aortic Valve)", "info": "อยู่ตรงขั้วหลอดเลือดแดงใหญ่ กั้นระหว่างห้องล่างซ้ายกับหลอดเลือด Aorta ป้องกันเลือดไหลย้อนกลับ" },
+              { "material_name": "Mat_PulmonaryValve", "name": "<b>ลิ้นหัวใจพัลโมนารี</b><br>(Pulmonary Valve)", "info": "อยู่ตรงขั้วหลอดเลือดสู่ปอด กั้นระหว่างห้องล่างขวากับหลอดเลือด Pulmonary artery" }
             ]
           },
           "quiz": [
