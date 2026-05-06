@@ -152,27 +152,29 @@ model-viewer { width:100%; height:calc(100vh - 60px); margin-top: 60px; --poster
 }
 .close-modal-btn:hover { background: #ff6b81; transform: translateY(-2px); }
 
-/* 🌟 ปุ่มสำหรับพับ/กาง กล่องข้อมูล */
-.toggle-info-btn {
+/* 🌟 ปุ่มกากบาท (X) สำหรับปิดกล่องข้อมูลหลัก */
+.close-info-btn {
     position: absolute;
     top: 15px;
     right: 15px;
-    background: rgba(255, 255, 255, 0.1);
-    color: #ffffff; 
+    background: transparent;
+    color: #94a3b8; 
     border: none;
-    font-size: 0.9rem;
+    font-size: 1.2rem;
     cursor: pointer;
     padding: 0;
-    width: 32px;
-    height: 32px;
+    width: 30px;
+    height: 30px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: 0.3s;
+    box-shadow: none; 
 }
-.toggle-info-btn:hover {
-    background: var(--primary);
+.close-info-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
 }
 
 /* =========================================
@@ -193,19 +195,16 @@ model-viewer { width:100%; height:calc(100vh - 60px); margin-top: 60px; --poster
    📱 6. โหมดมือถือ (Mobile Responsive)
    ========================================= */
 @media (max-width: 768px) {
-    /* ย่อส่วนแถบเมนูด้านบน */
     .app-header { padding: 0 10px; }
     .app-header span { display: none; } 
     .app-header button { padding: 6px 10px; font-size: 0.75rem; }
 
-    /* เลื่อนหมวดหมู่ซ้าย-ขวาได้ */
     .tabs {
         top: 70px; width: 95%; overflow-x: auto; justify-content: flex-start; padding-bottom: 5px;
     }
     .tabs::-webkit-scrollbar { display: none; }
     .tab-btn { white-space: nowrap; font-size: 0.85rem; padding: 8px 15px; flex-shrink: 0; }
 
-    /* ย้ายเมนูย่อยลงไปด้านล่าง */
     .menu {
         top: auto; bottom: 20px; right: 50%; transform: translateX(50%);
         flex-direction: row; width: 95%; overflow-x: auto;
@@ -213,13 +212,11 @@ model-viewer { width:100%; height:calc(100vh - 60px); margin-top: 60px; --poster
     .menu::-webkit-scrollbar { display: none; }
     .menu-item { white-space: nowrap; font-size: 0.85rem; padding: 8px 15px; flex-shrink: 0; }
 
-    /* ปรับขนาดกล่องข้อมูลให้อยู่ตรงกลางจอ */
     .info-panel {
         top: 50%; left: 50%; transform: translate(-50%, -50%);
         width: 90%; padding: 15px; max-height: 40vh; overflow-y: auto; background: rgba(15, 23, 42, 0.95);
     }
     
-    /* กล่องข้อมูลย่อยเวลาคลิกชิ้นส่วน */
     .part-info-card {
         top: 50%; left: 50%; transform: translate(-50%, -50%);
         width: 90%; max-height: 50vh; overflow-y: auto;
@@ -229,7 +226,6 @@ model-viewer { width:100%; height:calc(100vh - 60px); margin-top: 60px; --poster
         to { opacity: 1; transform: translate(-50%, -50%); }
     }
 
-    /* ย้ายปุ่มดูแบบเจาะลึก */
     .toggle-mode-btn { top: 120px; right: 10px; font-size: 0.8rem; padding: 8px 12px; }
 }
 </style>
@@ -287,6 +283,9 @@ model-viewer { width:100%; height:calc(100vh - 60px); margin-top: 60px; --poster
 <div class="app-header" id="appHeader">
     <span style="font-size: 1.1rem; color: #ffffff; font-weight: 500; letter-spacing: 1px;">BioLens AR</span>
     <div style="display: flex; gap: 10px;">
+        <button onclick="toggleInfoBox()" style="background:none; border:1px solid var(--border); font-size: 0.85rem; padding: 6px 14px; color: #4ade80; transition: 0.3s;">
+            ℹ️ ข้อมูล
+        </button>
         <button onclick="resetCamera()" style="background:none; border:1px solid var(--border); font-size: 0.85rem; padding: 6px 14px; color: #60a5fa; transition: 0.3s;">
             🎯 จัดกึ่งกลาง
         </button>
@@ -308,11 +307,10 @@ model-viewer { width:100%; height:calc(100vh - 60px); margin-top: 60px; --poster
   <button id="toggleModeBtn" class="toggle-mode-btn" onclick="toggleModelMode()">👁️ ดูแบบเจาะลึก</button>
   
   <div class="info-panel" id="mainInfoPanel">
-    <button class="toggle-info-btn" id="collapseBtn" onclick="toggleInfoPanel()">▼</button>
-    <h3 id="title" style="margin-right: 30px;"></h3> <div id="infoContent">
-        <p id="desc"></p>
-        <button onclick="showQRCode()" style="width: 100%; background: #3b82f6; padding: 10px; font-size: 0.9rem; margin-top: 5px;">📱 สแกน QR ดู AR บนมือถือ</button>
-    </div>
+    <button class="close-info-btn" onclick="toggleInfoBox()">✖</button>
+    <h3 id="title" style="margin-right: 30px;"></h3> 
+    <p id="desc"></p>
+    <button onclick="showQRCode()" style="width: 100%; background: #3b82f6; padding: 10px; font-size: 0.9rem; margin-top: 5px;">📱 สแกน QR ดู AR บนมือถือ</button>
   </div>
   
   <footer class="menu" id="menu"></footer>
@@ -374,20 +372,13 @@ function closeInfoAndReset() {
     resetCamera();
 }
 
-// 🌟 ฟังก์ชันระบบพับเก็บ/กางออก กล่องข้อมูล
-let isInfoCollapsed = false;
-function toggleInfoPanel() {
-    const content = document.getElementById("infoContent");
-    const btn = document.getElementById("collapseBtn");
-    
-    if (isInfoCollapsed) {
-        content.style.display = "block"; // กางออก
-        btn.innerHTML = "▼";
-        isInfoCollapsed = false;
+// 🌟 ฟังก์ชันสำหรับ เปิด/ปิด กล่องข้อความ
+function toggleInfoBox() {
+    const panel = document.getElementById("mainInfoPanel");
+    if (panel.style.display === "none") {
+        panel.style.display = "block";
     } else {
-        content.style.display = "none"; // พับเก็บ
-        btn.innerHTML = "▲";
-        isInfoCollapsed = true;
+        panel.style.display = "none";
     }
 }
 
@@ -461,11 +452,8 @@ function loadModelData(dataObj) {
     resetHighlight(); 
     resetCamera();
     
-    // 🌟 สั่งให้กล่องข้อมูลกางออกเสมอ เวลาเปลี่ยนไปดูอวัยวะอื่น
+    // 🌟 สั่งให้โชว์กล่องข้อมูลทุกครั้งที่มีการเปลี่ยนอวัยวะ
     document.getElementById("mainInfoPanel").style.display = "block"; 
-    document.getElementById("infoContent").style.display = "block";
-    document.getElementById("collapseBtn").innerHTML = "▼";
-    isInfoCollapsed = false;
     
     loadShell.style.display = "block";
     loadBar.style.width = "10%";
