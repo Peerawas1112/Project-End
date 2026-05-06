@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-<title>Anatomy Learning System (Desktop)</title>
+<!-- 🌟 แก้ไข 1: เปลี่ยนชื่อบนแท็บเบราว์เซอร์ให้สั้น กระชับ และตรงประเด็น -->
+<title>BioLens AR</title>
 
 <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js" defer></script>
 <!-- ไลบรารีสำหรับสร้าง QR Code -->
@@ -210,7 +211,10 @@ model-viewer { width:100%; height:calc(100vh - 60px); margin-top: 60px; --poster
 
 <div id="home" class="home">
   <div class="box">
-    <h1 style="margin-bottom: 5px;">Human Anatomy AR</h1>
+    <!-- 🌟 แก้ไข 2: เพิ่มชื่อแอปหลัก และคำบรรยายรองสำหรับ ม.2 ในหน้า Home -->
+    <h1 style="margin-bottom: 0px; color: var(--primary); font-size: 2.2rem;">BioLens AR</h1>
+    <h2 style="font-size: 1.1rem; color: #cbd5e1; margin-top: 5px; margin-bottom: 15px; font-weight: 400;">ท่องโลกกายวิภาคศาสตร์ | วิทยาศาสตร์ ม.2</h2>
+    
     <p id="loadingText" style="color: #fbbf24; margin-bottom: 25px;">กำลังโหลดข้อมูลบทเรียน...</p>
     
     <button id="btnLearn" onclick="startLearning()" style="width: 100%;" disabled>📚 เข้าบทเรียนเนื้อหา 3D</button>
@@ -237,9 +241,9 @@ model-viewer { width:100%; height:calc(100vh - 60px); margin-top: 60px; --poster
 </div>
 
 <div class="app-header" id="appHeader">
-    <span style="font-size: 1rem; color: #cbd5e1; font-weight: 500;">Anatomy 3D Explorer</span>
+    <!-- 🌟 แก้ไข 3: เปลี่ยนชื่อมุมซ้ายบนตอนเข้าสู่โหมดการเรียน -->
+    <span style="font-size: 1.1rem; color: #ffffff; font-weight: 500; letter-spacing: 1px;">BioLens AR</span>
     <div style="display: flex; gap: 10px;">
-        <!-- 🌟 ปุ่มจัดกึ่งกลาง -->
         <button onclick="resetCamera()" style="background:none; border:1px solid var(--border); font-size: 0.85rem; padding: 6px 14px; color: #60a5fa; transition: 0.3s;">
             🎯 จัดกึ่งกลาง
         </button>
