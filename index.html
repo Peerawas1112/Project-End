@@ -35,18 +35,15 @@ button:disabled { background: #475569; opacity: 0.5; cursor: not-allowed; }
 
 .choice { background:#1e293b; padding:16px; border-radius:16px; margin:12px 0; cursor:pointer; text-align: left; border: 1px solid transparent; transition: 0.2s; }
 .choice:hover { background: #334155; }
-.choice.correct { background:#16a34a !important; border-color: #4ade80; }
-.choice.wrong { background:#dc2626 !important; border-color: #f87171; }
+.choice.selected { background: #3b82f6 !important; border-color: #93c5fd; }
 .choice.disabled { pointer-events: none; }
+
 .grade-text { font-size: 4rem; font-weight: bold; color: var(--primary); margin: 10px 0; }
-.timer-container { width: 100%; height: 6px; background: #1e293b; border-radius: 10px; margin: 15px 0; overflow: hidden; }
-#timerBar { width: 100%; height: 100%; background: var(--primary); transition: width 1s linear; }
 
 /* =========================================
    3. Main Workspace
    ========================================= */
 .main { position:fixed; top:0; left:0; width:100vw; height:100vh; display: none; z-index: 1; }
-/* แก้ไขความสูงและเพิ่ม margin-top ให้หลบ Header */
 model-viewer { width:100%; height:calc(100vh - 60px); margin-top: 60px; --poster-color: transparent; outline: none; cursor: crosshair; }
 
 .app-header { position: absolute; top:0; left:0; width:100%; height: 60px; display: none; align-items: center; justify-content: space-between; padding: 0 20px; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); z-index: 500; }
@@ -74,67 +71,135 @@ model-viewer { width:100%; height:calc(100vh - 60px); margin-top: 60px; --poster
 .tabs { top: 80px; left: 50%; transform: translateX(-50%); flex-direction: row; }
 .menu { right: 30px; top: 50%; transform: translateY(-50%); flex-direction: column; }
 
-/* Toggle Mode Button */
 .toggle-mode-btn { position: absolute; top: 80px; right: 20px; background: rgba(15, 23, 42, 0.9); color: white; border: 1px solid var(--primary); border-radius: 12px; padding: 10px 16px; z-index: 200; cursor: pointer; display: none; transition: 0.3s; }
 .toggle-mode-btn:hover { background: var(--primary); }
 
 /* =========================================
-   4. Modals (Info & QR)
+   4. Modals & Floating Cards (QR & Info)
    ========================================= */
 .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center; z-index: 3000; padding: 20px; opacity: 0; animation: fadeIn 0.3s forwards; }
 @keyframes fadeIn { to { opacity: 1; } }
 .modal-box { background: var(--glass); border: 1px solid var(--border); border-radius: 24px; padding: 25px; width: 100%; max-width: 400px; text-align: center; color: white; transform: scale(0.95); animation: popUp 0.3s forwards ease-out; }
 @keyframes popUp { to { transform: scale(1); } }
-.modal-title { color: var(--primary); font-size: 1.3rem; margin: 0 0 12px 0; }
-.modal-desc { font-size: 0.95rem; color: #cbd5e1; line-height: 1.5; margin-bottom: 20px; text-align: left; }
-.close-modal-btn { background: var(--primary); color: white; border: none; padding: 12px 20px; border-radius: 12px; cursor: pointer; font-family: 'Kanit'; width: 100%; font-size: 1rem; }
+
+/* การ์ดลอยสำหรับแสดงข้อมูลชิ้นส่วน */
+.part-info-card {
+    position: absolute;
+    top: 50%;
+    right: 170px;
+    transform: translateY(-50%);
+    width: 360px;
+    background: var(--glass);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 25px;
+    color: white;
+    z-index: 20;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+    display: none;
+    flex-direction: column;
+    animation: slideInRight 0.3s forwards ease-out;
+}
+@keyframes slideInRight {
+    from { opacity: 0; transform: translate(30px, -50%); }
+    to { opacity: 1; transform: translate(0, -50%); }
+}
+
+/* 🌟 อัปเดต: เพิ่มพื้นหลังและกรอบให้หัวข้อดูโดดเด่นอ่านง่าย */
+.modal-title { 
+    color: var(--primary); 
+    font-size: 1.25rem; 
+    margin: 0 0 15px 0; 
+    background: rgba(255, 71, 87, 0.15); 
+    padding: 12px 16px; 
+    border-radius: 14px; 
+    border: 1px solid rgba(255, 71, 87, 0.3); 
+    line-height: 1.4;
+    text-align: center;
+}
+
+.modal-desc { 
+    font-size: 0.95rem; 
+    color: #cbd5e1; 
+    line-height: 1.5; 
+    margin-bottom: 20px; 
+    text-align: left; 
+    max-height: 250px;  
+    overflow-y: auto;   
+    padding-right: 5px; 
+}
+.modal-desc::-webkit-scrollbar { width: 6px; }
+.modal-desc::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); border-radius: 10px; }
+.modal-desc::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 10px; }
+.modal-desc::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.4); }
+
+/* 🌟 อัปเดต: ปรับขนาดปุ่มให้พอดีคำ และจัดให้อยู่กึ่งกลาง */
+.close-modal-btn { 
+    background: var(--primary); 
+    color: white; 
+    border: none; 
+    padding: 10px 32px; 
+    border-radius: 12px; 
+    cursor: pointer; 
+    font-family: 'Kanit'; 
+    font-size: 1rem;
+    width: max-content; 
+    display: block;
+    margin: 5px auto 0 auto; 
+    align-self: center; 
+    box-shadow: 0 4px 15px rgba(255, 71, 87, 0.3); 
+    transition: 0.2s;
+}
+.close-modal-btn:hover {
+    background: #ff6b81; 
+    transform: translateY(-2px); 
+}
 
 /* =========================================
    5. ซ่อน UI (Focus Mode)
    ========================================= */
-.info-panel, .menu, .tabs, .toggle-mode-btn, .app-header, .app-header span {
-    transition: all 0.3s ease-in-out;
+.info-panel, .menu, .tabs, .toggle-mode-btn, .app-header, .app-header span, .part-info-card { 
+    transition: all 0.3s ease-in-out; 
 }
 
-.ui-hidden .info-panel,
-.ui-hidden .menu,
-.ui-hidden .tabs,
-.ui-hidden .toggle-mode-btn {
-    opacity: 0;
-    pointer-events: none;
-    visibility: hidden;
+/* 🌟 เอาคำสั่งซ่อนการ์ดข้อมูลออกแล้ว เพื่อให้อ่านได้ตอนซ่อน UI */
+.ui-hidden .info-panel, 
+.ui-hidden .menu, 
+.ui-hidden .tabs, 
+.ui-hidden .toggle-mode-btn { 
+    opacity: 0; 
+    pointer-events: none; 
+    visibility: hidden; 
 }
 
-/* ทำให้ Header โปร่งใส และซ่อนชื่อแอป เมื่อกดซ่อน UI */
-.ui-hidden .app-header {
-    background: transparent;
-    backdrop-filter: none;
-    border-bottom: transparent;
+.ui-hidden .app-header { 
+    background: transparent; 
+    backdrop-filter: none; 
+    border-bottom: transparent; 
 }
-.ui-hidden .app-header span {
-    opacity: 0;
+.ui-hidden .app-header span { 
+    opacity: 0; 
 }
 </style>
 </head>
 
 <body>
 
-<!-- Modal แสดงข้อมูลชิ้นส่วนเมื่อถูกคลิก -->
-<div id="infoModal" class="modal-overlay">
-  <div class="modal-box">
-    <h3 id="modalTitle" class="modal-title">ชื่อส่วนประกอบ</h3>
-    <div id="modalDesc" class="modal-desc">รายละเอียด...</div>
-    <button class="close-modal-btn" onclick="closeModals()">ปิดหน้าต่าง</button>
-  </div>
+<!-- การ์ดลอย (Floating Card) ด้านขวา -->
+<div id="infoModal" class="part-info-card">
+  <h3 id="modalTitle" class="modal-title">ชื่อส่วนประกอบ</h3>
+  <div id="modalDesc" class="modal-desc">รายละเอียด...</div>
+  <button class="close-modal-btn" onclick="closeInfoAndReset()">ปิดหน้าต่าง</button>
 </div>
 
 <!-- Modal แสดง QR Code สำหรับมือถือ -->
 <div id="qrModal" class="modal-overlay">
     <div class="modal-box">
-      <h3 class="modal-title">📱 สแกนเพื่อดูแบบ AR</h3>
+      <h3 class="modal-title" style="background:transparent; border:none; padding:0; box-shadow:none;">📱 สแกนเพื่อดูแบบ AR</h3>
       <div id="qrcode" style="display:flex; justify-content:center; margin: 20px 0; background: white; padding: 15px; border-radius: 10px;"></div>
       <p style="font-size: 0.85rem; color: #cbd5e1; margin-bottom: 15px;">ใช้กล้องมือถือสแกนเพื่อโชว์โมเดล 3 มิติแบบทะลุจอบนโต๊ะเรียน</p>
-      <button class="close-modal-btn" onclick="closeModals()" style="background: #475569;">ปิดหน้าต่าง</button>
+      <button class="close-modal-btn" onclick="closeModals()" style="background: #475569; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">ปิดหน้าต่าง</button>
     </div>
 </div>
 
@@ -157,11 +222,11 @@ model-viewer { width:100%; height:calc(100vh - 60px); margin-top: 60px; --poster
   <div class="box" id="quizBox">
     <div id="quizHeader">
         <div id="quizType" style="color:var(--primary); font-weight:500; font-size: 1.2rem; margin-bottom: 10px;"></div>
-        <div class="timer-container" id="timerContainer"><div id="timerBar"></div></div>
     </div>
     <div id="quizBody">
         <h2 id="qTitle" style="font-size: 1.1rem; min-height: 60px; line-height: 1.4;"></h2>
         <div id="qChoices"></div>
+        <button id="nextQuestionBtn" onclick="nextQuestion()" style="display:none; width: 100%; margin-top: 15px; background: #3b82f6;">ข้อต่อไป ➡️</button>
         <p id="qProgress" style="font-size: 0.8rem; color: #94a3b8; margin-top: 15px;"></p>
     </div>
     <button id="exitQuizBtn" onclick="closeQuiz()" style="background:none; border:1px solid #4b5563; color:#94a3b8; margin-top:15px; width: 100%;">ยกเลิก / กลับหน้าหลัก</button>
@@ -171,7 +236,10 @@ model-viewer { width:100%; height:calc(100vh - 60px); margin-top: 60px; --poster
 <div class="app-header" id="appHeader">
     <span style="font-size: 1rem; color: #cbd5e1; font-weight: 500;">Anatomy 3D Explorer</span>
     <div style="display: flex; gap: 10px;">
-        <!-- ปุ่มซ่อน/แสดง UI -->
+        <!-- 🌟 ปุ่มจัดกึ่งกลาง -->
+        <button onclick="resetCamera()" style="background:none; border:1px solid var(--border); font-size: 0.85rem; padding: 6px 14px; color: #60a5fa; transition: 0.3s;">
+            🎯 จัดกึ่งกลาง
+        </button>
         <button id="toggleUIBtn" onclick="toggleUI()" style="background:none; border:1px solid var(--border); font-size: 0.85rem; padding: 6px 14px; color: white; transition: 0.3s;">
             👁️ ซ่อน UI
         </button>
@@ -186,39 +254,39 @@ model-viewer { width:100%; height:calc(100vh - 60px); margin-top: 60px; --poster
 
 <main class="main" id="mainArea">
   <nav class="tabs" id="tabs"></nav>
-  
-  <model-viewer id="viewer" autoplay camera-controls auto-rotate shadow-intensity="1" exposure="1.2" environment-image="neutral"></model-viewer>
-  
-  <button id="toggleModeBtn" class="toggle-mode-btn" onclick="toggleModelMode()">
-      👁️ ดูแบบเจาะลึก
-  </button>
+  <!-- 🌟 เพิ่ม disable-tap เพื่อป้องกันโมเดลกระโดดหนีเมื่อดับเบิลคลิก -->
+  <model-viewer id="viewer" autoplay camera-controls auto-rotate disable-tap shadow-intensity="1" exposure="1.2" environment-image="neutral"></model-viewer>
+  <button id="toggleModeBtn" class="toggle-mode-btn" onclick="toggleModelMode()">👁️ ดูแบบเจาะลึก</button>
   
   <div class="info-panel">
     <h3 id="title"></h3>
     <p id="desc"></p>
     <button onclick="showQRCode()" style="width: 100%; background: #3b82f6; padding: 10px; font-size: 0.9rem;">📱 สแกน QR ดู AR บนมือถือ</button>
   </div>
-
   <footer class="menu" id="menu"></footer>
 </main>
 
 <script>
-let data = [], currentQuizData = [], qIndex = 0, score = 0, isAnswered = false;
-let timerInterval, timeLeft = 15;
-const maxTime = 15;
+let data = [], currentQuizData = [], qIndex = 0, score = 0;
 let currentCorrectText = ""; 
+let selectedAnswerText = ""; 
+let userAnswers = []; 
 let currentOrganData = null; 
 let isAltMode = false;       
-let currentActiveModelUrl = ""; // เก็บ URL โมเดลปัจจุบันสำหรับทำ QR Code
-
-// 🌟 ตัวแปรเก็บชิ้นส่วนที่กำลังไฮไลต์อยู่
+let currentActiveModelUrl = ""; 
 let lastHighlightedMaterial = null; 
 
-// 🌟 ฟังก์ชันสำหรับปิดไฟไฮไลต์กลับเป็นปกติ
 function resetHighlight() {
     if (lastHighlightedMaterial) {
-        lastHighlightedMaterial.setEmissiveFactor([0, 0, 0]); // คืนค่าแสงเป็น 0 (มืดปกติ)
+        lastHighlightedMaterial.setEmissiveFactor([0, 0, 0]); 
         lastHighlightedMaterial = null;
+    }
+}
+
+function resetCamera() {
+    if (viewer) {
+        viewer.cameraTarget = "auto auto auto"; 
+        viewer.cameraOrbit = "0deg 75deg auto"; 
     }
 }
 
@@ -233,7 +301,6 @@ const infoModal = document.getElementById("infoModal");
 const qrModal = document.getElementById("qrModal");
 const toggleBtn = document.getElementById("toggleModeBtn");
 
-// ปิด Modal เมื่อคลิกพื้นที่ว่างด้านนอก
 document.querySelectorAll('.modal-overlay').forEach(modal => {
     modal.addEventListener('click', function(e) {
         if (e.target === this) closeModals();
@@ -243,7 +310,17 @@ document.querySelectorAll('.modal-overlay').forEach(modal => {
 function closeModals() {
     infoModal.style.display = 'none';
     qrModal.style.display = 'none';
-    resetHighlight(); // 🌟 ปิด Modal ปุ๊บ ให้ไฟไฮไลต์ดับปั๊บ
+    resetHighlight(); 
+    
+    // 🌟 ให้กลับมาหมุนอัตโนมัติเมื่อปิดการ์ดข้อมูล
+    if (viewer) {
+        viewer.autoRotate = true;
+    }
+}
+
+function closeInfoAndReset() {
+    closeModals();
+    resetCamera();
 }
 
 viewer.addEventListener('progress', (e) => {
@@ -254,7 +331,6 @@ viewer.addEventListener('progress', (e) => {
     }
 });
 
-// ดึงข้อมูล JSON
 fetch("anatomy_data.json?v=" + new Date().getTime())
 .then(r => {
     if(!r.ok) throw new Error("ไม่สามารถโหลดไฟล์ข้อมูลได้");
@@ -314,7 +390,8 @@ function selectOrgan(i, j) {
 }
 
 function loadModelData(dataObj) {
-    resetHighlight(); // 🌟 ปิดไฟเคลียร์ค่าเดิมก่อนโหลดโมเดลใหม่
+    resetHighlight(); 
+    resetCamera();
     
     loadShell.style.display = "block";
     loadBar.style.width = "10%";
@@ -322,7 +399,7 @@ function loadModelData(dataObj) {
 
     document.getElementById("title").textContent = dataObj.name;
     document.getElementById("desc").innerHTML = dataObj.description; 
-    currentActiveModelUrl = dataObj.model_file; // บันทึก url ไว้ทำ QR Code
+    currentActiveModelUrl = dataObj.model_file; 
 
     setTimeout(() => { viewer.src = dataObj.model_file; }, 50); 
 }
@@ -351,64 +428,41 @@ function toggleModelMode() {
     viewer.addEventListener('load', unlockButton);
 }
 
-// ---------------------------------------------------------
-// ระบบ Mesh Picking: เช็ค Material ที่ถูกคลิก + ไฮไลต์ 🌟
-// ---------------------------------------------------------
 viewer.addEventListener('click', (event) => {
-    // ดึงข้อมูล Material ที่เมาส์คลิกโดน
     const material = viewer.materialFromPoint(event.clientX, event.clientY);
-    
     if (material != null) {
         const partsData = isAltMode ? currentOrganData.alt_mode.click_parts : currentOrganData.click_parts;
-        
         if (partsData) {
             const clickedPart = partsData.find(p => p.material_name === material.name);
-            
             if (clickedPart) {
-                // 🌟 1. ดับไฟชิ้นเก่าที่เคยไฮไลต์ไว้ (ถ้ามี)
                 resetHighlight();
-
-                // 🌟 2. เปิดไฟไฮไลต์ให้ชิ้นใหม่
-                // ค่า [0.4, 0.4, 0.4] คือการบวกแสงสีขาวเข้าไป ทำให้ดูสว่างขึ้น
                 material.setEmissiveFactor([0.4, 0.4, 0.4]); 
-                lastHighlightedMaterial = material; // จำไว้ว่าชิ้นนี้สว่างอยู่
-
-                // 3. แสดง Modal ข้อมูล
-                document.getElementById('modalTitle').textContent = clickedPart.name;
+                lastHighlightedMaterial = material; 
+                document.getElementById('modalTitle').innerHTML = clickedPart.name;
                 document.getElementById('modalDesc').innerHTML = clickedPart.info || "ไม่มีข้อมูลรายละเอียดเพิ่มเติม"; 
                 infoModal.style.display = 'flex';
+                
+                // 🌟 ดึงกล้องกลับมาจุดศูนย์กลาง (เผื่อโดนเลื่อน) และหยุดหมุนโมเดล เพื่อให้อ่านง่าย
+                viewer.cameraTarget = "auto auto auto"; 
+                viewer.autoRotate = false;
             }
         }
     } else {
-        // 🌟 ถ้าคลิกโดนความว่างเปล่า (ไม่ได้โดนโมเดล) ให้ปิดหน้าต่างและปิดไฟ
         closeModals();
     }
 });
 
-// ---------------------------------------------------------
-// ระบบสร้าง QR Code เพื่อเปิด AR บนมือถือ
-// ---------------------------------------------------------
 function showQRCode() {
     qrModal.style.display = 'flex';
     const qrcodeContainer = document.getElementById("qrcode");
-    qrcodeContainer.innerHTML = ""; // ล้าง QR Code เก่า
-    
-    // สร้าง URL โดยดึงที่อยู่เว็บปัจจุบัน แล้วต่อท้ายด้วยหน้า ar-viewer และพารามิเตอร์ไฟล์
+    qrcodeContainer.innerHTML = ""; 
     const baseUrl = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
     const arUrl = `${baseUrl}/ar-viewer.html?model=${encodeURIComponent(currentActiveModelUrl)}`;
-    
-    // สร้าง QR Code
     new QRCode(qrcodeContainer, {
-        text: arUrl,
-        width: 150,
-        height: 150,
-        colorDark : "#0f172a",
-        colorLight : "#ffffff",
-        correctLevel : QRCode.CorrectLevel.H
+        text: arUrl, width: 150, height: 150, colorDark : "#0f172a", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H
     });
 }
 
-// (ส่วนระบบ Quiz ยังคงเดิม ไม่มีการแก้ไข)
 function startLearning() {
     home.style.display = "none";
     document.getElementById("appHeader").style.display = "flex";
@@ -430,6 +484,10 @@ function shuffleArray(array) {
     }
     return array;
 }
+
+// =========================================================
+// ระบบ Quiz
+// =========================================================
 function openQuiz(type) {
     let allQuestions = [];
     data.forEach(system => {
@@ -437,63 +495,98 @@ function openQuiz(type) {
     });
     if (allQuestions.length === 0) return alert("ยังไม่มีคำถามในระบบครับ");
     currentQuizData = shuffleArray([...allQuestions]).slice(0, 5);
+    
+    qIndex = 0; score = 0; userAnswers = []; 
+    
     document.getElementById("quizType").textContent = "แบบทดสอบ" + type;
     home.style.display = "none";
     quizPage.style.display = "flex";
-    document.getElementById("timerContainer").style.display = "block";
     document.getElementById("exitQuizBtn").style.display = "block";
-    qIndex = 0; score = 0; showQuestion();
+    
+    showQuestion();
 }
+
 function showQuestion() {
-    isAnswered = false;
+    selectedAnswerText = ""; 
+    document.getElementById("nextQuestionBtn").style.display = "none"; 
+    
     if (qIndex >= currentQuizData.length) return showResult();
+    
     const q = currentQuizData[qIndex];
     currentCorrectText = q.choices[q.answer];
     const shuffledChoices = shuffleArray([...q.choices]);
+    
     document.getElementById("qTitle").textContent = q.question;
-    document.getElementById("qChoices").innerHTML = shuffledChoices.map(c => `<div class="choice" onclick="answer(this)">${c}</div>`).join("");
+    document.getElementById("qChoices").innerHTML = shuffledChoices.map(c => `<div class="choice" onclick="selectChoice(this)">${c}</div>`).join("");
     document.getElementById("qProgress").textContent = `ข้อที่ ${qIndex + 1} / ${currentQuizData.length}`;
-    startTimer();
 }
-function startTimer() {
-    clearInterval(timerInterval); timeLeft = maxTime;
-    const timerBar = document.getElementById("timerBar"); timerBar.style.width = "100%";
-    timerInterval = setInterval(() => {
-        timeLeft--; timerBar.style.width = (timeLeft / maxTime) * 100 + "%";
-        if (timeLeft <= 0) { clearInterval(timerInterval); answer(null); }
-    }, 1000);
+
+function selectChoice(element) {
+    document.querySelectorAll(".choice").forEach(c => c.classList.remove("selected"));
+    element.classList.add("selected");
+    selectedAnswerText = element.textContent;
+    document.getElementById("nextQuestionBtn").style.display = "block";
 }
-function answer(element) {
-    if (isAnswered) return;
-    isAnswered = true; clearInterval(timerInterval);
-    const choices = document.querySelectorAll(".choice");
-    const selectedText = element ? element.textContent : "";
-    choices.forEach(c => {
-        c.classList.add("disabled");
-        if (c.textContent === currentCorrectText) c.classList.add("correct");
-        if (element && c === element && selectedText !== currentCorrectText) c.classList.add("wrong");
+
+function nextQuestion() {
+    if (!selectedAnswerText) return; 
+    
+    const q = currentQuizData[qIndex];
+    const isCorrect = (selectedAnswerText === currentCorrectText);
+    
+    if (isCorrect) score++;
+    
+    userAnswers.push({
+        question: q.question,
+        selected: selectedAnswerText,
+        correct: currentCorrectText,
+        isCorrect: isCorrect
     });
-    if (selectedText === currentCorrectText) score++;
-    setTimeout(() => { qIndex++; showQuestion(); }, 2000);
+    
+    qIndex++; 
+    showQuestion();
 }
+
 function showResult() {
     const percent = (score / currentQuizData.length) * 100;
     const grade = percent >= 80 ? "A" : percent >= 70 ? "B" : percent >= 60 ? "C" : percent >= 50 ? "D" : "F";
+    
+    let summaryHTML = `<div class="modal-desc" style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 16px; margin-bottom: 20px;">`;
+    summaryHTML += `<h3 style="color:var(--primary); margin: 0 0 15px 0;">📋 สรุปเฉลยคำตอบ</h3>`;
+    
+    userAnswers.forEach((ans, idx) => {
+        const borderColor = ans.isCorrect ? '#4ade80' : '#f87171';
+        summaryHTML += `
+            <div style="background: #1e293b; padding: 12px; border-radius: 12px; margin-bottom: 10px; border-left: 4px solid ${borderColor};">
+                <div style="margin-bottom: 5px; color: #e2e8f0; font-size: 0.9rem;"><b>ข้อ ${idx+1} :</b> ${ans.question}</div>
+                <div style="color: ${borderColor}; font-size: 0.85rem;"><b>นักเรียนตอบ :</b> ${ans.selected} ${ans.isCorrect ? '✅' : '❌'}</div>
+                ${!ans.isCorrect ? `<div style="color: #4ade80; margin-top: 5px; font-size: 0.85rem;"><b>คำตอบที่ถูกต้อง :</b> ${ans.correct}</div>` : ''}
+            </div>
+        `;
+    });
+    summaryHTML += `</div>`;
+
     document.getElementById("qTitle").textContent = "🎉 สรุปผลการทดสอบ";
     document.getElementById("qChoices").innerHTML = `
-        <div style="font-size: 1rem; color: #cbd5e1; margin-top:20px;">เกรดที่ได้</div>
-        <div class="grade-text">${grade}</div>
-        <div style="font-size: 1.5rem; margin-bottom: 20px;">คะแนน: ${score} / ${currentQuizData.length}</div>
-        <p style="color: ${percent >= 50 ? '#4ade80' : '#f87171'}; font-size: 1.1rem;">
+        <div style="font-size: 1rem; color: #cbd5e1; margin-top:10px;">เกรดที่ได้</div>
+        <div class="grade-text" style="font-size: 3rem;">${grade}</div>
+        <div style="font-size: 1.2rem; margin-bottom: 10px;">คะแนน: ${score} / ${currentQuizData.length}</div>
+        <p style="color: ${percent >= 50 ? '#4ade80' : '#f87171'}; font-size: 1rem; margin-bottom: 20px;">
             ${percent >= 50 ? 'เยี่ยมมาก! ผ่านเกณฑ์แล้วครับ ✨' : 'สู้ๆ นะครับ ลองทบทวนเนื้อหาใหม่อีกครั้ง 📚'}
         </p>
-        <button onclick="closeQuiz()" style="width:100%; margin-top:20px; padding: 16px;">กลับหน้าหลัก</button>
+        ${summaryHTML}
+        <button onclick="closeQuiz()" style="width:100%; padding: 16px;">กลับหน้าหลัก</button>
     `;
+    
     document.getElementById("qProgress").textContent = "";
-    document.getElementById("timerContainer").style.display = "none";
+    document.getElementById("nextQuestionBtn").style.display = "none";
     document.getElementById("exitQuizBtn").style.display = "none";
 }
-function closeQuiz() { clearInterval(timerInterval); quizPage.style.display = "none"; home.style.display = "flex"; }
+
+function closeQuiz() { 
+    quizPage.style.display = "none"; 
+    home.style.display = "flex"; 
+}
 
 // ---------------------------------------------------------
 // ระบบขยายเต็มจอ (Full Screen Mode)
@@ -501,24 +594,15 @@ function closeQuiz() { clearInterval(timerInterval); quizPage.style.display = "n
 function toggleFullScreen() {
     const doc = document.documentElement;
     const btn = document.getElementById("fullscreenBtn");
-
     if (!document.fullscreenElement) {
-        if (doc.requestFullscreen) {
-            doc.requestFullscreen();
-        } else if (doc.webkitRequestFullscreen) { /* Safari */
-            doc.webkitRequestFullscreen();
-        } else if (doc.msRequestFullscreen) { /* IE11 */
-            doc.msRequestFullscreen();
-        }
+        if (doc.requestFullscreen) doc.requestFullscreen();
+        else if (doc.webkitRequestFullscreen) doc.webkitRequestFullscreen();
+        else if (doc.msRequestFullscreen) doc.msRequestFullscreen();
         btn.innerHTML = "🗗 ย่อหน้าจอ";
     } else {
-        if (document.exitFullscreen) {
-            document.exitFullscreen();
-        } else if (document.webkitExitFullscreen) { /* Safari */
-            document.webkitExitFullscreen();
-        } else if (document.msExitFullscreen) { /* IE11 */
-            document.msExitFullscreen();
-        }
+        if (document.exitFullscreen) document.exitFullscreen();
+        else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+        else if (document.msExitFullscreen) document.msExitFullscreen();
         btn.innerHTML = "🔲 ขยายเต็มจอ";
     }
 }
@@ -529,11 +613,7 @@ function toggleFullScreen() {
 function toggleUI() {
     const body = document.body;
     const btn = document.getElementById("toggleUIBtn");
-    
-    // สลับคลาส ui-hidden ที่ body
     body.classList.toggle("ui-hidden");
-    
-    // เปลี่ยนข้อความและสีบนปุ่มให้ชัดเจนว่ากำลังเปิดโหมดไหน
     if (body.classList.contains("ui-hidden")) {
         btn.innerHTML = "👁️‍🗨️ แสดง UI";
         btn.style.borderColor = "var(--primary)";
