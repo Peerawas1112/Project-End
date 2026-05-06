@@ -3,11 +3,9 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-<!-- 🌟 แก้ไข 1: เปลี่ยนชื่อบนแท็บเบราว์เซอร์ให้สั้น กระชับ และตรงประเด็น -->
 <title>BioLens AR</title>
 
 <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js" defer></script>
-<!-- ไลบรารีสำหรับสร้าง QR Code -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500&display=swap" rel="stylesheet">
 
@@ -83,7 +81,6 @@ model-viewer { width:100%; height:calc(100vh - 60px); margin-top: 60px; --poster
 .modal-box { background: var(--glass); border: 1px solid var(--border); border-radius: 24px; padding: 25px; width: 100%; max-width: 400px; text-align: center; color: white; transform: scale(0.95); animation: popUp 0.3s forwards ease-out; }
 @keyframes popUp { to { transform: scale(1); } }
 
-/* การ์ดลอยสำหรับแสดงข้อมูลชิ้นส่วน */
 .part-info-card {
     position: absolute;
     top: 50%;
@@ -107,20 +104,19 @@ model-viewer { width:100%; height:calc(100vh - 60px); margin-top: 60px; --poster
     to { opacity: 1; transform: translate(0, -50%); }
 }
 
-/* 🌟 แนวทางที่ 3: สไตล์ Minimalist คลีนๆ (แก้ปัญหาตาลายได้ 100%) */
 .modal-title { 
-    color: #ffffff; /* ตัวอักษรสีขาวสะอาดตา */
-    background: transparent; /* เอาพื้นหลังออกไปเลยเพื่อลดความซับซ้อนของสี */
+    color: #ffffff;
+    background: transparent;
     font-size: 1.3rem; 
     margin: 0 0 15px 0; 
-    padding: 0 0 12px 0; /* เว้นระยะห่างด้านล่างก่อนถึงเส้นคั่น */
-    border: none; /* เอาเส้นขอบรอบๆ ออก */
-    border-bottom: 2px solid var(--primary); /* ใช้เส้นใต้สีแดงบางๆ เป็นตัวเน้นแทน */
+    padding: 0 0 12px 0;
+    border: none;
+    border-bottom: 2px solid var(--primary);
     border-radius: 0; 
     line-height: 1.4;
     text-align: center;
-    box-shadow: none; /* เอาเงาออกให้หมด */
-    letter-spacing: 0.5px; /* ถ่างช่องไฟตัวอักษรนิดนึงให้อ่านง่ายขึ้น */
+    box-shadow: none;
+    letter-spacing: 0.5px;
 }
 
 .modal-desc { 
@@ -138,7 +134,6 @@ model-viewer { width:100%; height:calc(100vh - 60px); margin-top: 60px; --poster
 .modal-desc::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 10px; }
 .modal-desc::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.4); }
 
-/* 🌟 อัปเดต: ปรับขนาดปุ่มให้พอดีคำ และจัดให้อยู่กึ่งกลาง */
 .close-modal-btn { 
     background: var(--primary); 
     color: white; 
@@ -155,10 +150,7 @@ model-viewer { width:100%; height:calc(100vh - 60px); margin-top: 60px; --poster
     box-shadow: 0 4px 15px rgba(255, 71, 87, 0.3); 
     transition: 0.2s;
 }
-.close-modal-btn:hover {
-    background: #ff6b81; 
-    transform: translateY(-2px); 
-}
+.close-modal-btn:hover { background: #ff6b81; transform: translateY(-2px); }
 
 /* =========================================
    5. ซ่อน UI (Focus Mode)
@@ -167,37 +159,67 @@ model-viewer { width:100%; height:calc(100vh - 60px); margin-top: 60px; --poster
     transition: all 0.3s ease-in-out; 
 }
 
-/* 🌟 เอาคำสั่งซ่อนการ์ดข้อมูลออกแล้ว เพื่อให้อ่านได้ตอนซ่อน UI */
-.ui-hidden .info-panel, 
-.ui-hidden .menu, 
-.ui-hidden .tabs, 
-.ui-hidden .toggle-mode-btn { 
-    opacity: 0; 
-    pointer-events: none; 
-    visibility: hidden; 
+.ui-hidden .info-panel, .ui-hidden .menu, .ui-hidden .tabs, .ui-hidden .toggle-mode-btn { 
+    opacity: 0; pointer-events: none; visibility: hidden; 
 }
 
-.ui-hidden .app-header { 
-    background: transparent; 
-    backdrop-filter: none; 
-    border-bottom: transparent; 
-}
-.ui-hidden .app-header span { 
-    opacity: 0; 
+.ui-hidden .app-header { background: transparent; backdrop-filter: none; border-bottom: transparent; }
+.ui-hidden .app-header span { opacity: 0; }
+
+/* =========================================
+   📱 6. โหมดมือถือ (Mobile Responsive)
+   ========================================= */
+@media (max-width: 768px) {
+    /* ย่อส่วนแถบเมนูด้านบน */
+    .app-header { padding: 0 10px; }
+    .app-header span { display: none; } 
+    .app-header button { padding: 6px 10px; font-size: 0.75rem; }
+
+    /* เลื่อนหมวดหมู่ซ้าย-ขวาได้ */
+    .tabs {
+        top: 70px; width: 95%; overflow-x: auto; justify-content: flex-start; padding-bottom: 5px;
+    }
+    .tabs::-webkit-scrollbar { display: none; }
+    .tab-btn { white-space: nowrap; font-size: 0.85rem; padding: 8px 15px; flex-shrink: 0; }
+
+    /* ย้ายเมนูย่อยลงไปด้านล่าง */
+    .menu {
+        top: auto; bottom: 20px; right: 50%; transform: translateX(50%);
+        flex-direction: row; width: 95%; overflow-x: auto;
+    }
+    .menu::-webkit-scrollbar { display: none; }
+    .menu-item { white-space: nowrap; font-size: 0.85rem; padding: 8px 15px; flex-shrink: 0; }
+
+    /* ปรับขนาดกล่องข้อมูลให้อยู่ตรงกลางจอ */
+    .info-panel {
+        top: 50%; left: 50%; transform: translate(-50%, -50%);
+        width: 90%; padding: 15px; max-height: 40vh; overflow-y: auto; background: rgba(15, 23, 42, 0.95);
+    }
+    
+    /* กล่องข้อมูลย่อยเวลาคลิกชิ้นส่วน */
+    .part-info-card {
+        top: 50%; left: 50%; transform: translate(-50%, -50%);
+        width: 90%; max-height: 50vh; overflow-y: auto;
+    }
+    @keyframes slideInRight {
+        from { opacity: 0; transform: translate(-50%, -40%); }
+        to { opacity: 1; transform: translate(-50%, -50%); }
+    }
+
+    /* ย้ายปุ่มดูแบบเจาะลึก */
+    .toggle-mode-btn { top: 120px; right: 10px; font-size: 0.8rem; padding: 8px 12px; }
 }
 </style>
 </head>
 
 <body>
 
-<!-- การ์ดลอย (Floating Card) ด้านขวา -->
 <div id="infoModal" class="part-info-card">
   <h3 id="modalTitle" class="modal-title">ชื่อส่วนประกอบ</h3>
   <div id="modalDesc" class="modal-desc">รายละเอียด...</div>
   <button class="close-modal-btn" onclick="closeInfoAndReset()">ปิดหน้าต่าง</button>
 </div>
 
-<!-- Modal แสดง QR Code สำหรับมือถือ -->
 <div id="qrModal" class="modal-overlay">
     <div class="modal-box">
       <h3 class="modal-title" style="background:transparent; border:none; padding:0; box-shadow:none;">📱 สแกนเพื่อดูแบบ AR</h3>
@@ -211,7 +233,6 @@ model-viewer { width:100%; height:calc(100vh - 60px); margin-top: 60px; --poster
 
 <div id="home" class="home">
   <div class="box">
-    <!-- 🌟 แก้ไข 2: เพิ่มชื่อแอปหลัก และคำบรรยายรองสำหรับ ม.2 ในหน้า Home -->
     <h1 style="margin-bottom: 0px; color: var(--primary); font-size: 2.2rem;">BioLens AR</h1>
     <h2 style="font-size: 1.1rem; color: #cbd5e1; margin-top: 5px; margin-bottom: 15px; font-weight: 400;">ท่องโลกกายวิภาคศาสตร์ | วิทยาศาสตร์ ม.2</h2>
     
@@ -241,7 +262,6 @@ model-viewer { width:100%; height:calc(100vh - 60px); margin-top: 60px; --poster
 </div>
 
 <div class="app-header" id="appHeader">
-    <!-- 🌟 แก้ไข 3: เปลี่ยนชื่อมุมซ้ายบนตอนเข้าสู่โหมดการเรียน -->
     <span style="font-size: 1.1rem; color: #ffffff; font-weight: 500; letter-spacing: 1px;">BioLens AR</span>
     <div style="display: flex; gap: 10px;">
         <button onclick="resetCamera()" style="background:none; border:1px solid var(--border); font-size: 0.85rem; padding: 6px 14px; color: #60a5fa; transition: 0.3s;">
@@ -261,7 +281,6 @@ model-viewer { width:100%; height:calc(100vh - 60px); margin-top: 60px; --poster
 
 <main class="main" id="mainArea">
   <nav class="tabs" id="tabs"></nav>
-  <!-- 🌟 เพิ่ม disable-tap เพื่อป้องกันโมเดลกระโดดหนีเมื่อดับเบิลคลิก -->
   <model-viewer id="viewer" autoplay camera-controls auto-rotate disable-tap shadow-intensity="1" exposure="1.2" environment-image="neutral"></model-viewer>
   <button id="toggleModeBtn" class="toggle-mode-btn" onclick="toggleModelMode()">👁️ ดูแบบเจาะลึก</button>
   
@@ -319,7 +338,6 @@ function closeModals() {
     qrModal.style.display = 'none';
     resetHighlight(); 
     
-    // 🌟 ให้กลับมาหมุนอัตโนมัติเมื่อปิดการ์ดข้อมูล
     if (viewer) {
         viewer.autoRotate = true;
     }
@@ -449,7 +467,6 @@ viewer.addEventListener('click', (event) => {
                 document.getElementById('modalDesc').innerHTML = clickedPart.info || "ไม่มีข้อมูลรายละเอียดเพิ่มเติม"; 
                 infoModal.style.display = 'flex';
                 
-                // 🌟 ดึงกล้องกลับมาจุดศูนย์กลาง (เผื่อโดนเลื่อน) และหยุดหมุนโมเดล เพื่อให้อ่านง่าย
                 viewer.cameraTarget = "auto auto auto"; 
                 viewer.autoRotate = false;
             }
