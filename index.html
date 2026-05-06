@@ -152,6 +152,29 @@ model-viewer { width:100%; height:calc(100vh - 60px); margin-top: 60px; --poster
 }
 .close-modal-btn:hover { background: #ff6b81; transform: translateY(-2px); }
 
+/* 🌟 ปุ่มสำหรับพับ/กาง กล่องข้อมูล */
+.toggle-info-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff; 
+    border: none;
+    font-size: 0.9rem;
+    cursor: pointer;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.3s;
+}
+.toggle-info-btn:hover {
+    background: var(--primary);
+}
+
 /* =========================================
    5. ซ่อน UI (Focus Mode)
    ========================================= */
@@ -284,11 +307,14 @@ model-viewer { width:100%; height:calc(100vh - 60px); margin-top: 60px; --poster
   <model-viewer id="viewer" autoplay camera-controls auto-rotate disable-tap shadow-intensity="1" exposure="1.2" environment-image="neutral"></model-viewer>
   <button id="toggleModeBtn" class="toggle-mode-btn" onclick="toggleModelMode()">👁️ ดูแบบเจาะลึก</button>
   
-  <div class="info-panel">
-    <h3 id="title"></h3>
-    <p id="desc"></p>
-    <button onclick="showQRCode()" style="width: 100%; background: #3b82f6; padding: 10px; font-size: 0.9rem;">📱 สแกน QR ดู AR บนมือถือ</button>
+  <div class="info-panel" id="mainInfoPanel">
+    <button class="toggle-info-btn" id="collapseBtn" onclick="toggleInfoPanel()">▼</button>
+    <h3 id="title" style="margin-right: 30px;"></h3> <div id="infoContent">
+        <p id="desc"></p>
+        <button onclick="showQRCode()" style="width: 100%; background: #3b82f6; padding: 10px; font-size: 0.9rem; margin-top: 5px;">📱 สแกน QR ดู AR บนมือถือ</button>
+    </div>
   </div>
+  
   <footer class="menu" id="menu"></footer>
 </main>
 
@@ -346,6 +372,23 @@ function closeModals() {
 function closeInfoAndReset() {
     closeModals();
     resetCamera();
+}
+
+// 🌟 ฟังก์ชันระบบพับเก็บ/กางออก กล่องข้อมูล
+let isInfoCollapsed = false;
+function toggleInfoPanel() {
+    const content = document.getElementById("infoContent");
+    const btn = document.getElementById("collapseBtn");
+    
+    if (isInfoCollapsed) {
+        content.style.display = "block"; // กางออก
+        btn.innerHTML = "▼";
+        isInfoCollapsed = false;
+    } else {
+        content.style.display = "none"; // พับเก็บ
+        btn.innerHTML = "▲";
+        isInfoCollapsed = true;
+    }
 }
 
 viewer.addEventListener('progress', (e) => {
@@ -417,6 +460,12 @@ function selectOrgan(i, j) {
 function loadModelData(dataObj) {
     resetHighlight(); 
     resetCamera();
+    
+    // 🌟 สั่งให้กล่องข้อมูลกางออกเสมอ เวลาเปลี่ยนไปดูอวัยวะอื่น
+    document.getElementById("mainInfoPanel").style.display = "block"; 
+    document.getElementById("infoContent").style.display = "block";
+    document.getElementById("collapseBtn").innerHTML = "▼";
+    isInfoCollapsed = false;
     
     loadShell.style.display = "block";
     loadBar.style.width = "10%";
