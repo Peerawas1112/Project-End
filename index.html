@@ -106,17 +106,20 @@ model-viewer { width:100%; height:calc(100vh - 60px); margin-top: 60px; --poster
     to { opacity: 1; transform: translate(0, -50%); }
 }
 
-/* 🌟 อัปเดต: เพิ่มพื้นหลังและกรอบให้หัวข้อดูโดดเด่นอ่านง่าย */
+/* 🌟 แนวทางที่ 3: สไตล์ Minimalist คลีนๆ (แก้ปัญหาตาลายได้ 100%) */
 .modal-title { 
-    color: var(--primary); 
-    font-size: 1.25rem; 
+    color: #ffffff; /* ตัวอักษรสีขาวสะอาดตา */
+    background: transparent; /* เอาพื้นหลังออกไปเลยเพื่อลดความซับซ้อนของสี */
+    font-size: 1.3rem; 
     margin: 0 0 15px 0; 
-    background: rgba(255, 71, 87, 0.15); 
-    padding: 12px 16px; 
-    border-radius: 14px; 
-    border: 1px solid rgba(255, 71, 87, 0.3); 
+    padding: 0 0 12px 0; /* เว้นระยะห่างด้านล่างก่อนถึงเส้นคั่น */
+    border: none; /* เอาเส้นขอบรอบๆ ออก */
+    border-bottom: 2px solid var(--primary); /* ใช้เส้นใต้สีแดงบางๆ เป็นตัวเน้นแทน */
+    border-radius: 0; 
     line-height: 1.4;
     text-align: center;
+    box-shadow: none; /* เอาเงาออกให้หมด */
+    letter-spacing: 0.5px; /* ถ่างช่องไฟตัวอักษรนิดนึงให้อ่านง่ายขึ้น */
 }
 
 .modal-desc { 
