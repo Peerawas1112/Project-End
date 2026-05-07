@@ -530,6 +530,7 @@ function toggleModelMode() {
     viewer.addEventListener('load', unlockButton);
 }
 
+// 🌟 อัปเดต: ฟังก์ชันคลิกโมเดล (ดรอปสีรอบข้างให้มืดลง ส่วนชิ้นที่คลิกโชว์สีดั้งเดิม 100% แบบไม่เรืองแสง)
 viewer.addEventListener('click', (event) => {
     const material = viewer.materialFromPoint(event.clientX, event.clientY);
     if (material != null) {
@@ -538,10 +539,13 @@ viewer.addEventListener('click', (event) => {
             const clickedPart = partsData.find(p => p.material_name === material.name);
             if (clickedPart) {
                 
+                // ลูปสั่งงานทีละชิ้นส่วนในโมเดล
                 for (const mat of viewer.model.materials) {
+                    // ดึงสีออริจินัลที่เซฟไว้ออกมา
                     const origColor = originalColors.get(mat.name) || [1, 1, 1, 1];
 
                     if (mat.name !== material.name) {
+                        // 👁️‍🗨️ ชิ้นที่ "ไม่ได้คลิก" เอาสีออริจินัลมาคูณ 0.15 ให้มืดลง เพื่อดันชิ้นหลักให้เด่น
                         mat.pbrMetallicRoughness.setBaseColorFactor([
                             origColor[0] * 0.15, 
                             origColor[1] * 0.15, 
@@ -550,20 +554,25 @@ viewer.addEventListener('click', (event) => {
                         ]); 
                         mat.setEmissiveFactor([0, 0, 0]); 
                     } else {
+                        // 🫀 ชิ้นที่ "คลิก" ให้โชว์สีสันปกติของโมเดล 100% 
                         mat.pbrMetallicRoughness.setBaseColorFactor(origColor);
-                        mat.setEmissiveFactor([0.6, 0.6, 0.6]); 
+                        // 🔥 ปิดการเรืองแสงทิ้งไปเลย เพื่อให้เห็น Texture และสีจริงคมชัดที่สุด
+                        mat.setEmissiveFactor([0, 0, 0]); 
                     }
                 }
                 
+                // อัปเดตข้อมูลกล่องข้อความ
                 document.getElementById('modalTitle').innerHTML = clickedPart.name;
                 document.getElementById('modalDesc').innerHTML = clickedPart.info || "ไม่มีข้อมูลรายละเอียดเพิ่มเติม"; 
                 infoModal.style.display = 'flex';
                 
+                // หยุดหมุนเพื่อให้เด็กอ่านง่าย
                 viewer.cameraTarget = "auto auto auto"; 
                 viewer.autoRotate = false;
             }
         }
     } else {
+        // ถ้ากดโดนพื้นหลัง ให้ปิดกล่องข้อมูลและคืนสีปกติทั้งหมด
         closeModals();
     }
 });
@@ -614,7 +623,6 @@ function closeQuizMenu() {
     home.style.display = "flex";
 }
 
-// 🌟 ฟังก์ชันจับเวลา 30 วินาที และนับต่อแม้จะกดตอบแล้ว
 function startTimer() {
     clearInterval(timerInterval);
     timeLeft = 30;
@@ -633,7 +641,7 @@ function startTimer() {
 
         if (timeLeft <= 0) {
             clearInterval(timerInterval);
-            nextQuestion(); // 🌟 เมื่อเวลาเหลือ 0 จะบังคับเปลี่ยนข้อทันที
+            nextQuestion(); 
         }
     }, 1000);
 }
@@ -683,17 +691,14 @@ function showQuestion() {
     document.getElementById("qChoices").innerHTML = shuffledChoices.map(c => `<div class="choice" onclick="selectChoice(this)">${c}</div>`).join("");
     document.getElementById("qProgress").textContent = `ข้อที่ ${qIndex + 1} / ${currentQuizData.length}`;
     
-    startTimer(); // 🌟 สั่งให้จับเวลา 30 วิตอนที่โชว์ข้อใหม่
+    startTimer(); 
 }
 
 function selectChoice(element) {
-    // 🌟 เอา clearInterval ออก เพื่อให้เวลาเดินต่อไปแม้จะกดตอบแล้ว
-    
     document.querySelectorAll(".choice").forEach(c => c.classList.remove("selected"));
     element.classList.add("selected");
     selectedAnswerText = element.textContent;
     
-    // โชว์ปุ่มถัดไป เผื่อเด็กไม่อยากรอให้เวลาหมด ก็กดข้ามเองได้เลย
     const nextBtn = document.getElementById("nextQuestionBtn");
     nextBtn.innerHTML = "ส่งคำตอบ / ข้อต่อไป ➡️";
     nextBtn.style.background = "#3b82f6";
@@ -701,7 +706,6 @@ function selectChoice(element) {
 }
 
 function nextQuestion() {
-    // 🌟 ถ้าครบ 30 วินาทีแล้วยังไม่กดตอบอะไรเลย ให้ตั้งเป็นหมดเวลา
     if (!selectedAnswerText) {
         selectedAnswerText = "⏳ หมดเวลา (ไม่ได้ตอบ)";
     }
@@ -723,7 +727,7 @@ function nextQuestion() {
 }
 
 function showResult() {
-    clearInterval(timerInterval); // ปิดเวลาตอนโชว์คะแนน
+    clearInterval(timerInterval); 
     document.getElementById("quizTimer").style.display = "none";
     
     const percent = (score / currentQuizData.length) * 100;
@@ -777,7 +781,7 @@ function showResult() {
 }
 
 function closeQuiz() { 
-    clearInterval(timerInterval); // ปิดเวลาถ้ายกเลิกกลางคัน
+    clearInterval(timerInterval); 
     quizPage.style.display = "none"; 
     home.style.display = "flex"; 
 }
