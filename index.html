@@ -7,6 +7,8 @@
 
 <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500&display=swap" rel="stylesheet">
 
 <style>
@@ -258,6 +260,11 @@ model-viewer { width:100%; height:calc(100vh - 60px); margin-top: 60px; --poster
     
     <button id="btnLearn" onclick="startLearning()" style="width: 100%; margin-bottom: 12px;" disabled>📚 เข้าบทเรียนเนื้อหา 3D</button>
     <button id="btnQuizMenu" onclick="showQuizMenu()" style="width: 100%; background: #8b5cf6; box-shadow: 0 10px 25px rgba(139, 92, 246, 0.4);" disabled>📝 เมนูแบบทดสอบ (Quiz)</button>
+
+    <div style="margin-top: 25px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
+        <button onclick="window.location.href='admin.html'" style="background: transparent; border: 1px dashed #475569; color: #94a3b8; font-size: 0.85rem; width: 100%; box-shadow: none;">⚙️ จัดการระบบ (สำหรับคุณครู)</button>
+    </div>
+
   </div>
 </div>
 
@@ -338,6 +345,47 @@ let originalColors = new Map();
 let timerInterval;
 let timeLeft = 30; // ตั้งค่า 30 วินาทีต่อข้อ
 
+// =========================================
+// 🌟 1. เชื่อมต่อฐานข้อมูล Firebase (Cloud Database)
+// =========================================
+const firebaseConfig = {
+  apiKey: "AIzaSyB9TZN4-yUb9Kfh0gdZNp6XglsbS-xEzfk",
+  authDomain: "biolens-ar.firebaseapp.com",
+  projectId: "biolens-ar",
+  storageBucket: "biolens-ar.firebasestorage.app",
+  messagingSenderId: "1088692183155",
+  appId: "1:1088692183155:web:d139f94812eca627e08a06"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+// =========================================
+// 🌟 2. ดึงข้อมูล Real-time จาก Cloud เมื่อเปิดเว็บ
+// =========================================
+db.collection("database").doc("anatomy").get()
+.then((docSnap) => {
+    if(docSnap.exists) {
+        data = docSnap.data().systems;
+        renderTabs();
+        renderQuizMenu(); 
+        
+        if (data.length > 0) loadSystem(0);
+        
+        document.getElementById("loadingText").textContent = "ระบบพร้อมใช้งานแล้ว (ดึงข้อมูลจาก Cloud ☁️)";
+        document.getElementById("loadingText").style.color = "#4ade80"; 
+        document.getElementById("btnLearn").disabled = false;
+        document.getElementById("btnQuizMenu").disabled = false;
+    } else {
+        throw new Error("ยังไม่มีข้อมูลใน Database");
+    }
+})
+.catch(err => {
+    console.error("Error:", err);
+    document.getElementById("loadingText").textContent = "ไม่สามารถเชื่อมต่อฐานข้อมูลได้ กรุณาไปเพิ่มข้อมูลที่หน้า Admin ก่อนครับ";
+    document.getElementById("loadingText").style.color = "#ef4444";
+});
+
+
 const viewer = document.getElementById("viewer");
 viewer.addEventListener('load', () => {
     if (viewer.model && viewer.model.materials) {
@@ -417,28 +465,6 @@ viewer.addEventListener('progress', (e) => {
     }
 });
 
-fetch("anatomy_data.json?v=" + new Date().getTime())
-.then(r => {
-    if(!r.ok) throw new Error("ไม่สามารถโหลดไฟล์ข้อมูลได้");
-    return r.json();
-})
-.then(j => {
-    data = j.systems;
-    renderTabs();
-    renderQuizMenu(); 
-    
-    if (data.length > 0) loadSystem(0);
-    
-    document.getElementById("loadingText").textContent = "ระบบพร้อมใช้งานแล้ว";
-    document.getElementById("loadingText").style.color = "#4ade80"; 
-    document.getElementById("btnLearn").disabled = false;
-    document.getElementById("btnQuizMenu").disabled = false;
-})
-.catch(err => {
-    console.error("Error:", err);
-    document.getElementById("loadingText").textContent = "ไม่พบไฟล์ฐานข้อมูล (JSON)";
-    document.getElementById("loadingText").style.color = "#ef4444";
-});
 
 function renderTabs() {
     tabs.innerHTML = data.map((s, i) => `<div class="tab-btn" id="t${i}" onclick="loadSystem(${i})">${s.category}</div>`).join("");
@@ -530,7 +556,6 @@ function toggleModelMode() {
     viewer.addEventListener('load', unlockButton);
 }
 
-// 🌟 อัปเดต: ฟังก์ชันคลิกโมเดล (ดรอปสีรอบข้างให้มืดลง ส่วนชิ้นที่คลิกโชว์สีดั้งเดิม 100% แบบไม่เรืองแสง)
 viewer.addEventListener('click', (event) => {
     const material = viewer.materialFromPoint(event.clientX, event.clientY);
     if (material != null) {
@@ -539,13 +564,10 @@ viewer.addEventListener('click', (event) => {
             const clickedPart = partsData.find(p => p.material_name === material.name);
             if (clickedPart) {
                 
-                // ลูปสั่งงานทีละชิ้นส่วนในโมเดล
                 for (const mat of viewer.model.materials) {
-                    // ดึงสีออริจินัลที่เซฟไว้ออกมา
                     const origColor = originalColors.get(mat.name) || [1, 1, 1, 1];
 
                     if (mat.name !== material.name) {
-                        // 👁️‍🗨️ ชิ้นที่ "ไม่ได้คลิก" เอาสีออริจินัลมาคูณ 0.15 ให้มืดลง เพื่อดันชิ้นหลักให้เด่น
                         mat.pbrMetallicRoughness.setBaseColorFactor([
                             origColor[0] * 0.15, 
                             origColor[1] * 0.15, 
@@ -554,25 +576,20 @@ viewer.addEventListener('click', (event) => {
                         ]); 
                         mat.setEmissiveFactor([0, 0, 0]); 
                     } else {
-                        // 🫀 ชิ้นที่ "คลิก" ให้โชว์สีสันปกติของโมเดล 100% 
                         mat.pbrMetallicRoughness.setBaseColorFactor(origColor);
-                        // 🔥 ปิดการเรืองแสงทิ้งไปเลย เพื่อให้เห็น Texture และสีจริงคมชัดที่สุด
                         mat.setEmissiveFactor([0, 0, 0]); 
                     }
                 }
                 
-                // อัปเดตข้อมูลกล่องข้อความ
                 document.getElementById('modalTitle').innerHTML = clickedPart.name;
                 document.getElementById('modalDesc').innerHTML = clickedPart.info || "ไม่มีข้อมูลรายละเอียดเพิ่มเติม"; 
                 infoModal.style.display = 'flex';
                 
-                // หยุดหมุนเพื่อให้เด็กอ่านง่าย
                 viewer.cameraTarget = "auto auto auto"; 
                 viewer.autoRotate = false;
             }
         }
     } else {
-        // ถ้ากดโดนพื้นหลัง ให้ปิดกล่องข้อมูลและคืนสีปกติทั้งหมด
         closeModals();
     }
 });

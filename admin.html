@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BioLens AR - Admin Dashboard</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500&display=swap" rel="stylesheet">
+    
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/9.10.0/jsoneditor.min.css" rel="stylesheet" type="text/css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/9.10.0/jsoneditor.min.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+
+    <style>
+        body { font-family: 'Kanit', sans-serif; background: #020617; }
+        .jsoneditor-menu { background-color: #3b82f6 !important; border-bottom: none !important; }
+        .jsoneditor { border: 1px solid #334155 !important; border-radius: 8px; }
+        .jsoneditor-tree { background: #ffffff !important; }
+    </style>
+</head>
+<body class="text-white h-screen flex flex-col">
+
+    <div id="loginPage" class="flex flex-col items-center justify-center h-full p-6">
+        <div class="bg-slate-800 p-8 rounded-3xl shadow-2xl w-full max-w-md text-center border border-slate-700">
+            <div class="text-5xl mb-4">🔐</div>
+            <h1 class="text-3xl font-bold text-rose-500 mb-2">BioLens Admin</h1>
+            <p class="text-slate-400 mb-8">กรุณาเข้าสู่ระบบเพื่อจัดการข้อมูล</p>
+            
+            <div class="space-y-4">
+                <input type="email" id="email" class="w-full p-4 rounded-2xl bg-slate-900 border border-slate-600 text-white outline-none focus:border-blue-500 transition-all" placeholder="อีเมลแอดมิน">
+                <input type="password" id="pass" class="w-full p-4 rounded-2xl bg-slate-900 border border-slate-600 text-white outline-none focus:border-blue-500 transition-all" placeholder="รหัสผ่าน">
+                <button onclick="login()" class="w-full bg-blue-600 hover:bg-blue-500 transition-all p-4 rounded-2xl text-white font-bold text-lg shadow-lg shadow-blue-900/20">เข้าสู่ระบบ</button>
+            </div>
+            <p id="errorMsg" class="text-red-400 mt-4 text-sm hidden">❌ อีเมลหรือรหัสผ่านไม่ถูกต้อง!</p>
+        </div>
+    </div>
+
+    <div id="dashboard" class="hidden flex-col h-full">
+        <header class="bg-slate-800 p-4 flex flex-wrap justify-between items-center border-b border-slate-700 gap-4">
+            <div class="flex items-center gap-3">
+                <span class="text-2xl">⚙️</span>
+                <h1 class="text-xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">Admin Dashboard</h1>
+            </div>
+            
+            <div class="flex flex-wrap gap-2">
+                <button onclick="syncInitialData()" class="bg-amber-600 hover:bg-amber-500 px-4 py-2 rounded-xl transition text-sm font-medium">📥 ดึงข้อมูลจากไฟล์ JSON</button>
+                <button onclick="saveData()" class="bg-emerald-600 hover:bg-emerald-500 px-6 py-2 rounded-xl transition font-bold shadow-lg shadow-emerald-900/20">💾 บันทึกการแก้ไข (Save)</button>
+                <button onclick="logout()" class="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-xl transition text-sm">🚪 ออกจากระบบ</button>
+            </div>
+        </header>
+        
+        <div class="p-4 flex-grow overflow-hidden bg-slate-900">
+            <div class="flex justify-between items-center mb-2">
+                <p class="text-slate-400 text-sm">💡 เคล็ดลับ: คลิกที่ลูกศรเพื่อกางข้อมูลออก แล้วดับเบิลคลิกที่ข้อความเพื่อแก้ไข</p>
+                <span id="status" class="text-xs text-emerald-400">เชื่อมต่อคลาวด์สำเร็จ</span>
+            </div>
+            <div id="editor" class="w-full h-[calc(100%-2rem)] shadow-2xl"></div>
+        </div>
+    </div>
+
+<script>
+// --- 1. ตั้งค่า Firebase ---
+const firebaseConfig = {
+  apiKey: "AIzaSyB9TZN4-yUb9Kfh0gdZNp6XglsbS-xEzfk",
+  authDomain: "biolens-ar.firebaseapp.com",
+  projectId: "biolens-ar",
+  storageBucket: "biolens-ar.firebasestorage.app",
+  messagingSenderId: "1088692183155",
+  appId: "1:1088692183155:web:d139f94812eca627e08a06"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+// --- 2. ตั้งค่า JSON Editor ---
+const container = document.getElementById("editor");
+const options = {
+    mode: 'tree',
+    modes: ['tree', 'code', 'view'], 
+    name: 'Anatomy_Data'
+};
+const editor = new JSONEditor(container, options);
+
+// --- 3. ระบบจัดการหน้าจอและ Login ---
+auth.onAuthStateChanged(user => {
+    if (user) {
+        document.getElementById('loginPage').classList.add('hidden');
+        document.getElementById('dashboard').classList.remove('hidden');
+        document.getElementById('dashboard').classList.add('flex');
+        loadDataFromCloud(); 
+    } else {
+        document.getElementById('loginPage').classList.remove('hidden');
+        document.getElementById('dashboard').classList.add('hidden');
+    }
+});
+
+function login() {
+    const e = document.getElementById('email').value;
+    const p = document.getElementById('pass').value;
+    const errorMsg = document.getElementById('errorMsg');
+    
+    auth.signInWithEmailAndPassword(e, p)
+        .catch(err => {
+            errorMsg.classList.remove('hidden');
+            console.error(err);
+        });
+}
+
+function logout() {
+    if(confirm("ยืนยันการออกจากระบบ?")) auth.signOut();
+}
+
+// --- 4. ฟังก์ชันจัดการข้อมูล ---
+
+// ดึงข้อมูลจาก Firebase มาโชว์
+function loadDataFromCloud() {
+    document.getElementById('status').textContent = "กำลังโหลดข้อมูล...";
+    db.collection("database").doc("anatomy").get().then(doc => {
+        if(doc.exists) {
+            editor.set(doc.data());
+            document.getElementById('status').textContent = "โหลดข้อมูลล่าสุดจาก Cloud แล้ว";
+        } else {
+            document.getElementById('status').textContent = "ยังไม่มีข้อมูลใน Cloud";
+            alert("⚠️ ยังไม่มีข้อมูลบน Cloud! โปรดกดปุ่มสีส้มเพื่อดึงข้อมูลจากไฟล์ JSON เดิมขึ้นระบบครับ");
+        }
+    });
+}
+
+// ดึงไฟล์ JSON เดิมขึ้นระบบ (ทำแค่ครั้งแรกครั้งเดียว)
+function syncInitialData() {
+    if(confirm("ระบบจะดึงข้อมูลจากไฟล์ anatomy_data.json ในเครื่องของคุณขึ้นไปเก็บไว้บน Firebase Cloud ยืนยันหรือไม่?")) {
+        fetch("anatomy_data.json")
+            .then(r => r.json())
+            .then(data => {
+                db.collection("database").doc("anatomy").set(data).then(() => {
+                    alert("✅ อัปโหลดสำเร็จ! ข้อมูลถูกย้ายไปอยู่บน Cloud เรียบร้อยแล้ว");
+                    editor.set(data);
+                });
+            })
+            .catch(e => alert("❌ ไม่พบไฟล์ anatomy_data.json หรือเกิดข้อผิดพลาดในการอ่านไฟล์"));
+    }
+}
+
+// บันทึกข้อมูลที่แก้ไขแล้วกลับขึ้น Firebase
+function saveData() {
+    try {
+        const updatedData = editor.get();
+        document.getElementById('status').textContent = "กำลังบันทึก...";
+        
+        db.collection("database").doc("anatomy").set(updatedData).then(() => {
+            alert("🎉 บันทึกสำเร็จ! ข้อมูลในแอปหน้าหลักจะเปลี่ยนตามทันทีโดยไม่ต้องแก้โค้ด");
+            document.getElementById('status').textContent = "บันทึกสำเร็จเมื่อ " + new Date().toLocaleTimeString();
+        }).catch(e => {
+            alert("❌ เกิดข้อผิดพลาดในการบันทึก: " + e.message);
+        });
+    } catch (err) {
+        alert("❌ ข้อมูลมีข้อผิดพลาด โปรดตรวจสอบรูปแบบให้ถูกต้อง");
+    }
+}
+</script>
+</body>
+</html>
