@@ -41,6 +41,34 @@ button:disabled { background: #475569; opacity: 0.5; cursor: not-allowed; }
 
 .grade-text { font-size: 4rem; font-weight: bold; color: var(--primary); margin: 10px 0; }
 
+/* 🌟 สไตล์สำหรับปุ่มไอคอนเต็มจอมุมขวาบน */
+.fs-icon-btn {
+    position: absolute;
+    top: 25px;
+    right: 25px;
+    width: 50px;
+    height: 50px;
+    background: rgba(30, 41, 59, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    color: white;
+    font-size: 1.3rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(5px);
+    z-index: 2000;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    padding: 0;
+}
+.fs-icon-btn:hover {
+    background: var(--primary);
+    border-color: var(--primary);
+    transform: scale(1.1);
+}
+
 /* =========================================
    3. Main Workspace
    ========================================= */
@@ -53,25 +81,9 @@ model-viewer { width:100%; height:calc(100vh - 60px); margin-top: 60px; --poster
 .tab-btn, .menu-item { pointer-events: auto; background: rgba(15, 23, 42, 0.9); border: 1px solid var(--border); border-radius: 16px; color: white; cursor: pointer; text-align: center; transition: 0.3s; padding: 10px 24px; box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
 .tab-btn.active, .menu-item.active { background: var(--primary); border-color: var(--primary); }
 
-.info-panel { 
-    position: absolute; 
-    top: 50%; 
-    left: 30px; 
-    transform: translateY(-50%); 
-    width: 380px; 
-    background: var(--glass); 
-    border-radius: 24px; 
-    border: 1px solid var(--border); 
-    pointer-events: auto; 
-    z-index: 10; 
-    padding: 24px; 
-    backdrop-filter: blur(10px); 
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
-}
-
+.info-panel { position: absolute; top: 50%; left: 30px; transform: translateY(-50%); width: 380px; background: var(--glass); border-radius: 24px; border: 1px solid var(--border); pointer-events: auto; z-index: 10; padding: 24px; backdrop-filter: blur(10px); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
 .tabs { top: 80px; left: 50%; transform: translateX(-50%); flex-direction: row; }
 .menu { right: 30px; top: 50%; transform: translateY(-50%); flex-direction: column; }
-
 .toggle-mode-btn { position: absolute; top: 80px; right: 20px; background: rgba(15, 23, 42, 0.9); color: white; border: 1px solid var(--primary); border-radius: 12px; padding: 10px 16px; z-index: 200; cursor: pointer; display: none; transition: 0.3s; }
 .toggle-mode-btn:hover { background: var(--primary); }
 
@@ -83,112 +95,26 @@ model-viewer { width:100%; height:calc(100vh - 60px); margin-top: 60px; --poster
 .modal-box { background: var(--glass); border: 1px solid var(--border); border-radius: 24px; padding: 25px; width: 100%; max-width: 400px; text-align: center; color: white; transform: scale(0.95); animation: popUp 0.3s forwards ease-out; }
 @keyframes popUp { to { transform: scale(1); } }
 
-.part-info-card {
-    position: absolute;
-    top: 50%;
-    right: 170px;
-    transform: translateY(-50%);
-    width: 360px;
-    background: var(--glass);
-    border: 1px solid var(--border);
-    border-radius: 24px;
-    padding: 25px;
-    color: white;
-    z-index: 20;
-    backdrop-filter: blur(10px);
-    box-shadow: 0 15px 40px rgba(0,0,0,0.6);
-    display: none;
-    flex-direction: column;
-    animation: slideInRight 0.3s forwards ease-out;
-}
-@keyframes slideInRight {
-    from { opacity: 0; transform: translate(30px, -50%); }
-    to { opacity: 1; transform: translate(0, -50%); }
-}
+.part-info-card { position: absolute; top: 50%; right: 170px; transform: translateY(-50%); width: 360px; background: var(--glass); border: 1px solid var(--border); border-radius: 24px; padding: 25px; color: white; z-index: 20; backdrop-filter: blur(10px); box-shadow: 0 15px 40px rgba(0,0,0,0.6); display: none; flex-direction: column; animation: slideInRight 0.3s forwards ease-out; }
+@keyframes slideInRight { from { opacity: 0; transform: translate(30px, -50%); } to { opacity: 1; transform: translate(0, -50%); } }
 
-.modal-title { 
-    color: #ffffff;
-    background: transparent;
-    font-size: 1.3rem; 
-    margin: 0 0 15px 0; 
-    padding: 0 0 12px 0;
-    border: none;
-    border-bottom: 2px solid var(--primary);
-    border-radius: 0; 
-    line-height: 1.4;
-    text-align: center;
-    box-shadow: none;
-    letter-spacing: 0.5px;
-}
-
-.modal-desc { 
-    font-size: 0.95rem; 
-    color: #cbd5e1; 
-    line-height: 1.5; 
-    margin-bottom: 20px; 
-    text-align: left; 
-    max-height: 250px;  
-    overflow-y: auto;   
-    padding-right: 5px; 
-}
+.modal-title { color: #ffffff; background: transparent; font-size: 1.3rem; margin: 0 0 15px 0; padding: 0 0 12px 0; border: none; border-bottom: 2px solid var(--primary); border-radius: 0; line-height: 1.4; text-align: center; box-shadow: none; letter-spacing: 0.5px; }
+.modal-desc { font-size: 0.95rem; color: #cbd5e1; line-height: 1.5; margin-bottom: 20px; text-align: left; max-height: 250px; overflow-y: auto; padding-right: 5px; }
 .modal-desc::-webkit-scrollbar { width: 6px; }
 .modal-desc::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); border-radius: 10px; }
 .modal-desc::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 10px; }
 .modal-desc::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.4); }
 
-.close-modal-btn { 
-    background: var(--primary); 
-    color: white; 
-    border: none; 
-    padding: 10px 32px; 
-    border-radius: 12px; 
-    cursor: pointer; 
-    font-family: 'Kanit'; 
-    font-size: 1rem;
-    width: max-content; 
-    display: block;
-    margin: 5px auto 0 auto; 
-    align-self: center; 
-    box-shadow: 0 4px 15px rgba(255, 71, 87, 0.3); 
-    transition: 0.2s;
-}
+.close-modal-btn { background: var(--primary); color: white; border: none; padding: 10px 32px; border-radius: 12px; cursor: pointer; font-family: 'Kanit'; font-size: 1rem; width: max-content; display: block; margin: 5px auto 0 auto; align-self: center; box-shadow: 0 4px 15px rgba(255, 71, 87, 0.3); transition: 0.2s; }
 .close-modal-btn:hover { background: #ff6b81; transform: translateY(-2px); }
-
-.close-info-btn {
-    position: absolute;
-    top: 15px;
-    right: 15px;
-    background: transparent;
-    color: #94a3b8; 
-    border: none;
-    font-size: 1.2rem;
-    cursor: pointer;
-    padding: 0;
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: 0.3s;
-    box-shadow: none; 
-}
-.close-info-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: white;
-}
+.close-info-btn { position: absolute; top: 15px; right: 15px; background: transparent; color: #94a3b8; border: none; font-size: 1.2rem; cursor: pointer; padding: 0; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: 0.3s; box-shadow: none; }
+.close-info-btn:hover { background: rgba(255, 255, 255, 0.1); color: white; }
 
 /* =========================================
    5. ซ่อน UI (Focus Mode)
    ========================================= */
-.info-panel, .menu, .tabs, .toggle-mode-btn, .app-header, .app-header span, .part-info-card { 
-    transition: all 0.3s ease-in-out; 
-}
-
-.ui-hidden .info-panel, .ui-hidden .menu, .ui-hidden .tabs, .ui-hidden .toggle-mode-btn { 
-    opacity: 0; pointer-events: none; visibility: hidden; 
-}
-
+.info-panel, .menu, .tabs, .toggle-mode-btn, .app-header, .app-header span, .part-info-card { transition: all 0.3s ease-in-out; }
+.ui-hidden .info-panel, .ui-hidden .menu, .ui-hidden .tabs, .ui-hidden .toggle-mode-btn { opacity: 0; pointer-events: none; visibility: hidden; }
 .ui-hidden .app-header { background: transparent; backdrop-filter: none; border-bottom: transparent; }
 .ui-hidden .app-header span { opacity: 0; }
 
@@ -199,35 +125,17 @@ model-viewer { width:100%; height:calc(100vh - 60px); margin-top: 60px; --poster
     .app-header { padding: 0 10px; }
     .app-header span { display: none; } 
     .app-header button { padding: 6px 10px; font-size: 0.75rem; }
-
-    .tabs {
-        top: 70px; width: 95%; overflow-x: auto; justify-content: flex-start; padding-bottom: 5px;
-    }
+    .tabs { top: 70px; width: 95%; overflow-x: auto; justify-content: flex-start; padding-bottom: 5px; }
     .tabs::-webkit-scrollbar { display: none; }
     .tab-btn { white-space: nowrap; font-size: 0.85rem; padding: 8px 15px; flex-shrink: 0; }
-
-    .menu {
-        top: auto; bottom: 20px; right: 50%; transform: translateX(50%);
-        flex-direction: row; width: 95%; overflow-x: auto;
-    }
+    .menu { top: auto; bottom: 20px; right: 50%; transform: translateX(50%); flex-direction: row; width: 95%; overflow-x: auto; }
     .menu::-webkit-scrollbar { display: none; }
     .menu-item { white-space: nowrap; font-size: 0.85rem; padding: 8px 15px; flex-shrink: 0; }
-
-    .info-panel {
-        top: 50%; left: 50%; transform: translate(-50%, -50%);
-        width: 90%; padding: 15px; max-height: 40vh; overflow-y: auto; background: rgba(15, 23, 42, 0.95);
-    }
-    
-    .part-info-card {
-        top: 50%; left: 50%; transform: translate(-50%, -50%);
-        width: 90%; max-height: 50vh; overflow-y: auto;
-    }
-    @keyframes slideInRight {
-        from { opacity: 0; transform: translate(-50%, -40%); }
-        to { opacity: 1; transform: translate(-50%, -50%); }
-    }
-
+    .info-panel { top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; padding: 15px; max-height: 40vh; overflow-y: auto; background: rgba(15, 23, 42, 0.95); }
+    .part-info-card { top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-height: 50vh; overflow-y: auto; }
+    @keyframes slideInRight { from { opacity: 0; transform: translate(-50%, -40%); } to { opacity: 1; transform: translate(-50%, -50%); } }
     .toggle-mode-btn { top: 120px; right: 10px; font-size: 0.8rem; padding: 8px 12px; }
+    .fs-icon-btn { top: 15px; right: 15px; width: 40px; height: 40px; font-size: 1rem; }
 }
 </style>
 </head>
@@ -252,6 +160,8 @@ model-viewer { width:100%; height:calc(100vh - 60px); margin-top: 60px; --poster
 <div id="load-shell"><div id="load-bar"></div></div>
 
 <div id="home" class="home">
+  <button class="fs-icon-btn fs-toggle" onclick="toggleFullScreen()" title="ขยายเต็มจอ">🔲</button>
+
   <div class="box">
     <h1 style="margin-bottom: 0px; color: var(--primary); font-size: 2.2rem;">BioLens AR</h1>
     <h2 style="font-size: 1.1rem; color: #cbd5e1; margin-top: 5px; margin-bottom: 15px; font-weight: 400;">ท่องโลกกายวิภาคศาสตร์ | วิทยาศาสตร์ ม.2</h2>
@@ -259,16 +169,17 @@ model-viewer { width:100%; height:calc(100vh - 60px); margin-top: 60px; --poster
     <p id="loadingText" style="color: #fbbf24; margin-bottom: 25px;">กำลังโหลดข้อมูลบทเรียน...</p>
     
     <button id="btnLearn" onclick="startLearning()" style="width: 100%; margin-bottom: 12px;" disabled>📚 เข้าบทเรียนเนื้อหา 3D</button>
-    <button id="btnQuizMenu" onclick="showQuizMenu()" style="width: 100%; background: #8b5cf6; box-shadow: 0 10px 25px rgba(139, 92, 246, 0.4);" disabled>📝 เมนูแบบทดสอบ (Quiz)</button>
+    <button id="btnQuizMenu" onclick="showQuizMenu()" style="width: 100%; background: #8b5cf6; box-shadow: 0 10px 25px rgba(139, 92, 246, 0.4); margin-bottom: 25px;" disabled>📝 เมนูแบบทดสอบ (Quiz)</button>
 
-    <div style="margin-top: 25px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
+    <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
         <button onclick="window.location.href='admin.html'" style="background: transparent; border: 1px dashed #475569; color: #94a3b8; font-size: 0.85rem; width: 100%; box-shadow: none;">⚙️ จัดการระบบ (สำหรับคุณครู)</button>
     </div>
-
   </div>
 </div>
 
 <div id="quizMenuPage" class="quiz-page">
+  <button class="fs-icon-btn fs-toggle" onclick="toggleFullScreen()" title="ขยายเต็มจอ">🔲</button>
+  
   <div class="box">
     <h2 style="color:var(--primary); margin-top:0; border-bottom: 2px solid var(--border); padding-bottom: 15px;">เมนูแบบทดสอบ</h2>
     <p style="color: #94a3b8; font-size: 0.9rem; margin-bottom: 20px;">เลือกทำแบบทดสอบแยกตามระบบ หรือ ทำแบบทดสอบรวมเพื่อวัดความรู้ทั้งหมด</p>
@@ -298,21 +209,13 @@ model-viewer { width:100%; height:calc(100vh - 60px); margin-top: 60px; --poster
 <div class="app-header" id="appHeader">
     <span style="font-size: 1.1rem; color: #ffffff; font-weight: 500; letter-spacing: 1px;">BioLens AR</span>
     <div style="display: flex; gap: 10px;">
-        <button onclick="toggleInfoBox()" style="background:none; border:1px solid var(--border); font-size: 0.85rem; padding: 6px 14px; color: #4ade80; transition: 0.3s;">
-            ℹ️ ข้อมูล
-        </button>
-        <button onclick="resetCamera()" style="background:none; border:1px solid var(--border); font-size: 0.85rem; padding: 6px 14px; color: #60a5fa; transition: 0.3s;">
-            🎯 จัดกึ่งกลาง
-        </button>
-        <button id="toggleUIBtn" onclick="toggleUI()" style="background:none; border:1px solid var(--border); font-size: 0.85rem; padding: 6px 14px; color: white; transition: 0.3s;">
-            👁️ ซ่อน UI
-        </button>
-        <button id="fullscreenBtn" onclick="toggleFullScreen()" style="background:none; border:1px solid var(--border); font-size: 0.85rem; padding: 6px 14px; color: white;">
-            🔲 ขยายเต็มจอ
-        </button>
-        <button onclick="backToHome()" style="background:none; border:1px solid var(--border); font-size: 0.85rem; padding: 6px 14px; color: white;">
-            🏠 กลับหน้าหลัก
-        </button>
+        <button onclick="toggleInfoBox()" style="background:none; border:1px solid var(--border); font-size: 0.85rem; padding: 6px 14px; color: #4ade80; transition: 0.3s;">ℹ️ ข้อมูล</button>
+        <button onclick="resetCamera()" style="background:none; border:1px solid var(--border); font-size: 0.85rem; padding: 6px 14px; color: #60a5fa; transition: 0.3s;">🎯 จัดกึ่งกลาง</button>
+        <button id="toggleUIBtn" onclick="toggleUI()" style="background:none; border:1px solid var(--border); font-size: 0.85rem; padding: 6px 14px; color: white; transition: 0.3s;">👁️ ซ่อน UI</button>
+        
+        <button class="fs-text-btn fs-toggle" onclick="toggleFullScreen()" style="background:none; border:1px solid var(--border); font-size: 0.85rem; padding: 6px 14px; color: white;">🔲 ขยายเต็มจอ</button>
+        
+        <button onclick="backToHome()" style="background:none; border:1px solid var(--border); font-size: 0.85rem; padding: 6px 14px; color: white;">🏠 กลับหน้าหลัก</button>
     </div>
 </div>
 
@@ -333,17 +236,10 @@ model-viewer { width:100%; height:calc(100vh - 60px); margin-top: 60px; --poster
 
 <script>
 let data = [], currentQuizData = [], qIndex = 0, score = 0;
-let currentCorrectText = ""; 
-let selectedAnswerText = ""; 
-let userAnswers = []; 
-let currentOrganData = null; 
-let isAltMode = false;       
-let currentActiveModelUrl = ""; 
+let currentCorrectText = "", selectedAnswerText = "", userAnswers = []; 
+let currentOrganData = null, isAltMode = false, currentActiveModelUrl = ""; 
 let originalColors = new Map();
-
-// ระบบจับเวลา
-let timerInterval;
-let timeLeft = 30; // ตั้งค่า 30 วินาทีต่อข้อ
+let timerInterval, timeLeft = 30; 
 
 // =========================================
 // 🌟 1. เชื่อมต่อฐานข้อมูล Firebase (Cloud Database)
@@ -368,7 +264,6 @@ db.collection("database").doc("anatomy").get()
         data = docSnap.data().systems;
         renderTabs();
         renderQuizMenu(); 
-        
         if (data.length > 0) loadSystem(0);
         
         document.getElementById("loadingText").textContent = "ระบบพร้อมใช้งานแล้ว (ดึงข้อมูลจาก Cloud ☁️)";
@@ -428,41 +323,25 @@ const qrModal = document.getElementById("qrModal");
 const toggleBtn = document.getElementById("toggleModeBtn");
 
 document.querySelectorAll('.modal-overlay').forEach(modal => {
-    modal.addEventListener('click', function(e) {
-        if (e.target === this) closeModals();
-    });
+    modal.addEventListener('click', function(e) { if (e.target === this) closeModals(); });
 });
 
 function closeModals() {
-    infoModal.style.display = 'none';
-    qrModal.style.display = 'none';
-    resetHighlight(); 
-    
-    if (viewer) {
-        viewer.autoRotate = true;
-    }
+    infoModal.style.display = 'none'; qrModal.style.display = 'none'; resetHighlight(); 
+    if (viewer) viewer.autoRotate = true;
 }
 
-function closeInfoAndReset() {
-    closeModals();
-    resetCamera();
-}
+function closeInfoAndReset() { closeModals(); resetCamera(); }
 
 function toggleInfoBox() {
     const panel = document.getElementById("mainInfoPanel");
-    if (panel.style.display === "none") {
-        panel.style.display = "block";
-    } else {
-        panel.style.display = "none";
-    }
+    panel.style.display = panel.style.display === "none" ? "block" : "none";
 }
 
 viewer.addEventListener('progress', (e) => {
     loadShell.style.display = "block";
     loadBar.style.width = (e.detail.totalProgress * 100) + "%";
-    if(e.detail.totalProgress === 1) {
-        setTimeout(() => { loadShell.style.display = "none"; }, 400);
-    }
+    if(e.detail.totalProgress === 1) setTimeout(() => { loadShell.style.display = "none"; }, 400);
 });
 
 
@@ -473,13 +352,10 @@ function renderTabs() {
 function renderQuizMenu() {
     const container = document.getElementById("quizMenuButtons");
     let html = "";
-    
     data.forEach((sys, idx) => {
         html += `<button onclick="startQuiz(${idx})" style="background: #1e293b; border: 1px solid var(--border); text-align: left; padding-left: 20px;">📝 ${sys.category} (10 ข้อ)</button>`;
     });
-    
     html += `<button onclick="startQuiz('all')" style="background: var(--primary); text-align: left; padding-left: 20px; box-shadow: 0 5px 15px rgba(255, 71, 87, 0.4);">🏆 แบบทดสอบรวมทุกระบบ (10 ข้อ)</button>`;
-    
     container.innerHTML = html;
 }
 
@@ -516,43 +392,28 @@ function selectOrgan(i, j) {
 }
 
 function loadModelData(dataObj) {
-    resetHighlight(); 
-    resetCamera();
-    
+    resetHighlight(); resetCamera();
     document.getElementById("mainInfoPanel").style.display = "block"; 
-    
-    loadShell.style.display = "block";
-    loadBar.style.width = "10%";
-    viewer.src = ""; 
+    loadShell.style.display = "block"; loadBar.style.width = "10%"; viewer.src = ""; 
 
     document.getElementById("title").textContent = dataObj.name;
     document.getElementById("desc").innerHTML = dataObj.description; 
     currentActiveModelUrl = dataObj.model_file; 
-
     setTimeout(() => { viewer.src = dataObj.model_file; }, 50); 
 }
 
 function toggleModelMode() {
     if (!currentOrganData || !currentOrganData.alt_mode) return;
 
-    toggleBtn.style.pointerEvents = "none";
-    toggleBtn.style.opacity = "0.5";
+    toggleBtn.style.pointerEvents = "none"; toggleBtn.style.opacity = "0.5";
 
     if (isAltMode) {
-        isAltMode = false;
-        toggleBtn.innerHTML = "👁️ ดูแบบเจาะลึกภายใน";
-        loadModelData(currentOrganData);
+        isAltMode = false; toggleBtn.innerHTML = "👁️ ดูแบบเจาะลึกภายใน"; loadModelData(currentOrganData);
     } else {
-        isAltMode = true;
-        toggleBtn.innerHTML = "🫀 กลับสู่โหมดมองภายนอก";
-        loadModelData(currentOrganData.alt_mode);
+        isAltMode = true; toggleBtn.innerHTML = "🫀 กลับสู่โหมดมองภายนอก"; loadModelData(currentOrganData.alt_mode);
     }
 
-    const unlockButton = () => {
-        toggleBtn.style.pointerEvents = "auto";
-        toggleBtn.style.opacity = "1";
-        viewer.removeEventListener('load', unlockButton); 
-    };
+    const unlockButton = () => { toggleBtn.style.pointerEvents = "auto"; toggleBtn.style.opacity = "1"; viewer.removeEventListener('load', unlockButton); };
     viewer.addEventListener('load', unlockButton);
 }
 
@@ -563,30 +424,20 @@ viewer.addEventListener('click', (event) => {
         if (partsData) {
             const clickedPart = partsData.find(p => p.material_name === material.name);
             if (clickedPart) {
-                
                 for (const mat of viewer.model.materials) {
                     const origColor = originalColors.get(mat.name) || [1, 1, 1, 1];
-
                     if (mat.name !== material.name) {
-                        mat.pbrMetallicRoughness.setBaseColorFactor([
-                            origColor[0] * 0.15, 
-                            origColor[1] * 0.15, 
-                            origColor[2] * 0.15, 
-                            origColor[3]
-                        ]); 
+                        mat.pbrMetallicRoughness.setBaseColorFactor([origColor[0] * 0.15, origColor[1] * 0.15, origColor[2] * 0.15, origColor[3]]); 
                         mat.setEmissiveFactor([0, 0, 0]); 
                     } else {
                         mat.pbrMetallicRoughness.setBaseColorFactor(origColor);
                         mat.setEmissiveFactor([0, 0, 0]); 
                     }
                 }
-                
                 document.getElementById('modalTitle').innerHTML = clickedPart.name;
                 document.getElementById('modalDesc').innerHTML = clickedPart.info || "ไม่มีข้อมูลรายละเอียดเพิ่มเติม"; 
                 infoModal.style.display = 'flex';
-                
-                viewer.cameraTarget = "auto auto auto"; 
-                viewer.autoRotate = false;
+                viewer.cameraTarget = "auto auto auto"; viewer.autoRotate = false;
             }
         }
     } else {
@@ -600,156 +451,93 @@ function showQRCode() {
     qrcodeContainer.innerHTML = ""; 
     const baseUrl = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
     const arUrl = `${baseUrl}/ar-viewer.html?model=${encodeURIComponent(currentActiveModelUrl)}`;
-    new QRCode(qrcodeContainer, {
-        text: arUrl, width: 150, height: 150, colorDark : "#0f172a", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H
-    });
+    new QRCode(qrcodeContainer, { text: arUrl, width: 150, height: 150, colorDark : "#0f172a", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H });
 }
 
 function startLearning() {
-    home.style.display = "none";
-    document.getElementById("appHeader").style.display = "flex";
-    document.getElementById("mainArea").style.display = "block";
-    tabs.style.display = "flex";
-    menu.style.display = "flex"; 
+    home.style.display = "none"; document.getElementById("appHeader").style.display = "flex";
+    document.getElementById("mainArea").style.display = "block"; tabs.style.display = "flex"; menu.style.display = "flex"; 
 }
 function backToHome() {
-    document.getElementById("appHeader").style.display = "none";
-    document.getElementById("mainArea").style.display = "none";
-    tabs.style.display = "none";
-    menu.style.display = "none";
-    home.style.display = "flex";
+    document.getElementById("appHeader").style.display = "none"; document.getElementById("mainArea").style.display = "none";
+    tabs.style.display = "none"; menu.style.display = "none"; home.style.display = "flex";
 }
 function shuffleArray(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-    }
+    for (let i = array.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [array[i], array[j]] = [array[j], array[i]]; }
     return array;
 }
 
 // =========================================================
 // ระบบ Quiz 
 // =========================================================
-function showQuizMenu() {
-    home.style.display = "none";
-    quizMenuPage.style.display = "flex";
-}
-
-function closeQuizMenu() {
-    quizMenuPage.style.display = "none";
-    home.style.display = "flex";
-}
+function showQuizMenu() { home.style.display = "none"; quizMenuPage.style.display = "flex"; }
+function closeQuizMenu() { quizMenuPage.style.display = "none"; home.style.display = "flex"; }
 
 function startTimer() {
-    clearInterval(timerInterval);
-    timeLeft = 30;
+    clearInterval(timerInterval); timeLeft = 30;
     const timerDisplay = document.getElementById("quizTimer");
-    timerDisplay.style.display = "block";
-    timerDisplay.textContent = `⏱️ ${timeLeft}s`;
-    timerDisplay.style.background = "#ef4444";
+    timerDisplay.style.display = "block"; timerDisplay.textContent = `⏱️ ${timeLeft}s`; timerDisplay.style.background = "#ef4444";
     
     timerInterval = setInterval(() => {
-        timeLeft--;
-        timerDisplay.textContent = `⏱️ ${timeLeft}s`;
-        
-        if (timeLeft <= 5 && timeLeft > 0) {
-            timerDisplay.style.background = timeLeft % 2 === 0 ? "#b91c1c" : "#ef4444"; 
-        }
-
-        if (timeLeft <= 0) {
-            clearInterval(timerInterval);
-            nextQuestion(); 
-        }
+        timeLeft--; timerDisplay.textContent = `⏱️ ${timeLeft}s`;
+        if (timeLeft <= 5 && timeLeft > 0) timerDisplay.style.background = timeLeft % 2 === 0 ? "#b91c1c" : "#ef4444"; 
+        if (timeLeft <= 0) { clearInterval(timerInterval); nextQuestion(); }
     }, 1000);
 }
 
 function startQuiz(index) {
-    let pool = [];
-    let title = "";
-    
+    let pool = []; let title = "";
     if (index === 'all') {
         title = "รวมทุกระบบ";
-        data.forEach(sys => {
-            if(sys.items) sys.items.forEach(item => { if (item.quiz) pool = pool.concat(item.quiz); });
-        });
+        data.forEach(sys => { if(sys.items) sys.items.forEach(item => { if (item.quiz) pool = pool.concat(item.quiz); }); });
     } else {
         title = data[index].category;
-        if(data[index].items) {
-            data[index].items.forEach(item => { if (item.quiz) pool = pool.concat(item.quiz); });
-        }
+        if(data[index].items) data[index].items.forEach(item => { if (item.quiz) pool = pool.concat(item.quiz); });
     }
-
-    if (pool.length === 0) {
-        return alert(`ยังไม่มีคำถามในหมวด "${title}" ครับ`);
-    }
+    if (pool.length === 0) return alert(`ยังไม่มีคำถามในหมวด "${title}" ครับ`);
     
     currentQuizData = shuffleArray([...pool]).slice(0, 10);
     qIndex = 0; score = 0; userAnswers = []; 
     
     document.getElementById("quizType").textContent = "แบบทดสอบ: " + title;
-    quizMenuPage.style.display = "none";
-    quizPage.style.display = "flex";
-    document.getElementById("exitQuizBtn").style.display = "block";
-    
+    quizMenuPage.style.display = "none"; quizPage.style.display = "flex"; document.getElementById("exitQuizBtn").style.display = "block";
     showQuestion();
 }
 
 function showQuestion() {
-    selectedAnswerText = ""; 
-    document.getElementById("nextQuestionBtn").style.display = "none"; 
-    
+    selectedAnswerText = ""; document.getElementById("nextQuestionBtn").style.display = "none"; 
     if (qIndex >= currentQuizData.length) return showResult();
     
-    const q = currentQuizData[qIndex];
-    currentCorrectText = q.choices[q.answer];
+    const q = currentQuizData[qIndex]; currentCorrectText = q.choices[q.answer];
     const shuffledChoices = shuffleArray([...q.choices]);
     
     document.getElementById("qTitle").textContent = q.question;
     document.getElementById("qChoices").innerHTML = shuffledChoices.map(c => `<div class="choice" onclick="selectChoice(this)">${c}</div>`).join("");
     document.getElementById("qProgress").textContent = `ข้อที่ ${qIndex + 1} / ${currentQuizData.length}`;
-    
     startTimer(); 
 }
 
 function selectChoice(element) {
     document.querySelectorAll(".choice").forEach(c => c.classList.remove("selected"));
-    element.classList.add("selected");
-    selectedAnswerText = element.textContent;
-    
+    element.classList.add("selected"); selectedAnswerText = element.textContent;
     const nextBtn = document.getElementById("nextQuestionBtn");
-    nextBtn.innerHTML = "ส่งคำตอบ / ข้อต่อไป ➡️";
-    nextBtn.style.background = "#3b82f6";
-    nextBtn.style.display = "block";
+    nextBtn.innerHTML = "ส่งคำตอบ / ข้อต่อไป ➡️"; nextBtn.style.background = "#3b82f6"; nextBtn.style.display = "block";
 }
 
 function nextQuestion() {
-    if (!selectedAnswerText) {
-        selectedAnswerText = "⏳ หมดเวลา (ไม่ได้ตอบ)";
-    }
-    
+    if (!selectedAnswerText) selectedAnswerText = "⏳ หมดเวลา (ไม่ได้ตอบ)";
     const q = currentQuizData[qIndex];
     const isCorrect = (selectedAnswerText === currentCorrectText);
-    
     if (isCorrect) score++;
     
-    userAnswers.push({
-        question: q.question,
-        selected: selectedAnswerText,
-        correct: currentCorrectText,
-        isCorrect: isCorrect
-    });
-    
-    qIndex++; 
-    showQuestion();
+    userAnswers.push({ question: q.question, selected: selectedAnswerText, correct: currentCorrectText, isCorrect: isCorrect });
+    qIndex++; showQuestion();
 }
 
 function showResult() {
-    clearInterval(timerInterval); 
-    document.getElementById("quizTimer").style.display = "none";
-    
+    clearInterval(timerInterval); document.getElementById("quizTimer").style.display = "none";
     const percent = (score / currentQuizData.length) * 100;
     const grade = percent >= 80 ? "A" : percent >= 70 ? "B" : percent >= 60 ? "C" : percent >= 50 ? "D" : "F";
-    
     let summaryHTML = `<div style="max-height: 40vh; overflow-y: auto; padding-right: 5px; margin-bottom: 20px; text-align: left;">`;
     
     userAnswers.forEach((ans, idx) => {
@@ -757,7 +545,6 @@ function showResult() {
         const bgColor = isCorrect ? 'rgba(74, 222, 128, 0.1)' : 'rgba(248, 113, 113, 0.1)';
         const borderColor = isCorrect ? '#4ade80' : '#f87171';
         const icon = isCorrect ? '✅' : '❌';
-
         summaryHTML += `
             <div style="background: ${bgColor}; border: 1px solid ${borderColor}; padding: 15px; border-radius: 16px; margin-bottom: 15px;">
                 <div style="color: white; font-size: 1rem; margin-bottom: 12px; line-height: 1.4;">
@@ -765,17 +552,10 @@ function showResult() {
                     ${ans.question}
                 </div>
                 <div style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: 12px;">
-                    <div style="color: ${isCorrect ? '#4ade80' : '#f87171'}; font-size: 0.95rem; margin-bottom: ${isCorrect ? '0' : '8px'};">
-                        ${icon} <b>นักเรียนตอบ:</b> ${ans.selected}
-                    </div>
-                    ${!isCorrect ? `
-                    <div style="color: #4ade80; font-size: 0.95rem; border-top: 1px dashed rgba(255,255,255,0.2); padding-top: 8px;">
-                        💡 <b>เฉลยที่ถูกต้อง:</b> ${ans.correct}
-                    </div>
-                    ` : ''}
+                    <div style="color: ${isCorrect ? '#4ade80' : '#f87171'}; font-size: 0.95rem; margin-bottom: ${isCorrect ? '0' : '8px'};">${icon} <b>นักเรียนตอบ:</b> ${ans.selected}</div>
+                    ${!isCorrect ? `<div style="color: #4ade80; font-size: 0.95rem; border-top: 1px dashed rgba(255,255,255,0.2); padding-top: 8px;">💡 <b>เฉลยที่ถูกต้อง:</b> ${ans.correct}</div>` : ''}
                 </div>
-            </div>
-        `;
+            </div>`;
     });
     summaryHTML += `</div>`;
 
@@ -791,31 +571,21 @@ function showResult() {
         ${summaryHTML}
         <button onclick="closeQuiz()" style="width:100%; padding: 16px; font-size: 1.1rem; box-shadow: 0 5px 15px rgba(255,71,87,0.3);">🏠 กลับหน้าหลัก</button>
     `;
-    
-    document.getElementById("qProgress").textContent = "";
-    document.getElementById("nextQuestionBtn").style.display = "none";
-    document.getElementById("exitQuizBtn").style.display = "none";
+    document.getElementById("qProgress").textContent = ""; document.getElementById("nextQuestionBtn").style.display = "none"; document.getElementById("exitQuizBtn").style.display = "none";
 }
 
-function closeQuiz() { 
-    clearInterval(timerInterval); 
-    quizPage.style.display = "none"; 
-    home.style.display = "flex"; 
-}
+function closeQuiz() { clearInterval(timerInterval); quizPage.style.display = "none"; home.style.display = "flex"; }
 
 // ---------------------------------------------------------
-// 🌟 อัปเดต: ระบบขยายเต็มจอ (ทำงานแบบ Global)
+// 🌟 3. ระบบขยายเต็มจอ (แยกปรับข้อความ/ไอคอน อัตโนมัติ)
 // ---------------------------------------------------------
-
-// ฟังก์ชันเช็กตอนโหลดหน้าเว็บ ว่าเคยสั่งเต็มจอไว้ไหม
 window.onload = function() {
     if (localStorage.getItem('isFullScreen') === 'true') {
-        // เบราว์เซอร์บางตัวไม่อนุญาตให้เต็มจอออโต้ถ้าผู้ใช้ยังไม่คลิก แต่เราจะพยายามสั่งเต็มจอก่อน
         tryFullScreen();
+        updateFsButtons(true);
     }
 };
 
-// ฟังก์ชันพยายามขยายเต็มจอ
 function tryFullScreen() {
     const doc = document.documentElement;
     if (!document.fullscreenElement) {
@@ -825,30 +595,28 @@ function tryFullScreen() {
     }
 }
 
+function updateFsButtons(isFull) {
+    document.querySelectorAll(".fs-text-btn").forEach(btn => btn.innerHTML = isFull ? "🗗 ย่อหน้าจอ" : "🔲 ขยายเต็มจอ");
+    document.querySelectorAll(".fs-icon-btn").forEach(btn => btn.innerHTML = isFull ? "🗗" : "🔲");
+}
+
 function toggleFullScreen() {
     const doc = document.documentElement;
-    const btn = document.getElementById("fullscreenBtn");
-    
     if (!document.fullscreenElement) {
-        // 🌟 สั่งขยายเต็มจอ และบันทึกสถานะลง localStorage
         if (doc.requestFullscreen) doc.requestFullscreen();
         else if (doc.webkitRequestFullscreen) doc.webkitRequestFullscreen();
         else if (doc.msRequestFullscreen) doc.msRequestFullscreen();
-        
-        btn.innerHTML = "🗗 ย่อหน้าจอ";
+        updateFsButtons(true);
         localStorage.setItem('isFullScreen', 'true');
     } else {
-        // 🌟 สั่งย่อหน้าจอ และบันทึกสถานะลง localStorage
         if (document.exitFullscreen) document.exitFullscreen();
         else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
         else if (document.msExitFullscreen) document.msExitFullscreen();
-        
-        btn.innerHTML = "🔲 ขยายเต็มจอ";
+        updateFsButtons(false);
         localStorage.setItem('isFullScreen', 'false');
     }
 }
 
-// ดักจับเหตุการณ์เผื่อผู้ใช้กดปุ่ม ESC ออกจากเต็มจอเอง
 document.addEventListener('fullscreenchange', exitHandler);
 document.addEventListener('webkitfullscreenchange', exitHandler);
 document.addEventListener('mozfullscreenchange', exitHandler);
@@ -856,27 +624,16 @@ document.addEventListener('MSFullscreenChange', exitHandler);
 
 function exitHandler() {
     if (!document.fullscreenElement && !document.webkitIsFullScreen && !document.mozFullScreen && !document.msFullscreenElement) {
-        document.getElementById("fullscreenBtn").innerHTML = "🔲 ขยายเต็มจอ";
+        updateFsButtons(false);
         localStorage.setItem('isFullScreen', 'false');
     }
 }
 
-// ---------------------------------------------------------
-// ระบบ ซ่อน/แสดง UI
-// ---------------------------------------------------------
 function toggleUI() {
-    const body = document.body;
-    const btn = document.getElementById("toggleUIBtn");
+    const body = document.body; const btn = document.getElementById("toggleUIBtn");
     body.classList.toggle("ui-hidden");
-    if (body.classList.contains("ui-hidden")) {
-        btn.innerHTML = "👁️‍🗨️ แสดง UI";
-        btn.style.borderColor = "var(--primary)";
-        btn.style.color = "var(--primary)";
-    } else {
-        btn.innerHTML = "👁️ ซ่อน UI";
-        btn.style.borderColor = "var(--border)";
-        btn.style.color = "white";
-    }
+    if (body.classList.contains("ui-hidden")) { btn.innerHTML = "👁️‍🗨️ แสดง UI"; btn.style.borderColor = "var(--primary)"; btn.style.color = "var(--primary)"; } 
+    else { btn.innerHTML = "👁️ ซ่อน UI"; btn.style.borderColor = "var(--border)"; btn.style.color = "white"; }
 }
 </script>
 </body>
