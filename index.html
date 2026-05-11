@@ -56,14 +56,35 @@ model-viewer { width:100%; height:calc(100vh - 60px); margin-top: 60px; --poster
 .header-btn { background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border); font-size: 0.85rem; padding: 6px 14px; color: white; transition: 0.3s; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; font-family: 'Kanit'; }
 .header-btn:hover { background: rgba(255, 255, 255, 0.15); }
 
-.tabs, .menu { position: absolute; display: none; gap: 10px; z-index: 100; pointer-events: none; }
-.tab-btn, .menu-item { pointer-events: auto; background: rgba(15, 23, 42, 0.9); border: 1px solid var(--border); border-radius: 16px; color: white; cursor: pointer; text-align: center; transition: 0.3s; padding: 10px 24px; box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
-.tab-btn.active, .menu-item.active { background: var(--primary); border-color: var(--primary); }
+/* 🌟 ปรับปรุงใหม่: เมนูหลัก (แถบบน) บังคับบรรทัดเดียวและกระชับขึ้น */
+.tabs { top: 80px; left: 50%; transform: translateX(-50%); flex-direction: row; position: absolute; display: none; gap: 10px; z-index: 100; pointer-events: none; }
+.tab-btn { 
+    pointer-events: auto; 
+    background: rgba(15, 23, 42, 0.7); 
+    border: 1px solid rgba(255,255,255,0.1); 
+    border-radius: 30px; 
+    color: #cbd5e1; 
+    cursor: pointer; 
+    text-align: center; 
+    transition: 0.3s; 
+    padding: 6px 18px; /* ลด Padding ให้บางลง */
+    font-weight: 500; 
+    font-size: 0.95rem; /* ลดขนาดฟอนต์นิดนึง */
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3); 
+    backdrop-filter: blur(10px); 
+    white-space: nowrap; /* 🌟 บังคับห้ามตัดขึ้นบรรทัดใหม่เด็ดขาด */
+}
+.tab-btn:hover { background: rgba(255, 255, 255, 0.1); color: white; transform: translateY(-2px); }
+.tab-btn.active { background: var(--primary); border-color: var(--primary); color: white; box-shadow: 0 8px 25px rgba(255, 71, 87, 0.4); transform: translateY(-2px); }
+
+/* 🌟 ปรับปรุงใหม่: เมนูย่อย (แถบขวา) */
+.menu { right: 30px; top: 50%; transform: translateY(-50%); flex-direction: column; position: absolute; display: none; gap: 4px; z-index: 100; pointer-events: auto; background: rgba(15, 23, 42, 0.6); padding: 10px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(15px); box-shadow: 0 10px 30px rgba(0,0,0,0.4); min-width: 180px; }
+.menu-item { background: transparent; border: none; border-radius: 8px; color: #94a3b8; cursor: pointer; text-align: right; transition: 0.3s; padding: 10px 16px; font-size: 0.9rem; width: 100%; border-right: 4px solid transparent; font-family: 'Kanit'; }
+.menu-item:hover { background: rgba(255, 255, 255, 0.05); color: white; }
+.menu-item.active { background: linear-gradient(90deg, rgba(255,71,87,0) 0%, rgba(255,71,87,0.15) 100%); color: white; font-weight: 500; border-right: 4px solid var(--primary); }
 
 .info-panel { position: absolute; top: 50%; left: 30px; transform: translateY(-50%); width: 380px; background: var(--glass); border-radius: 24px; border: 1px solid var(--border); pointer-events: auto; z-index: 10; padding: 24px; backdrop-filter: blur(10px); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-.tabs { top: 80px; left: 50%; transform: translateX(-50%); flex-direction: row; }
-.menu { right: 30px; top: 50%; transform: translateY(-50%); flex-direction: column; }
-.toggle-mode-btn { position: absolute; top: 80px; right: 20px; background: rgba(15, 23, 42, 0.9); color: white; border: 1px solid var(--primary); border-radius: 12px; padding: 10px 16px; z-index: 200; cursor: pointer; display: none; transition: 0.3s; }
+.toggle-mode-btn { position: absolute; top: 80px; right: 20px; background: rgba(15, 23, 42, 0.9); color: white; border: 1px solid var(--primary); border-radius: 12px; padding: 8px 14px; font-size: 0.9rem; z-index: 200; cursor: pointer; display: none; transition: 0.3s; }
 .toggle-mode-btn:hover { background: var(--primary); }
 
 /* =========================================
@@ -108,16 +129,21 @@ model-viewer { width:100%; height:calc(100vh - 60px); margin-top: 60px; --poster
     .header-btn { padding: 0; width: 42px; height: 42px; border-radius: 50%; justify-content: center; font-size: 1.2rem; background: rgba(15, 23, 42, 0.8); }
     .btn-text { display: none; } 
 
-    .tabs { top: 75px; width: 95%; overflow-x: auto; justify-content: flex-start; padding-bottom: 5px; }
+    /* ปรับเมนูหลักให้เลื่อนได้ในมือถือ */
+    .tabs { top: 75px; width: 95%; overflow-x: auto; justify-content: flex-start; padding-bottom: 10px; }
     .tabs::-webkit-scrollbar { display: none; }
-    .tab-btn { white-space: nowrap; font-size: 0.85rem; padding: 8px 15px; flex-shrink: 0; }
-    .menu { top: auto; bottom: 20px; right: 50%; transform: translateX(50%); flex-direction: row; width: 95%; overflow-x: auto; }
+    .tab-btn { white-space: nowrap; font-size: 0.85rem; padding: 6px 15px; flex-shrink: 0; transform: none !important; }
+    
+    /* ปรับเมนูย่อยให้เป็นแถบเลื่อนแนวนอนติดขอบล่าง */
+    .menu { top: auto; bottom: 20px; right: 50%; transform: translateX(50%); flex-direction: row; width: 95%; overflow-x: auto; padding: 8px; border-radius: 16px; justify-content: flex-start; }
     .menu::-webkit-scrollbar { display: none; }
-    .menu-item { white-space: nowrap; font-size: 0.85rem; padding: 8px 15px; flex-shrink: 0; }
+    .menu-item { white-space: nowrap; font-size: 0.85rem; padding: 8px 12px; flex-shrink: 0; text-align: center; border-right: none; border-bottom: 3px solid transparent; min-width: auto; }
+    .menu-item.active { background: linear-gradient(180deg, rgba(255,71,87,0) 0%, rgba(255,71,87,0.15) 100%); border-right: none; border-bottom: 3px solid var(--primary); }
+
     .info-panel { top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; padding: 15px; max-height: 40vh; overflow-y: auto; background: rgba(15, 23, 42, 0.95); }
     .part-info-card { top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-height: 50vh; overflow-y: auto; }
     @keyframes slideInRight { from { opacity: 0; transform: translate(-50%, -40%); } to { opacity: 1; transform: translate(-50%, -50%); } }
-    .toggle-mode-btn { top: 130px; right: 10px; font-size: 0.8rem; padding: 8px 12px; }
+    .toggle-mode-btn { top: 125px; right: 10px; font-size: 0.8rem; padding: 8px 12px; }
     .fs-icon-btn { top: 15px; right: 15px; width: 40px; height: 40px; font-size: 1rem; }
 }
 </style>
@@ -139,8 +165,6 @@ model-viewer { width:100%; height:calc(100vh - 60px); margin-top: 60px; --poster
       <button class="close-modal-btn" onclick="closeModals()" style="background: #475569; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">ปิดหน้าต่าง</button>
     </div>
 </div>
-
-<div id="load-shell"><div id="load-bar"></div></div>
 
 <div id="home" class="home">
   <button class="fs-icon-btn fs-toggle" onclick="toggleFullScreen()"></button>
@@ -203,6 +227,8 @@ model-viewer { width:100%; height:calc(100vh - 60px); margin-top: 60px; --poster
 </div>
 
 <main class="main" id="mainArea">
+  <div id="load-shell"><div id="load-bar"></div></div>
+  
   <nav class="tabs" id="tabs"></nav>
   <model-viewer id="viewer" autoplay camera-controls auto-rotate disable-tap shadow-intensity="1" exposure="1.2" environment-image="neutral"></model-viewer>
   <button id="toggleModeBtn" class="toggle-mode-btn" onclick="toggleModelMode()">👁️ ดูแบบเจาะลึก</button>
@@ -256,7 +282,6 @@ db.collection("database").doc("anatomy").get()
     document.getElementById("loadingText").textContent = "ไม่สามารถเชื่อมต่อฐานข้อมูลได้ กรุณาไปเพิ่มข้อมูลที่หน้า Admin ก่อนครับ";
     document.getElementById("loadingText").style.color = "#ef4444";
 });
-
 
 const viewer = document.getElementById("viewer");
 viewer.addEventListener('load', () => {
@@ -563,16 +588,12 @@ function showResult() {
 
 function closeQuiz() { clearInterval(timerInterval); quizPage.style.display = "none"; home.style.display = "flex"; }
 
-// ---------------------------------------------------------
-// 🌟 3. ระบบสลับภาพวาด SVG และแสดงไอคอน Emoji ปกติ
-// ---------------------------------------------------------
-const svgExpand = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" style="display: inline-block; vertical-align: middle;"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>`;
-
-const svgCollapse = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" style="display: inline-block; vertical-align: middle;"><polyline points="4 14 10 14 10 20"></polyline><polyline points="20 10 14 10 14 4"></polyline><line x1="14" y1="10" x2="21" y2="3"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>`;
+const svgExpand = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" style="display: inline-block; vertical-align: middle;"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>`;
+const svgCollapse = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" style="display: inline-block; vertical-align: middle;"><polyline points="4 14 10 14 10 20"></polyline><polyline points="20 10 14 10 14 4"></polyline><line x1="14" y1="10" x2="21" y2="3"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>`;
 
 function updateFsButtons(isFull) {
     document.querySelectorAll(".fs-text-btn").forEach(btn => {
-        btn.innerHTML = isFull ? svgCollapse + " <span class='btn-text'>ย่อหน้าจอ</span>" : svgExpand + " <span class='btn-text'>ขยายเต็มจอ</span>";
+        btn.innerHTML = isFull ? svgCollapse + "<span class='btn-text' style='margin-left:6px;'>ย่อหน้าจอ</span>" : svgExpand + "<span class='btn-text' style='margin-left:6px;'>ขยายเต็มจอ</span>";
     });
     document.querySelectorAll(".fs-icon-btn").forEach(btn => {
         btn.innerHTML = isFull ? svgCollapse : svgExpand;
@@ -629,11 +650,11 @@ function toggleUI() {
     const body = document.body; const btn = document.getElementById("toggleUIBtn");
     body.classList.toggle("ui-hidden");
     if (body.classList.contains("ui-hidden")) { 
-        btn.innerHTML = "👁️‍🗨️ <span class='btn-text'>แสดง UI</span>"; 
+        btn.innerHTML = "👁️‍🗨️<span class='btn-text' style='margin-left:4px;'>แสดง UI</span>"; 
         btn.style.borderColor = "var(--primary)"; btn.style.color = "var(--primary)"; 
     } 
     else { 
-        btn.innerHTML = "👁️ <span class='btn-text'>ซ่อน UI</span>"; 
+        btn.innerHTML = "👁️<span class='btn-text' style='margin-left:4px;'>ซ่อน UI</span>"; 
         btn.style.borderColor = "var(--border)"; btn.style.color = "white"; 
     }
 }
