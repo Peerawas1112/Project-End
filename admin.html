@@ -18,17 +18,19 @@
     <style>
         body { font-family: 'Kanit', sans-serif; background: #020617; }
         .jsoneditor-menu { background-color: #3b82f6 !important; border-bottom: none !important; }
-        .jsoneditor { border: 1px solid #334155 !important; border-radius: 8px; }
-        .jsoneditor-tree { background: #ffffff !important; }
+        .jsoneditor { border: none !important; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .jsoneditor-tree { background: #f8fafc !important; padding: 20px; }
+        .jsoneditor-field, .jsoneditor-value { font-family: 'Kanit', sans-serif !important; font-size: 1rem !important; }
+        .jsoneditor-value { border: 1px solid #cbd5e1 !important; border-radius: 6px; padding: 4px 8px !important; background: white; }
     </style>
 </head>
-<body class="text-white h-screen flex flex-col">
+<body class="text-white h-screen flex flex-col overflow-hidden">
 
-    <div id="loginPage" class="flex flex-col items-center justify-center h-full p-6">
+    <div id="loginPage" class="flex flex-col items-center justify-center h-full p-6 bg-slate-900 absolute inset-0 z-50">
         <div class="bg-slate-800 p-8 rounded-3xl shadow-2xl w-full max-w-md text-center border border-slate-700">
             <div class="text-5xl mb-4">🔐</div>
             <h1 class="text-3xl font-bold text-rose-500 mb-2">BioLens Admin</h1>
-            <p class="text-slate-400 mb-8">กรุณาเข้าสู่ระบบเพื่อจัดการข้อมูล</p>
+            <p class="text-slate-400 mb-8">เข้าสู่ระบบเพื่อจัดการเนื้อหาบทเรียน</p>
             
             <div class="space-y-4">
                 <input type="email" id="email" class="w-full p-4 rounded-2xl bg-slate-900 border border-slate-600 text-white outline-none focus:border-blue-500 transition-all" placeholder="อีเมลแอดมิน">
@@ -36,29 +38,60 @@
                 <button onclick="login()" class="w-full bg-blue-600 hover:bg-blue-500 transition-all p-4 rounded-2xl text-white font-bold text-lg shadow-lg shadow-blue-900/20">เข้าสู่ระบบ</button>
             </div>
             <p id="errorMsg" class="text-red-400 mt-4 text-sm hidden">❌ อีเมลหรือรหัสผ่านไม่ถูกต้อง!</p>
+
+            <div class="mt-8 pt-6 border-t border-slate-700">
+                <button onclick="window.location.href='index.html'" class="text-slate-400 hover:text-white transition-colors text-sm flex items-center justify-center gap-2 w-full p-2">
+                    <span>🔙</span> กลับไปหน้าแอปพลิเคชัน (Home)
+                </button>
+            </div>
         </div>
     </div>
 
-    <div id="dashboard" class="hidden flex-col h-full">
-        <header class="bg-slate-800 p-4 flex flex-wrap justify-between items-center border-b border-slate-700 gap-4">
-            <div class="flex items-center gap-3">
-                <span class="text-2xl">⚙️</span>
-                <h1 class="text-xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">Admin Dashboard</h1>
-            </div>
+    <header class="bg-slate-800 p-4 flex justify-between items-center border-b border-slate-700 z-10 shrink-0">
+        <div class="flex items-center gap-3">
+            <span class="text-2xl">⚙️</span>
+            <h1 class="text-xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">Admin Dashboard</h1>
+        </div>
+        <div class="flex gap-2">
+            <button onclick="syncInitialData()" class="bg-amber-600 hover:bg-amber-500 px-4 py-2 rounded-xl transition text-sm font-medium hidden" id="btnSync">📥 อัปโหลด JSON ขึ้นคลาวด์</button>
             
-            <div class="flex flex-wrap gap-2">
-                <button onclick="syncInitialData()" class="bg-amber-600 hover:bg-amber-500 px-4 py-2 rounded-xl transition text-sm font-medium">📥 ดึงข้อมูลจากไฟล์ JSON</button>
-                <button onclick="saveData()" class="bg-emerald-600 hover:bg-emerald-500 px-6 py-2 rounded-xl transition font-bold shadow-lg shadow-emerald-900/20">💾 บันทึกการแก้ไข (Save)</button>
-                <button onclick="logout()" class="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-xl transition text-sm">🚪 ออกจากระบบ</button>
-            </div>
-        </header>
+            <button onclick="window.location.href='index.html'" class="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-xl transition text-sm flex items-center gap-2">
+                🏠 กลับหน้าหลักแอป
+            </button>
+
+            <button onclick="logout()" class="bg-rose-600 hover:bg-rose-500 px-4 py-2 rounded-xl transition text-sm shadow-lg shadow-rose-900/20">🚪 ออกจากระบบ</button>
+        </div>
+    </header>
+
+    <div id="dashboard" class="hidden flex-row h-full overflow-hidden">
         
-        <div class="p-4 flex-grow overflow-hidden bg-slate-900">
-            <div class="flex justify-between items-center mb-2">
-                <p class="text-slate-400 text-sm">💡 เคล็ดลับ: คลิกที่ลูกศรเพื่อกางข้อมูลออก แล้วดับเบิลคลิกที่ข้อความเพื่อแก้ไข</p>
-                <span id="status" class="text-xs text-emerald-400">เชื่อมต่อคลาวด์สำเร็จ</span>
+        <div class="w-1/3 max-w-sm bg-slate-800 border-r border-slate-700 p-4 overflow-y-auto shrink-0 flex flex-col">
+            <h2 class="text-lg font-bold text-white mb-4 border-b border-slate-600 pb-2">📂 เลือกบทเรียนที่ต้องการแก้ไข</h2>
+            <div id="sidebarMenu" class="flex flex-col gap-4">
+                </div>
+        </div>
+
+        <div class="w-2/3 flex-grow bg-slate-900 p-6 flex flex-col">
+            
+            <div id="welcomeScreen" class="flex flex-col items-center justify-center h-full text-slate-500">
+                <span class="text-6xl mb-4">👈</span>
+                <p class="text-xl">กรุณาเลือกเนื้อหาจากเมนูด้านซ้ายเพื่อเริ่มแก้ไข</p>
             </div>
-            <div id="editor" class="w-full h-[calc(100%-2rem)] shadow-2xl"></div>
+
+            <div id="editorScreen" class="hidden flex-col h-full">
+                <div class="flex justify-between items-center mb-4 shrink-0">
+                    <div>
+                        <h2 id="editingTitle" class="text-2xl font-bold text-emerald-400">ชื่ออวัยวะ</h2>
+                        <p class="text-slate-400 text-sm">แก้ไขข้อมูล เสร็จแล้วกดปุ่มบันทึกด้านขวา 👉</p>
+                    </div>
+                    <button onclick="saveSpecificItem()" class="bg-emerald-600 hover:bg-emerald-500 px-8 py-3 rounded-xl transition font-bold text-lg shadow-lg shadow-emerald-900/40">💾 บันทึกการเปลี่ยนแปลง</button>
+                </div>
+                
+                <div class="flex-grow bg-white rounded-xl shadow-2xl overflow-hidden relative">
+                    <div id="editor" class="w-full h-full"></div>
+                </div>
+            </div>
+
         </div>
     </div>
 
@@ -77,12 +110,17 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// --- 2. ตั้งค่า JSON Editor ---
+let globalDatabase = null; 
+let editingSysIndex = null;
+let editingItemIndex = null;
+
+// --- 2. ตั้งค่า Form Editor ---
 const container = document.getElementById("editor");
 const options = {
-    mode: 'tree',
-    modes: ['tree', 'code', 'view'], 
-    name: 'Anatomy_Data'
+    mode: 'form', 
+    search: false, 
+    navigationBar: false,
+    mainMenuBar: false,
 };
 const editor = new JSONEditor(container, options);
 
@@ -102,64 +140,97 @@ auth.onAuthStateChanged(user => {
 function login() {
     const e = document.getElementById('email').value;
     const p = document.getElementById('pass').value;
-    const errorMsg = document.getElementById('errorMsg');
-    
-    auth.signInWithEmailAndPassword(e, p)
-        .catch(err => {
-            errorMsg.classList.remove('hidden');
-            console.error(err);
-        });
+    auth.signInWithEmailAndPassword(e, p).catch(err => {
+        document.getElementById('errorMsg').classList.remove('hidden');
+    });
 }
 
 function logout() {
     if(confirm("ยืนยันการออกจากระบบ?")) auth.signOut();
 }
 
-// --- 4. ฟังก์ชันจัดการข้อมูล ---
-
-// ดึงข้อมูลจาก Firebase มาโชว์
+// --- 4. ดึงข้อมูลและสร้างเมนู ---
 function loadDataFromCloud() {
-    document.getElementById('status').textContent = "กำลังโหลดข้อมูล...";
     db.collection("database").doc("anatomy").get().then(doc => {
         if(doc.exists) {
-            editor.set(doc.data());
-            document.getElementById('status').textContent = "โหลดข้อมูลล่าสุดจาก Cloud แล้ว";
+            globalDatabase = doc.data();
+            renderSidebar();
+            document.getElementById('btnSync').classList.add('hidden');
         } else {
-            document.getElementById('status').textContent = "ยังไม่มีข้อมูลใน Cloud";
-            alert("⚠️ ยังไม่มีข้อมูลบน Cloud! โปรดกดปุ่มสีส้มเพื่อดึงข้อมูลจากไฟล์ JSON เดิมขึ้นระบบครับ");
+            alert("⚠️ ยังไม่มีข้อมูลบน Cloud! โปรดกดปุ่มสีส้มเพื่ออัปโหลด JSON ขึ้นระบบครับ");
+            document.getElementById('btnSync').classList.remove('hidden');
         }
     });
 }
 
-// ดึงไฟล์ JSON เดิมขึ้นระบบ (ทำแค่ครั้งแรกครั้งเดียว)
-function syncInitialData() {
-    if(confirm("ระบบจะดึงข้อมูลจากไฟล์ anatomy_data.json ในเครื่องของคุณขึ้นไปเก็บไว้บน Firebase Cloud ยืนยันหรือไม่?")) {
-        fetch("anatomy_data.json")
-            .then(r => r.json())
-            .then(data => {
-                db.collection("database").doc("anatomy").set(data).then(() => {
-                    alert("✅ อัปโหลดสำเร็จ! ข้อมูลถูกย้ายไปอยู่บน Cloud เรียบร้อยแล้ว");
-                    editor.set(data);
-                });
-            })
-            .catch(e => alert("❌ ไม่พบไฟล์ anatomy_data.json หรือเกิดข้อผิดพลาดในการอ่านไฟล์"));
-    }
+function renderSidebar() {
+    const menuContainer = document.getElementById('sidebarMenu');
+    menuContainer.innerHTML = '';
+
+    globalDatabase.systems.forEach((sys, sysIdx) => {
+        let section = `<div class="mb-4">
+            <h3 class="text-blue-400 font-bold mb-2 text-sm uppercase tracking-wider">${sys.category}</h3>
+            <div class="flex flex-col gap-1">`;
+        
+        sys.items.forEach((item, itemIdx) => {
+            section += `
+                <button onclick="editItem(${sysIdx}, ${itemIdx})" id="btn-${sysIdx}-${itemIdx}" class="text-left bg-slate-700 hover:bg-slate-600 px-4 py-3 rounded-xl text-sm transition text-slate-200 menu-btn">
+                    📄 ${item.name}
+                </button>`;
+        });
+        
+        section += `</div></div>`;
+        menuContainer.innerHTML += section;
+    });
 }
 
-// บันทึกข้อมูลที่แก้ไขแล้วกลับขึ้น Firebase
-function saveData() {
+function editItem(sysIdx, itemIdx) {
+    editingSysIndex = sysIdx;
+    editingItemIndex = itemIdx;
+
+    document.querySelectorAll('.menu-btn').forEach(btn => btn.classList.remove('bg-blue-600', 'text-white'));
+    document.querySelectorAll('.menu-btn').forEach(btn => btn.classList.add('bg-slate-700', 'text-slate-200'));
+    const activeBtn = document.getElementById(`btn-${sysIdx}-${itemIdx}`);
+    activeBtn.classList.remove('bg-slate-700', 'text-slate-200');
+    activeBtn.classList.add('bg-blue-600', 'text-white');
+
+    const itemData = globalDatabase.systems[sysIdx].items[itemIdx];
+    
+    document.getElementById('welcomeScreen').classList.add('hidden');
+    document.getElementById('editorScreen').classList.remove('hidden');
+    document.getElementById('editorScreen').classList.add('flex');
+    
+    document.getElementById('editingTitle').textContent = `แก้ไข: ${itemData.name}`;
+
+    editor.set(itemData);
+    editor.expandAll(); 
+}
+
+function saveSpecificItem() {
     try {
-        const updatedData = editor.get();
-        document.getElementById('status').textContent = "กำลังบันทึก...";
+        const updatedItem = editor.get(); 
         
-        db.collection("database").doc("anatomy").set(updatedData).then(() => {
-            alert("🎉 บันทึกสำเร็จ! ข้อมูลในแอปหน้าหลักจะเปลี่ยนตามทันทีโดยไม่ต้องแก้โค้ด");
-            document.getElementById('status').textContent = "บันทึกสำเร็จเมื่อ " + new Date().toLocaleTimeString();
+        globalDatabase.systems[editingSysIndex].items[editingItemIndex] = updatedItem;
+        
+        db.collection("database").doc("anatomy").set(globalDatabase).then(() => {
+            alert("🎉 บันทึกสำเร็จ! ข้อมูลในแอปหน้าหลักอัปเดตเรียบร้อยแล้ว");
+            renderSidebar(); 
         }).catch(e => {
             alert("❌ เกิดข้อผิดพลาดในการบันทึก: " + e.message);
         });
     } catch (err) {
         alert("❌ ข้อมูลมีข้อผิดพลาด โปรดตรวจสอบรูปแบบให้ถูกต้อง");
+    }
+}
+
+function syncInitialData() {
+    if(confirm("ดึงข้อมูลจากไฟล์ anatomy_data.json ขึ้น Firebase ยืนยันหรือไม่?")) {
+        fetch("anatomy_data.json").then(r => r.json()).then(data => {
+            db.collection("database").doc("anatomy").set(data).then(() => {
+                alert("✅ อัปโหลดสำเร็จ!");
+                loadDataFromCloud();
+            });
+        });
     }
 }
 </script>
