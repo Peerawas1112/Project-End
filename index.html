@@ -56,28 +56,11 @@ model-viewer { width:100%; height:calc(100vh - 60px); margin-top: 60px; --poster
 .header-btn { background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border); font-size: 0.85rem; padding: 6px 14px; color: white; transition: 0.3s; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; font-family: 'Kanit'; }
 .header-btn:hover { background: rgba(255, 255, 255, 0.15); }
 
-/* 🌟 ปรับปรุงใหม่: เมนูหลัก (แถบบน) บังคับบรรทัดเดียวและกระชับขึ้น */
 .tabs { top: 80px; left: 50%; transform: translateX(-50%); flex-direction: row; position: absolute; display: none; gap: 10px; z-index: 100; pointer-events: none; }
-.tab-btn { 
-    pointer-events: auto; 
-    background: rgba(15, 23, 42, 0.7); 
-    border: 1px solid rgba(255,255,255,0.1); 
-    border-radius: 30px; 
-    color: #cbd5e1; 
-    cursor: pointer; 
-    text-align: center; 
-    transition: 0.3s; 
-    padding: 6px 18px; /* ลด Padding ให้บางลง */
-    font-weight: 500; 
-    font-size: 0.95rem; /* ลดขนาดฟอนต์นิดนึง */
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3); 
-    backdrop-filter: blur(10px); 
-    white-space: nowrap; /* 🌟 บังคับห้ามตัดขึ้นบรรทัดใหม่เด็ดขาด */
-}
+.tab-btn { pointer-events: auto; background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255,255,255,0.1); border-radius: 30px; color: #cbd5e1; cursor: pointer; text-align: center; transition: 0.3s; padding: 6px 18px; font-weight: 500; font-size: 0.95rem; box-shadow: 0 4px 15px rgba(0,0,0,0.3); backdrop-filter: blur(10px); white-space: nowrap; }
 .tab-btn:hover { background: rgba(255, 255, 255, 0.1); color: white; transform: translateY(-2px); }
 .tab-btn.active { background: var(--primary); border-color: var(--primary); color: white; box-shadow: 0 8px 25px rgba(255, 71, 87, 0.4); transform: translateY(-2px); }
 
-/* 🌟 ปรับปรุงใหม่: เมนูย่อย (แถบขวา) */
 .menu { right: 30px; top: 50%; transform: translateY(-50%); flex-direction: column; position: absolute; display: none; gap: 4px; z-index: 100; pointer-events: auto; background: rgba(15, 23, 42, 0.6); padding: 10px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(15px); box-shadow: 0 10px 30px rgba(0,0,0,0.4); min-width: 180px; }
 .menu-item { background: transparent; border: none; border-radius: 8px; color: #94a3b8; cursor: pointer; text-align: right; transition: 0.3s; padding: 10px 16px; font-size: 0.9rem; width: 100%; border-right: 4px solid transparent; font-family: 'Kanit'; }
 .menu-item:hover { background: rgba(255, 255, 255, 0.05); color: white; }
@@ -129,12 +112,10 @@ model-viewer { width:100%; height:calc(100vh - 60px); margin-top: 60px; --poster
     .header-btn { padding: 0; width: 42px; height: 42px; border-radius: 50%; justify-content: center; font-size: 1.2rem; background: rgba(15, 23, 42, 0.8); }
     .btn-text { display: none; } 
 
-    /* ปรับเมนูหลักให้เลื่อนได้ในมือถือ */
     .tabs { top: 75px; width: 95%; overflow-x: auto; justify-content: flex-start; padding-bottom: 10px; }
     .tabs::-webkit-scrollbar { display: none; }
     .tab-btn { white-space: nowrap; font-size: 0.85rem; padding: 6px 15px; flex-shrink: 0; transform: none !important; }
     
-    /* ปรับเมนูย่อยให้เป็นแถบเลื่อนแนวนอนติดขอบล่าง */
     .menu { top: auto; bottom: 20px; right: 50%; transform: translateX(50%); flex-direction: row; width: 95%; overflow-x: auto; padding: 8px; border-radius: 16px; justify-content: flex-start; }
     .menu::-webkit-scrollbar { display: none; }
     .menu-item { white-space: nowrap; font-size: 0.85rem; padding: 8px 12px; flex-shrink: 0; text-align: center; border-right: none; border-bottom: 3px solid transparent; min-width: auto; }
@@ -171,7 +152,12 @@ model-viewer { width:100%; height:calc(100vh - 60px); margin-top: 60px; --poster
 
   <div class="box">
     <h1 style="margin-bottom: 0px; color: var(--primary); font-size: 2.2rem;">BioLens AR</h1>
-    <h2 style="font-size: 1.1rem; color: #cbd5e1; margin-top: 5px; margin-bottom: 15px; font-weight: 400;">ท่องโลกกายวิภาคศาสตร์ | วิทยาศาสตร์ ม.2</h2>
+    
+    <h2 style="font-size: 1.1rem; color: #cbd5e1; margin-top: 5px; margin-bottom: 8px; font-weight: 400;">ท่องโลกกายวิภาคศาสตร์ | วิทยาศาสตร์ ม.2</h2>
+    <p style="font-size: 0.85rem; color: #94a3b8; margin-top: 0; margin-bottom: 25px; font-weight: 300; line-height: 1.6;">
+        ระบบหมุนเวียนเลือด • ระบบหายใจ • ระบบขับถ่าย<br>
+        ระบบประสาท • ระบบสืบพันธุ์
+    </p>
     
     <p id="loadingText" style="color: #fbbf24; margin-bottom: 25px;">กำลังโหลดข้อมูลบทเรียน...</p>
     
