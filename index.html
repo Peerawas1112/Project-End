@@ -41,7 +41,7 @@ button:disabled { background: #475569; opacity: 0.5; cursor: not-allowed; }
 
 .grade-text { font-size: 4rem; font-weight: bold; color: var(--primary); margin: 10px 0; }
 
-.fs-icon-btn { position: absolute; top: 25px; right: 25px; width: 50px; height: 50px; background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 50%; color: white; font-size: 1.3rem; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: all 0.3s ease; backdrop-filter: blur(5px); z-index: 2000; box-shadow: 0 4px 15px rgba(0,0,0,0.3); padding: 0; }
+.fs-icon-btn { position: absolute; top: 25px; right: 25px; width: 50px; height: 50px; background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 50%; color: white; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: all 0.3s ease; backdrop-filter: blur(5px); z-index: 2000; box-shadow: 0 4px 15px rgba(0,0,0,0.3); padding: 0; }
 .fs-icon-btn:hover { background: var(--primary); border-color: var(--primary); transform: scale(1.1); }
 
 /* =========================================
@@ -52,9 +52,8 @@ model-viewer { width:100%; height:calc(100vh - 60px); margin-top: 60px; --poster
 
 .app-header { position: absolute; top:0; left:0; width:100%; height: 60px; display: none; align-items: center; justify-content: space-between; padding: 0 20px; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); z-index: 500; }
 
-/* 🌟 สไตล์ใหม่สำหรับกลุ่มปุ่มเมนูบน */
 .header-buttons { display: flex; gap: 8px; align-items: center; }
-.header-btn { background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border); font-size: 0.85rem; padding: 6px 14px; color: white; transition: 0.3s; border-radius: 12px; display: flex; align-items: center; gap: 6px; white-space: nowrap; font-family: 'Kanit'; }
+.header-btn { background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border); font-size: 0.85rem; padding: 6px 14px; color: white; transition: 0.3s; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; font-family: 'Kanit'; }
 .header-btn:hover { background: rgba(255, 255, 255, 0.15); }
 
 .tabs, .menu { position: absolute; display: none; gap: 10px; z-index: 100; pointer-events: none; }
@@ -93,7 +92,7 @@ model-viewer { width:100%; height:calc(100vh - 60px); margin-top: 60px; --poster
 /* =========================================
    5. ซ่อน UI (Focus Mode)
    ========================================= */
-.info-panel, .menu, .tabs, .toggle-mode-btn, .app-header, .app-header span, .part-info-card { transition: all 0.3s ease-in-out; }
+.info-panel, .menu, .tabs, .toggle-mode-btn, .app-header, .app-header span.title-text, .part-info-card { transition: all 0.3s ease-in-out; }
 .ui-hidden .info-panel, .ui-hidden .menu, .ui-hidden .tabs, .ui-hidden .toggle-mode-btn { opacity: 0; pointer-events: none; visibility: hidden; }
 .ui-hidden .app-header { background: transparent; backdrop-filter: none; border-bottom: transparent; }
 .ui-hidden .app-header .title-text { opacity: 0; }
@@ -102,14 +101,12 @@ model-viewer { width:100%; height:calc(100vh - 60px); margin-top: 60px; --poster
    📱 6. โหมดมือถือ (Mobile Responsive)
    ========================================= */
 @media (max-width: 768px) {
-    /* 🌟 จัดแถบบนใหม่ให้กระชับ ไม่ล้น */
     .app-header { padding: 0 10px; height: 60px; justify-content: center; }
-    .title-text { display: none; } /* ซ่อนคำว่า BioLens AR ไปเลย */
+    .title-text { display: none; } 
     .header-buttons { gap: 12px; justify-content: center; width: 100%; }
     
-    /* 🌟 เปลี่ยนปุ่มยาวๆ ให้เป็นปุ่มวงกลมมินิมอล */
     .header-btn { padding: 0; width: 42px; height: 42px; border-radius: 50%; justify-content: center; font-size: 1.2rem; background: rgba(15, 23, 42, 0.8); }
-    .btn-text { display: none; } /* ซ่อนตัวหนังสือทั้งหมด เหลือแค่ไอคอน */
+    .btn-text { display: none; } 
 
     .tabs { top: 75px; width: 95%; overflow-x: auto; justify-content: flex-start; padding-bottom: 5px; }
     .tabs::-webkit-scrollbar { display: none; }
@@ -146,7 +143,7 @@ model-viewer { width:100%; height:calc(100vh - 60px); margin-top: 60px; --poster
 <div id="load-shell"><div id="load-bar"></div></div>
 
 <div id="home" class="home">
-  <button class="fs-icon-btn fs-toggle" onclick="toggleFullScreen()" title="ขยายเต็มจอ">🔲</button>
+  <button class="fs-icon-btn fs-toggle" onclick="toggleFullScreen()"></button>
 
   <div class="box">
     <h1 style="margin-bottom: 0px; color: var(--primary); font-size: 2.2rem;">BioLens AR</h1>
@@ -166,7 +163,7 @@ model-viewer { width:100%; height:calc(100vh - 60px); margin-top: 60px; --poster
 </div>
 
 <div id="quizMenuPage" class="quiz-page">
-  <button class="fs-icon-btn fs-toggle" onclick="toggleFullScreen()" title="ขยายเต็มจอ">🔲</button>
+  <button class="fs-icon-btn fs-toggle" onclick="toggleFullScreen()"></button>
   
   <div class="box">
     <h2 style="color:var(--primary); margin-top:0; border-bottom: 2px solid var(--border); padding-bottom: 15px;">เมนูแบบทดสอบ</h2>
@@ -200,7 +197,7 @@ model-viewer { width:100%; height:calc(100vh - 60px); margin-top: 60px; --poster
         <button onclick="toggleInfoBox()" class="header-btn">ℹ️<span class="btn-text">ข้อมูล</span></button>
         <button onclick="resetCamera()" class="header-btn">🎯<span class="btn-text">จัดกึ่งกลาง</span></button>
         <button id="toggleUIBtn" onclick="toggleUI()" class="header-btn">👁️<span class="btn-text">ซ่อน UI</span></button>
-        <button class="fs-text-btn fs-toggle header-btn" onclick="toggleFullScreen()">🔲<span class="btn-text">ขยายเต็มจอ</span></button>
+        <button class="fs-text-btn fs-toggle header-btn" onclick="toggleFullScreen()"></button>
         <button onclick="backToHome()" class="header-btn">🏠<span class="btn-text">กลับหน้าหลัก</span></button>
     </div>
 </div>
@@ -323,7 +320,6 @@ viewer.addEventListener('progress', (e) => {
     loadBar.style.width = (e.detail.totalProgress * 100) + "%";
     if(e.detail.totalProgress === 1) setTimeout(() => { loadShell.style.display = "none"; }, 400);
 });
-
 
 function renderTabs() {
     tabs.innerHTML = data.map((s, i) => `<div class="tab-btn" id="t${i}" onclick="loadSystem(${i})">${s.category}</div>`).join("");
@@ -461,9 +457,6 @@ function shuffleArray(array) {
     return array;
 }
 
-// =========================================================
-// ระบบ Quiz 
-// =========================================================
 function showQuizMenu() { home.style.display = "none"; quizMenuPage.style.display = "flex"; }
 function closeQuizMenu() { quizMenuPage.style.display = "none"; home.style.display = "flex"; }
 
@@ -571,12 +564,26 @@ function showResult() {
 function closeQuiz() { clearInterval(timerInterval); quizPage.style.display = "none"; home.style.display = "flex"; }
 
 // ---------------------------------------------------------
-// 🌟 อัปเดต: ระบบสลับตัวอักษรบนปุ่ม
+// 🌟 3. ระบบสลับภาพวาด SVG และแสดงไอคอน Emoji ปกติ
 // ---------------------------------------------------------
+const svgExpand = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" style="display: inline-block; vertical-align: middle;"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>`;
+
+const svgCollapse = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" style="display: inline-block; vertical-align: middle;"><polyline points="4 14 10 14 10 20"></polyline><polyline points="20 10 14 10 14 4"></polyline><line x1="14" y1="10" x2="21" y2="3"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>`;
+
+function updateFsButtons(isFull) {
+    document.querySelectorAll(".fs-text-btn").forEach(btn => {
+        btn.innerHTML = isFull ? svgCollapse + " <span class='btn-text'>ย่อหน้าจอ</span>" : svgExpand + " <span class='btn-text'>ขยายเต็มจอ</span>";
+    });
+    document.querySelectorAll(".fs-icon-btn").forEach(btn => {
+        btn.innerHTML = isFull ? svgCollapse : svgExpand;
+    });
+}
+
+updateFsButtons(localStorage.getItem('isFullScreen') === 'true');
+
 window.onload = function() {
     if (localStorage.getItem('isFullScreen') === 'true') {
         tryFullScreen();
-        updateFsButtons(true);
     }
 };
 
@@ -587,11 +594,6 @@ function tryFullScreen() {
         else if (doc.webkitRequestFullscreen) { doc.webkitRequestFullscreen().catch(err => console.log(err)); }
         else if (doc.msRequestFullscreen) { doc.msRequestFullscreen().catch(err => console.log(err)); }
     }
-}
-
-function updateFsButtons(isFull) {
-    document.querySelectorAll(".fs-text-btn").forEach(btn => btn.innerHTML = isFull ? "🗗<span class='btn-text'> ย่อหน้าจอ</span>" : "🔲<span class='btn-text'> ขยายเต็มจอ</span>");
-    document.querySelectorAll(".fs-icon-btn").forEach(btn => btn.innerHTML = isFull ? "🗗" : "🔲");
 }
 
 function toggleFullScreen() {
@@ -623,15 +625,15 @@ function exitHandler() {
     }
 }
 
-// อัปเดตฟังก์ชันซ่อน UI เพื่อจัดการกับ .btn-text ด้วย
 function toggleUI() {
     const body = document.body; const btn = document.getElementById("toggleUIBtn");
     body.classList.toggle("ui-hidden");
     if (body.classList.contains("ui-hidden")) { 
-        btn.innerHTML = "👁️‍🗨️<span class='btn-text'> แสดง UI</span>"; 
+        btn.innerHTML = "👁️‍🗨️ <span class='btn-text'>แสดง UI</span>"; 
         btn.style.borderColor = "var(--primary)"; btn.style.color = "var(--primary)"; 
-    } else { 
-        btn.innerHTML = "👁️<span class='btn-text'> ซ่อน UI</span>"; 
+    } 
+    else { 
+        btn.innerHTML = "👁️ <span class='btn-text'>ซ่อน UI</span>"; 
         btn.style.borderColor = "var(--border)"; btn.style.color = "white"; 
     }
 }
