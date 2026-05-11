@@ -804,21 +804,60 @@ function closeQuiz() {
 }
 
 // ---------------------------------------------------------
-// ระบบขยายเต็มจอ
+// 🌟 อัปเดต: ระบบขยายเต็มจอ (ทำงานแบบ Global)
 // ---------------------------------------------------------
+
+// ฟังก์ชันเช็กตอนโหลดหน้าเว็บ ว่าเคยสั่งเต็มจอไว้ไหม
+window.onload = function() {
+    if (localStorage.getItem('isFullScreen') === 'true') {
+        // เบราว์เซอร์บางตัวไม่อนุญาตให้เต็มจอออโต้ถ้าผู้ใช้ยังไม่คลิก แต่เราจะพยายามสั่งเต็มจอก่อน
+        tryFullScreen();
+    }
+};
+
+// ฟังก์ชันพยายามขยายเต็มจอ
+function tryFullScreen() {
+    const doc = document.documentElement;
+    if (!document.fullscreenElement) {
+        if (doc.requestFullscreen) { doc.requestFullscreen().catch(err => console.log(err)); }
+        else if (doc.webkitRequestFullscreen) { doc.webkitRequestFullscreen().catch(err => console.log(err)); }
+        else if (doc.msRequestFullscreen) { doc.msRequestFullscreen().catch(err => console.log(err)); }
+    }
+}
+
 function toggleFullScreen() {
     const doc = document.documentElement;
     const btn = document.getElementById("fullscreenBtn");
+    
     if (!document.fullscreenElement) {
+        // 🌟 สั่งขยายเต็มจอ และบันทึกสถานะลง localStorage
         if (doc.requestFullscreen) doc.requestFullscreen();
         else if (doc.webkitRequestFullscreen) doc.webkitRequestFullscreen();
         else if (doc.msRequestFullscreen) doc.msRequestFullscreen();
+        
         btn.innerHTML = "🗗 ย่อหน้าจอ";
+        localStorage.setItem('isFullScreen', 'true');
     } else {
+        // 🌟 สั่งย่อหน้าจอ และบันทึกสถานะลง localStorage
         if (document.exitFullscreen) document.exitFullscreen();
         else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
         else if (document.msExitFullscreen) document.msExitFullscreen();
+        
         btn.innerHTML = "🔲 ขยายเต็มจอ";
+        localStorage.setItem('isFullScreen', 'false');
+    }
+}
+
+// ดักจับเหตุการณ์เผื่อผู้ใช้กดปุ่ม ESC ออกจากเต็มจอเอง
+document.addEventListener('fullscreenchange', exitHandler);
+document.addEventListener('webkitfullscreenchange', exitHandler);
+document.addEventListener('mozfullscreenchange', exitHandler);
+document.addEventListener('MSFullscreenChange', exitHandler);
+
+function exitHandler() {
+    if (!document.fullscreenElement && !document.webkitIsFullScreen && !document.mozFullScreen && !document.msFullscreenElement) {
+        document.getElementById("fullscreenBtn").innerHTML = "🔲 ขยายเต็มจอ";
+        localStorage.setItem('isFullScreen', 'false');
     }
 }
 

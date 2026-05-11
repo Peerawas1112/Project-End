@@ -13,7 +13,17 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
 
     <style>
-        body { font-family: 'Kanit', sans-serif; background: #0f172a; color: #f8fafc; overflow: hidden; }
+        /* บังคับ html และ body ให้เต็มจอ 100% ลบขอบขาวทิ้ง */
+        html, body { 
+            height: 100%; 
+            margin: 0; 
+            padding: 0; 
+            font-family: 'Kanit', sans-serif; 
+            background: #0f172a; 
+            color: #f8fafc; 
+            overflow: hidden; 
+        }
+        
         .input-box { background: #1e293b; border: 1px solid #334155; color: white; border-radius: 8px; padding: 10px; width: 100%; transition: border 0.2s; outline: none; }
         .input-box:focus { border-color: #3b82f6; }
         .label-text { font-size: 0.9rem; color: #94a3b8; font-weight: 500; margin-bottom: 4px; display: block; }
@@ -25,9 +35,9 @@
         ::-webkit-scrollbar-thumb:hover { background: #475569; }
     </style>
 </head>
-<body class="h-screen flex flex-col">
+<body class="h-screen w-screen flex flex-col m-0 p-0">
 
-    <div id="loginPage" class="flex flex-col items-center justify-center h-full p-6 bg-slate-900 absolute inset-0 z-50">
+    <div id="loginPage" class="flex flex-col items-center justify-center h-full w-full p-6 bg-slate-900 absolute inset-0 z-50">
         <div class="bg-slate-800 p-8 rounded-3xl shadow-2xl w-full max-w-md text-center border border-slate-700">
             <div class="text-5xl mb-4">🔐</div>
             <h1 class="text-3xl font-bold text-rose-500 mb-2">BioLens Admin</h1>
@@ -140,7 +150,7 @@ const db = firebase.firestore();
 let globalDatabase = null;
 let currentSysIndex = null;
 let currentItemIndex = null;
-let currentItemData = null; // เก็บข้อมูลชั่วคราวก่อนกด Save
+let currentItemData = null; 
 
 // --- 2. ระบบจัดการ Login ---
 auth.onAuthStateChanged(user => {
@@ -213,12 +223,11 @@ function renderSidebar() {
     });
 }
 
-// --- 4. การจัดการฟอร์มแก้ไข (หัวใจหลักที่ทำให้ใช้ง่าย) ---
+// --- 4. การจัดการฟอร์มแก้ไข ---
 function editItem(sysIdx, itemIdx) {
     currentSysIndex = sysIdx;
     currentItemIndex = itemIdx;
     
-    // Copy ข้อมูลมาพักไว้ เพื่อไม่ให้แก้ของจริงจนกว่าจะกด Save
     currentItemData = JSON.parse(JSON.stringify(globalDatabase.systems[sysIdx].items[itemIdx]));
 
     document.querySelectorAll('.menu-btn').forEach(btn => btn.classList.remove('bg-blue-600', 'text-white', 'border-blue-500'));
@@ -229,7 +238,6 @@ function editItem(sysIdx, itemIdx) {
 
     document.getElementById('welcomeScreen').classList.add('hidden');
     
-    // ใส่ข้อมูลลงฟอร์ม
     document.getElementById('editingTitle').textContent = `แก้ไข: ${currentItemData.name}`;
     document.getElementById('frmName').value = currentItemData.name || '';
     document.getElementById('frmModelPath').value = currentItemData.model_file || '';
@@ -239,12 +247,10 @@ function editItem(sysIdx, itemIdx) {
     renderQuizForm();
 }
 
-// วาดฟอร์มสำหรับแก้ไขจุดคลิกบนโมเดล
 function renderClickPartsForm() {
     const container = document.getElementById('clickPartsContainer');
     container.innerHTML = '';
     
-    // ตรวจสอบว่าใช้ข้อมูลจากโหมดปกติ หรือ โหมดเจาะลึก(alt_mode)
     let partsData = currentItemData.click_parts;
     if (!partsData && currentItemData.alt_mode && currentItemData.alt_mode.click_parts) {
         partsData = currentItemData.alt_mode.click_parts;
@@ -286,7 +292,6 @@ function updatePartInfo(index, val) {
     else if (currentItemData.alt_mode) currentItemData.alt_mode.click_parts[index].info = val;
 }
 
-// วาดฟอร์มสำหรับแก้ไขข้อสอบ
 function renderQuizForm() {
     const container = document.getElementById('quizContainer');
     container.innerHTML = '';
@@ -329,27 +334,24 @@ function updateQuizQuestion(qIdx, val) { currentItemData.quiz[qIdx].question = v
 function updateQuizChoice(qIdx, cIdx, val) { currentItemData.quiz[qIdx].choices[cIdx] = val; }
 function updateQuizAnswer(qIdx, newAnsIdx) { 
     currentItemData.quiz[qIdx].answer = newAnsIdx; 
-    renderQuizForm(); // รีเฟรชกรอบสีเขียวของข้อสอบ
+    renderQuizForm(); 
 }
 
 // --- 5. กดปุ่มบันทึก ---
 function saveData() {
     if (!currentItemData) return;
 
-    // อัปเดตข้อมูลพื้นฐานจากฟอร์มลงตัวแปร
     currentItemData.name = document.getElementById('frmName').value;
     currentItemData.model_file = document.getElementById('frmModelPath').value;
     currentItemData.description = document.getElementById('frmDesc').value;
 
-    // เอาตัวแปรที่แก้ ไปทับของเดิมใน globalDatabase
     globalDatabase.systems[currentSysIndex].items[currentItemIndex] = currentItemData;
 
-    // บันทึกขึ้น Firebase
     document.getElementById('editorHeader').classList.add('opacity-50', 'pointer-events-none');
     
     db.collection("database").doc("anatomy").set(globalDatabase).then(() => {
         alert("🎉 บันทึกการแก้ไขสำเร็จ! นักเรียนจะเห็นข้อมูลใหม่ทันที");
-        renderSidebar(); // อัปเดตเมนูด้านซ้ายเผื่อมีการเปลี่ยนชื่อ
+        renderSidebar(); 
         document.getElementById('editorHeader').classList.remove('opacity-50', 'pointer-events-none');
     }).catch(e => {
         alert("❌ เกิดข้อผิดพลาดในการบันทึก: " + e.message);
