@@ -14,33 +14,32 @@
 
     <style>
         html, body { height: 100%; margin: 0; padding: 0; font-family: 'Kanit', sans-serif; background: #0f172a; color: #f8fafc; overflow: hidden; }
+        
+        /* สไตล์กล่องข้อความทั่วไป */
         .input-box { background: #1e293b; border: 1px solid #334155; color: white; border-radius: 8px; padding: 10px; width: 100%; transition: border 0.2s; outline: none; }
         .input-box:focus { border-color: #3b82f6; }
-        .label-text { font-size: 0.9rem; color: #94a3b8; font-weight: 500; margin-bottom: 4px; display: block; }
+        .label-text { font-size: 0.9rem; color: #94a3b8; font-weight: 500; margin-bottom: 6px; display: block; }
+        
+        /* สไตล์สำหรับกล่องพิมพ์ข้อความแบบใหม่ (Rich Text Editor) */
+        .rich-editor-container { border: 1px solid #334155; border-radius: 8px; background: #1e293b; overflow: hidden; transition: border 0.2s; }
+        .rich-editor-container:focus-within { border-color: #3b82f6; box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2); }
+        .rich-editor-toolbar { background: #0f172a; padding: 6px 10px; border-bottom: 1px solid #334155; display: flex; gap: 8px; align-items: center; }
+        .editor-btn { background: #334155; border: 1px solid #475569; color: white; padding: 4px 10px; border-radius: 4px; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: 0.2s; }
+        .editor-btn:hover { background: #475569; }
+        .editor-btn:active { background: #3b82f6; border-color: #3b82f6; }
+        .rich-editor-content { padding: 12px; min-height: 40px; color: white; outline: none; line-height: 1.6; }
+        .rich-editor-content b { color: #fbbf24; } /* ไฮไลต์สีตัวหนาให้ครูเห็นชัดๆ ในหน้าแอดมิน */
+        
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #0f172a; }
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #475569; }
 
         .fs-icon-btn {
-            position: absolute;
-            top: 25px;
-            right: 25px;
-            width: 50px;
-            height: 50px;
-            background: rgba(30, 41, 59, 0.7);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 50%;
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(5px);
-            z-index: 9999;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            padding: 0;
+            position: absolute; top: 25px; right: 25px; width: 50px; height: 50px;
+            background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 50%;
+            color: white; display: flex; justify-content: center; align-items: center; cursor: pointer;
+            transition: all 0.3s ease; backdrop-filter: blur(5px); z-index: 9999; box-shadow: 0 4px 15px rgba(0,0,0,0.3); padding: 0;
         }
         .fs-icon-btn:hover { background: #3b82f6; border-color: #3b82f6; transform: scale(1.1); }
     </style>
@@ -53,18 +52,15 @@
 
     <div id="loginPage" class="flex flex-col items-center justify-center h-full w-full p-6 bg-slate-900 absolute inset-0 z-50">
         <div class="bg-slate-800 p-8 rounded-3xl shadow-2xl w-full max-w-md text-center border border-slate-700 relative">
-            
             <div class="text-5xl mb-4 mt-2">🔐</div>
             <h1 class="text-3xl font-bold text-rose-500 mb-2">BioLens Admin</h1>
             <p class="text-slate-400 mb-8">เข้าสู่ระบบเพื่อจัดการเนื้อหาบทเรียน</p>
-            
             <div class="space-y-4">
-                <input type="email" id="email" class="input-box" placeholder="อีเมล">
+                <input type="email" id="email" class="input-box" placeholder="อีเมลแอดมิน">
                 <input type="password" id="pass" class="input-box" placeholder="รหัสผ่าน">
                 <button onclick="login()" class="w-full bg-blue-600 hover:bg-blue-500 transition-all p-4 rounded-xl text-white font-bold text-lg shadow-lg shadow-blue-900/20">เข้าสู่ระบบ</button>
             </div>
             <p id="errorMsg" class="text-red-400 mt-4 text-sm hidden">❌ อีเมลหรือรหัสผ่านไม่ถูกต้อง!</p>
-
             <div class="mt-8 pt-6 border-t border-slate-700">
                 <button onclick="window.location.href='index.html'" class="text-slate-400 hover:text-white transition-colors text-sm flex items-center justify-center gap-2 w-full p-2">
                     🔙 กลับไปหน้าแอปพลิเคชัน (Home)
@@ -80,7 +76,6 @@
         </div>
         <div class="flex gap-3">
             <button class="fs-icon-btn" style="position:relative; top:0; right:0; width:40px; height:40px;" onclick="toggleFullScreen()"></button>
-            
             <button onclick="syncInitialData()" class="bg-amber-600 hover:bg-amber-500 px-4 py-2 rounded-xl transition text-sm font-medium hidden" id="btnSync">📥 อัปโหลดข้อมูลเริ่มต้น</button>
             <button onclick="window.location.href='index.html'" class="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-xl transition text-sm flex items-center gap-2">🏠 กลับหน้าหลักแอป</button>
             <button onclick="logout()" class="bg-rose-600 hover:bg-rose-500 px-4 py-2 rounded-xl transition text-sm shadow-md">🚪 ออกจากระบบ</button>
@@ -102,7 +97,7 @@
             <div id="editorHeader" class="bg-slate-800 p-6 border-b border-slate-700 flex justify-between items-center shrink-0">
                 <div>
                     <h2 id="editingTitle" class="text-2xl font-bold text-blue-400">ชื่ออวัยวะ</h2>
-                    <p class="text-slate-400 text-sm mt-1">แก้ไขเนื้อหาด้านล่าง เสร็จแล้วอย่าลืมกดบันทึก</p>
+                    <p class="text-slate-400 text-sm mt-1">ลากเมาส์คลุมข้อความแล้วกดปุ่ม <b class="text-white bg-slate-700 px-1 rounded">B</b> เพื่อทำตัวหนาได้เลย</p>
                 </div>
                 <button onclick="saveData()" class="bg-emerald-600 hover:bg-emerald-500 px-8 py-3 rounded-xl transition font-bold text-white shadow-lg shadow-emerald-900/40 flex items-center gap-2">
                     💾 บันทึกการเปลี่ยนแปลง
@@ -112,9 +107,27 @@
             <div id="customEditorForm" class="flex-grow p-6 overflow-y-auto bg-slate-900">
                 <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 mb-6 shadow-sm">
                     <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">📝 ข้อมูลทั่วไป</h3>
-                    <div class="mb-4"><label class="label-text">ชื่อบทเรียน / อวัยวะ (Name)</label><input type="text" id="frmName" class="input-box text-lg font-bold text-blue-300"></div>
-                    <div class="mb-4"><label class="label-text">ลิงก์ไฟล์โมเดล 3D (Model File Path)</label><input type="text" id="frmModelPath" class="input-box text-slate-400" placeholder="เช่น models/Heart.glb"></div>
-                    <div><label class="label-text">คำอธิบายภาพรวม (Description) - รองรับโค้ด HTML เช่น &lt;br&gt;, &lt;b&gt;</label><textarea id="frmDesc" class="input-box h-32"></textarea></div>
+                    
+                    <div class="mb-4">
+                        <label class="label-text">ชื่อบทเรียน / อวัยวะ (Name)</label>
+                        <input type="text" id="frmName" class="input-box text-lg font-bold text-blue-300">
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="label-text text-xs text-rose-400">🔒 ลิงก์ไฟล์โมเดล 3D (ถูกล็อกไว้ ป้องกันโมเดลไม่แสดงผล)</label>
+                        <input type="text" id="frmModelPath" class="input-box text-sm text-slate-500 bg-slate-800/50 border-slate-700/50 cursor-not-allowed" readonly title="หากต้องการเปลี่ยนไฟล์โมเดล กรุณาติดต่อนักพัฒนาระบบ">
+                    </div>
+                    
+                    <div>
+                        <label class="label-text text-emerald-400">คำอธิบายภาพรวม (กด Enter เพื่อขึ้นบรรทัดใหม่ได้เลย)</label>
+                        <div class="rich-editor-container">
+                            <div class="rich-editor-toolbar">
+                                <button type="button" onmousedown="event.preventDefault(); document.execCommand('bold', false, null);" class="editor-btn">B ตัวหนา</button>
+                                <span class="text-slate-500 text-xs ml-2">ลากเมาส์คลุมข้อความ แล้วกดปุ่มเพื่อทำตัวหนา</span>
+                            </div>
+                            <div id="frmDesc" class="rich-editor-content h-32 overflow-y-auto" contenteditable="true"></div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 mb-6 shadow-sm">
@@ -205,7 +218,9 @@ function editItem(sysIdx, itemIdx) {
     document.getElementById('editingTitle').textContent = `แก้ไข: ${currentItemData.name}`;
     document.getElementById('frmName').value = currentItemData.name || '';
     document.getElementById('frmModelPath').value = currentItemData.model_file || '';
-    document.getElementById('frmDesc').value = currentItemData.description || '';
+    
+    // 🌟 นำข้อมูล HTML เข้าไปใส่ใน Editor ตรงๆ ได้เลย
+    document.getElementById('frmDesc').innerHTML = currentItemData.description || '';
 
     renderClickPartsForm(); renderQuizForm();
 }
@@ -219,15 +234,37 @@ function renderClickPartsForm() {
     partsData.forEach((part, index) => {
         container.innerHTML += `
             <div class="bg-slate-900 p-4 rounded-xl border border-slate-700">
-                <div class="flex gap-4">
-                    <div class="w-1/3"><label class="label-text text-xs">ชื่อวัสดุในไฟล์ 3D (ห้ามแก้ถ้าไม่จำเป็น)</label><input type="text" class="input-box text-sm text-slate-400 bg-slate-800" value="${part.material_name}" readonly></div>
-                    <div class="w-2/3"><label class="label-text text-xs text-blue-300">ชื่อที่จะแสดงให้เด็กเห็น (แก้ไขได้)</label><input type="text" class="input-box text-sm font-bold text-white border-blue-900" value="${part.name}" onchange="updatePartName(${index}, this.value)"></div>
+                <div class="flex gap-4 mb-3">
+                    <div class="w-1/3">
+                        <label class="label-text text-xs text-rose-400">🔒 ชื่ออ้างอิงระบบ (ห้ามแก้ไข)</label>
+                        <input type="text" class="input-box text-sm text-slate-500 bg-slate-800/50 border-slate-700/50 cursor-not-allowed" value="${part.material_name}" readonly title="ข้อมูลนี้สำหรับให้ระบบอ่าน ห้ามแก้ไข">
+                    </div>
+                    
+                    <div class="w-2/3">
+                        <label class="label-text text-xs text-emerald-400">ชื่อที่จะแสดงให้เด็กเห็น (กด Enter ได้)</label>
+                        <div class="rich-editor-container bg-slate-800">
+                            <div class="rich-editor-toolbar py-1 px-2 border-slate-700">
+                                <button type="button" onmousedown="event.preventDefault(); document.execCommand('bold', false, null);" class="editor-btn text-xs px-2 py-1">B ตัวหนา</button>
+                            </div>
+                            <div class="rich-editor-content p-2 min-h-[40px] text-sm font-bold text-blue-200" contenteditable="true" oninput="updatePartName(${index}, this.innerHTML)">${part.name || ''}</div>
+                        </div>
+                    </div>
                 </div>
-                <div class="mt-3"><label class="label-text text-xs text-blue-300">คำอธิบายรายละเอียด (แก้ไขได้)</label><textarea class="input-box text-sm h-20 border-blue-900" onchange="updatePartInfo(${index}, this.value)">${part.info || ''}</textarea></div>
+
+                <div>
+                    <label class="label-text text-xs text-emerald-400">คำอธิบายรายละเอียด (กด Enter ขึ้นบรรทัดใหม่ได้)</label>
+                    <div class="rich-editor-container bg-slate-800">
+                        <div class="rich-editor-toolbar py-1 px-2 border-slate-700">
+                            <button type="button" onmousedown="event.preventDefault(); document.execCommand('bold', false, null);" class="editor-btn text-xs px-2 py-1">B ตัวหนา</button>
+                        </div>
+                        <div class="rich-editor-content p-2 min-h-[60px] text-sm text-slate-300" contenteditable="true" oninput="updatePartInfo(${index}, this.innerHTML)">${part.info || ''}</div>
+                    </div>
+                </div>
             </div>`;
     });
 }
 
+// รับค่า HTML มาเซฟตรงๆ ได้เลย ไม่ต้องแปลง \n ให้ยุ่งยากแล้ว
 function updatePartName(index, val) { if (currentItemData.click_parts) currentItemData.click_parts[index].name = val; else if (currentItemData.alt_mode) currentItemData.alt_mode.click_parts[index].name = val; }
 function updatePartInfo(index, val) { if (currentItemData.click_parts) currentItemData.click_parts[index].info = val; else if (currentItemData.alt_mode) currentItemData.alt_mode.click_parts[index].info = val; }
 
@@ -250,8 +287,18 @@ function renderQuizForm() {
         container.innerHTML += `
             <div class="bg-slate-900 p-5 rounded-xl border border-slate-700 shadow-inner relative">
                 <span class="absolute -top-3 -left-3 bg-blue-600 text-white w-8 h-8 flex items-center justify-center rounded-full font-bold shadow-lg">Q${qIndex + 1}</span>
-                <div class="mb-4 ml-4"><label class="label-text text-blue-300">โจทย์คำถาม</label><textarea class="input-box text-base font-medium h-16 border-blue-900" onchange="updateQuizQuestion(${qIndex}, this.value)">${q.question}</textarea></div>
-                <div class="ml-4"><label class="label-text mb-2">ตัวเลือก (คลิกจุดกลมๆ เพื่อเลือกข้อที่ถูกต้องเป็นเฉลย)</label>${choicesHTML}</div>
+                
+                <div class="mb-4 ml-4">
+                    <label class="label-text text-emerald-400">โจทย์คำถาม</label>
+                    <div class="rich-editor-container bg-slate-800">
+                        <div class="rich-editor-toolbar py-1 px-2 border-slate-700">
+                            <button type="button" onmousedown="event.preventDefault(); document.execCommand('bold', false, null);" class="editor-btn text-xs px-2 py-1">B ตัวหนา</button>
+                        </div>
+                        <div class="rich-editor-content p-3 min-h-[60px] text-base font-medium" contenteditable="true" oninput="updateQuizQuestion(${qIndex}, this.innerHTML)">${q.question || ''}</div>
+                    </div>
+                </div>
+
+                <div class="ml-4"><label class="label-text mb-2 text-slate-400">ตัวเลือก (คลิกจุดกลมๆ เพื่อเลือกข้อที่ถูกต้องเป็นเฉลย)</label>${choicesHTML}</div>
             </div>`;
     });
 }
@@ -262,7 +309,11 @@ function updateQuizAnswer(qIdx, newAnsIdx) { currentItemData.quiz[qIdx].answer =
 
 function saveData() {
     if (!currentItemData) return;
-    currentItemData.name = document.getElementById('frmName').value; currentItemData.model_file = document.getElementById('frmModelPath').value; currentItemData.description = document.getElementById('frmDesc').value;
+    
+    // ดึงค่า HTML จากกล่อง Editor ตรงๆ ไปบันทึกได้เลย ระบบจะจำตัวหนาและการเว้นบรรทัดไว้ให้ครบ
+    currentItemData.name = document.getElementById('frmName').value; 
+    currentItemData.description = document.getElementById('frmDesc').innerHTML;
+
     globalDatabase.systems[currentSysIndex].items[currentItemIndex] = currentItemData;
     document.getElementById('editorHeader').classList.add('opacity-50', 'pointer-events-none');
     
@@ -329,6 +380,16 @@ function exitHandler() {
         localStorage.setItem('isFullScreen', 'false');
     }
 }
+// 🌟 ป้องกันการก๊อปปี้สไตล์ (สี, ฟอนต์) จาก Word หรือเว็บอื่นมาวาง
+document.addEventListener('paste', function(e) {
+    if (e.target.isContentEditable) {
+        e.preventDefault();
+        // ดึงมาแค่ข้อความเปล่าๆ (Plain text)
+        let text = (e.originalEvent || e).clipboardData.getData('text/plain');
+        // แทรกข้อความกลับเข้าไปแบบไม่มีสไตล์
+        document.execCommand('insertText', false, text);
+    }
+});
 </script>
 </body>
 </html>
