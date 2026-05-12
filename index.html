@@ -166,8 +166,16 @@ model-viewer { width:100%; height:calc(100vh - 60px); margin-top: 60px; --poster
 
     <button onclick="showAppQRCode()" style="width: 100%; background: #0ea5e9; box-shadow: 0 10px 25px rgba(14, 165, 233, 0.4); margin-bottom: 25px;">📲 แสดง QR Code ของแอป</button>
 
-    <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
-        <button onclick="window.location.href='admin.html'" style="background: transparent; border: 1px dashed #475569; color: #94a3b8; font-size: 0.85rem; width: 100%; box-shadow: none;">⚙️ จัดการระบบ (สำหรับคุณครู)</button>
+    <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; display: flex; flex-direction: column; gap: 10px;">
+        <button onclick="window.location.href='admin.html'" 
+            style="background: transparent; border: 1px dashed #475569; color: #94a3b8; font-size: 0.85rem; width: 100%; box-shadow: none;">
+            ⚙️ จัดการระบบ (สำหรับคุณครู)
+        </button>
+
+        <button onclick="window.location.href='super_admin.html'" 
+            style="background: rgba(30, 41, 59, 0.4); border: 1px solid #334155; color: #60a5fa; font-size: 0.85rem; width: 100%; box-shadow: none;">
+            🛡️ ระบบควบคุมนักพัฒนา (Super Admin)
+        </button>
     </div>
   </div>
 </div>

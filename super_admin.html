@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BioLens AR - Super Admin (Developer Full Control)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+
+    <style>
+        html, body { height: 100%; margin: 0; font-family: 'Kanit', sans-serif; background: #0f172a; color: #f8fafc; overflow: hidden; }
+        .input-box { background: #1e293b; border: 1px solid #334155; color: white; border-radius: 12px; padding: 12px; width: 100%; outline: none; transition: 0.2s; }
+        .input-box:focus { border-color: #3b82f6; }
+        .rich-editor-content { padding: 15px; min-height: 100px; background: #1e293b; border: 1px solid #334155; border-radius: 12px; color: white; outline: none; line-height: 1.6; }
+        .rich-editor-content b { color: #fbbf24; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        .sidebar-item.active { background: #2563eb; color: white; border-color: #3b82f6; }
+    </style>
+</head>
+<body class="h-screen w-screen flex flex-col">
+
+    <div id="loginPage" class="flex flex-col items-center justify-center h-full w-full p-6 bg-slate-950 absolute inset-0 z-50">
+        <div class="bg-slate-900 p-10 rounded-[2rem] shadow-2xl w-full max-w-md text-center border border-slate-800">
+            <div class="text-5xl mb-4">🛡️</div>
+            <h1 class="text-3xl font-bold text-white mb-2">Super Admin</h1>
+            <p class="text-slate-400 mb-8">Developer Control Mode</p>
+            <input type="email" id="email" class="input-box mb-4" placeholder="Developer Email">
+            <input type="password" id="pass" class="input-box mb-6" placeholder="Password">
+            <button onclick="login()" class="w-full bg-blue-600 hover:bg-blue-500 p-4 rounded-xl text-white font-bold transition">เข้าสู่ระบบควบคุมสูงสุด</button>
+            <button onclick="window.location.href='index.html'" class="mt-6 text-slate-500 hover:text-white text-sm transition">🔙 กลับหน้าแอป</button>
+        </div>
+    </div>
+
+    <header class="bg-slate-800 p-4 flex justify-between items-center border-b border-slate-700 shrink-0 z-10">
+        <div class="flex items-center gap-3">
+            <span class="text-2xl">⚙️</span>
+            <h1 class="text-xl font-bold text-white">Super Admin Dashboard</h1>
+        </div>
+        <div class="flex gap-3">
+            <button onclick="addNewSystem()" class="bg-blue-600/10 hover:bg-blue-600 text-blue-400 hover:text-white px-4 py-2 rounded-xl text-sm border border-blue-600/30">➕ เพิ่มระบบร่างกาย</button>
+            <button onclick="addNewItem()" class="bg-emerald-600/10 hover:bg-emerald-600 text-emerald-400 hover:text-white px-4 py-2 rounded-xl text-sm border border-emerald-600/30">➕ เพิ่มอวัยวะใหม่</button>
+            <button onclick="clearAllData()" class="bg-rose-600/10 hover:bg-rose-600 text-rose-400 hover:text-white px-4 py-2 rounded-xl text-sm border border-rose-600/30">🧹 ล้าง Cloud</button>
+            <div class="w-[1px] bg-slate-700 mx-2"></div>
+            <button onclick="window.location.href='index.html'" class="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-xl text-sm">🏠 กลับหน้าหลัก</button>
+            <button onclick="logout()" class="bg-slate-900 hover:bg-rose-700 px-4 py-2 rounded-xl text-sm">🚪 ออก</button>
+        </div>
+    </header>
+
+    <div id="dashboard" class="hidden flex-row h-full overflow-hidden">
+        <div class="w-80 bg-slate-800 border-r border-slate-700 p-5 overflow-y-auto shrink-0">
+            <div id="sidebarMenu" class="space-y-6"></div>
+        </div>
+
+        <div class="flex-grow bg-slate-900 flex flex-col h-full overflow-hidden relative">
+            <div id="welcomeScreen" class="absolute inset-0 flex flex-col items-center justify-center bg-slate-900 z-10 text-slate-500">
+                <p class="text-lg">เลือกบทเรียนจากเมนูด้านซ้ายเพื่อเริ่มจัดการโครงสร้าง</p>
+            </div>
+
+            <div id="editorHeader" class="bg-slate-800 p-6 border-b border-slate-700 flex justify-between items-center shrink-0">
+                <h2 id="editingTitle" class="text-2xl font-bold text-blue-400">Editor</h2>
+                <div class="flex gap-3">
+                    <button onclick="deleteCurrentItem()" class="text-rose-400 hover:bg-rose-400/10 px-4 py-2 rounded-lg text-sm border border-rose-400/20">🗑️ ลบรายการนี้</button>
+                    <button onclick="saveData()" class="bg-blue-600 hover:bg-blue-500 px-10 py-3 rounded-2xl font-bold text-white shadow-lg">💾 SAVE TO CLOUD</button>
+                </div>
+            </div>
+            
+            <div class="flex-grow p-8 overflow-y-auto space-y-8">
+                <div class="bg-slate-800 p-8 rounded-[2rem] border border-slate-700">
+                    <div class="grid grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <label class="text-xs text-slate-400 mb-2 block uppercase">NAME</label>
+                            <input type="text" id="frmName" class="input-box text-lg font-bold text-white">
+                        </div>
+                        <div>
+                            <label class="text-xs text-slate-400 mb-2 block uppercase">MODEL PATH (GLB)</label>
+                            <input type="text" id="frmModelPath" class="input-box font-mono text-emerald-400 text-sm">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="text-xs text-slate-400 mb-2 block uppercase">DESCRIPTION (HTML)</label>
+                        <div id="frmDesc" class="rich-editor-content" contenteditable="true"></div>
+                    </div>
+                </div>
+
+                <div class="bg-slate-800 p-8 rounded-[2rem] border border-slate-700">
+                    <h3 class="text-amber-400 font-bold mb-6">🎯 Click Parts (จัดการ ID โมเดลได้เอง)</h3>
+                    <div id="clickPartsContainer" class="space-y-4"></div>
+                    <button onclick="addClickPart()" class="mt-4 text-sm text-amber-500 hover:text-amber-400">+ เพิ่มจุดคลิก</button>
+                </div>
+
+                <div class="bg-slate-800 p-8 rounded-[2rem] border border-slate-700 mb-20">
+                    <h3 class="text-rose-400 font-bold mb-6">📝 Quiz Engine</h3>
+                    <div id="quizContainer" class="space-y-6"></div>
+                    <button onclick="addQuiz()" class="mt-4 text-sm text-rose-500 hover:text-rose-400">+ เพิ่มข้อสอบ</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+// --- ใช้ Config Firebase ของคุณ ---
+const firebaseConfig = {
+  apiKey: "AIzaSyB9TZN4-yUb9Kfh0gdZNp6XglsbS-xEzfk",
+  authDomain: "biolens-ar.firebaseapp.com",
+  projectId: "biolens-ar",
+  storageBucket: "biolens-ar.firebasestorage.app",
+  messagingSenderId: "1088692183155",
+  appId: "1:1088692183155:web:d139f94812eca627e08a06"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+const DEV_EMAIL = "superadmin@biolens.com"; // 🌟 กำหนดอีเมล Super Admin ที่นี่
+
+auth.onAuthStateChanged(user => {
+    if (user) {
+        // ตรวจสอบสิทธิ์อีเมล: ถ้าไม่ใช่ Dev ให้สั่ง Logout ทันที
+        if (user.email !== DEV_EMAIL) {
+            alert("ขออภัย! คุณไม่มีสิทธิ์เข้าหน้าควบคุม Super Admin");
+            auth.signOut();
+            return;
+        }
+        document.getElementById('loginPage').classList.add('hidden');
+        document.getElementById('dashboard').classList.remove('hidden');
+        document.getElementById('dashboard').classList.add('flex');
+        loadData();
+    } else {
+        document.getElementById('loginPage').classList.remove('hidden');
+        document.getElementById('dashboard').classList.add('hidden');
+    }
+});
+
+function login() {
+    const e = document.getElementById('email').value, p = document.getElementById('pass').value;
+    if (e !== DEV_EMAIL) { alert("อีเมลนี้ไม่มีสิทธิ์เป็น Super Admin"); return; }
+    auth.signInWithEmailAndPassword(e, p).catch(() => alert("รหัสผ่านไม่ถูกต้อง"));
+}
+function logout() { auth.signOut(); }
+
+// --- โหลดและวาด Sidebar (อัปเดตให้ลบแล้วหายทันที) ---
+function loadData() {
+    db.collection("database").doc("anatomy").get().then(doc => {
+        if(doc.exists) { globalDatabase = doc.data(); renderSidebar(); }
+    });
+}
+
+function renderSidebar() {
+    const menu = document.getElementById('sidebarMenu'); menu.innerHTML = '';
+    globalDatabase.systems.forEach((sys, sIdx) => {
+        let html = `<div class="mb-4"><div class="flex justify-between items-center px-2 mb-2">
+                <h3 class="text-blue-500 font-bold text-[11px] uppercase">${sys.category}</h3>
+                <button onclick="deleteSystem(${sIdx})" class="text-[9px] text-slate-500 hover:text-rose-500">ลบกลุ่ม</button>
+            </div><div class="flex flex-col gap-1">`;
+        sys.items.forEach((item, iIdx) => {
+            const isActive = (currentSysIndex === sIdx && currentItemIndex === iIdx);
+            html += `<button onclick="editItem(${sIdx}, ${iIdx})" class="sidebar-item text-left p-3 rounded-xl text-sm transition border border-transparent ${isActive ? 'active' : 'bg-slate-900/30 text-slate-400'}">📄 ${item.name}</button>`;
+        });
+        html += `</div></div>`;
+        menu.innerHTML += html;
+    });
+}
+
+function editItem(sIdx, iIdx) {
+    currentSysIndex = sIdx; currentItemIndex = iIdx;
+    currentItemData = JSON.parse(JSON.stringify(globalDatabase.systems[sIdx].items[iIdx]));
+    document.getElementById('welcomeScreen').classList.add('hidden');
+    document.getElementById('editingTitle').textContent = currentItemData.name;
+    document.getElementById('frmName').value = currentItemData.name;
+    document.getElementById('frmModelPath').value = currentItemData.model_file;
+    document.getElementById('frmDesc').innerHTML = currentItemData.description || '';
+    renderSidebar(); renderParts(); renderQuiz();
+}
+
+function addClickPart() { currentItemData.click_parts.push({material_name:'', name:'', info:''}); renderParts(); }
+function addQuiz() { currentItemData.quiz.push({question:'?', choices:['','','',''], answer:0}); renderQuiz(); }
+
+function renderParts() {
+    const container = document.getElementById('clickPartsContainer'); container.innerHTML = '';
+    currentItemData.click_parts.forEach((p, idx) => {
+        container.innerHTML += `<div class="grid grid-cols-12 gap-3 bg-slate-900/50 p-4 rounded-xl border border-slate-700">
+            <input type="text" class="col-span-3 input-box text-xs font-mono" value="${p.material_name}" oninput="currentItemData.click_parts[${idx}].material_name=this.value" placeholder="ID ในโมเดล">
+            <input type="text" class="col-span-3 input-box text-xs" value="${p.name}" oninput="currentItemData.click_parts[${idx}].name=this.value" placeholder="ชื่อเรียก">
+            <input type="text" class="col-span-5 input-box text-xs" value="${p.info}" oninput="currentItemData.click_parts[${idx}].info=this.value" placeholder="รายละเอียด">
+            <button onclick="currentItemData.click_parts.splice(${idx},1);renderParts()" class="col-span-1 text-rose-500">✕</button>
+        </div>`;
+    });
+}
+
+function renderQuiz() {
+    const container = document.getElementById('quizContainer'); container.innerHTML = '';
+    currentItemData.quiz.forEach((q, idx) => {
+        container.innerHTML += `<div class="bg-slate-900/50 p-6 rounded-2xl border border-slate-700">
+            <input type="text" class="input-box mb-4 font-medium" value="${q.question}" oninput="currentItemData.quiz[${idx}].question=this.value">
+            <div class="grid grid-cols-2 gap-3">
+                ${q.choices.map((c, cIdx) => `<div class="flex gap-2 items-center"><input type="radio" name="ans-${idx}" ${q.answer===cIdx?'checked':''} onchange="currentItemData.quiz[${idx}].answer=${cIdx}">
+                <input type="text" class="input-box text-xs" value="${c}" oninput="currentItemData.quiz[${idx}].choices[${cIdx}]=this.value"></div>`).join('')}
+            </div>
+            <button onclick="currentItemData.quiz.splice(${idx},1);renderQuiz()" class="mt-4 text-[10px] text-rose-500 opacity-50 hover:opacity-100 italic">ลบควิซข้อนี้</button>
+        </div>`;
+    });
+}
+
+function saveData() {
+    if(currentSysIndex === null) return;
+    currentItemData.name = document.getElementById('frmName').value;
+    currentItemData.model_file = document.getElementById('frmModelPath').value;
+    currentItemData.description = document.getElementById('frmDesc').innerHTML;
+    globalDatabase.systems[currentSysIndex].items[currentItemIndex] = currentItemData;
+    db.collection("database").doc("anatomy").set(globalDatabase).then(() => { alert("Saved! ✅"); renderSidebar(); });
+}
+
+function deleteCurrentItem() {
+    if(confirm("ลบถาวร?")) {
+        globalDatabase.systems[currentSysIndex].items.splice(currentItemIndex, 1);
+        db.collection("database").doc("anatomy").set(globalDatabase).then(() => { 
+            currentItemData = null; currentSysIndex = null; currentItemIndex = null;
+            renderSidebar(); 
+            document.getElementById('welcomeScreen').classList.remove('hidden'); 
+        });
+    }
+}
+
+function deleteSystem(idx) { if(confirm("ลบกลุ่มระบบนี้?")) { globalDatabase.systems.splice(idx, 1); db.collection("database").doc("anatomy").set(globalDatabase).then(() => renderSidebar()); } }
+function addNewSystem() { const n = prompt("ชื่อระบบใหม่:"); if(n) { globalDatabase.systems.push({category: n, items: []}); db.collection("database").doc("anatomy").set(globalDatabase).then(() => renderSidebar()); } }
+function addNewItem() { if(currentSysIndex === null) return alert("เลือกกลุ่มก่อน"); globalDatabase.systems[currentSysIndex].items.push({name: "อวัยวะใหม่", model_file: "models/brain.glb", description: "", click_parts: [], quiz: []}); db.collection("database").doc("anatomy").set(globalDatabase).then(() => renderSidebar()); }
+function clearAllData() { if(confirm("ล้าง Cloud ทั้งหมด?")) db.collection("database").doc("anatomy").delete().then(() => location.reload()); }
+</script>
+</body>
+</html>
