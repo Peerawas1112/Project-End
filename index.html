@@ -167,7 +167,7 @@ model-viewer { width:100%; height:calc(100vh - 60px); margin-top: 60px; --poster
     <button onclick="showAppQRCode()" style="width: 100%; background: #0ea5e9; box-shadow: 0 10px 25px rgba(14, 165, 233, 0.4); margin-bottom: 25px;">📲 แสดง QR Code ของแอป</button>
 
     <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
-        <button onclick="window.location.href='admin.html'" style="background: transparent; border: 1px dashed #475569; color: #94a3b8; font-size: 0.85rem; width: 100%; box-shadow: none;">⚙️ จัดการระบบ (สำหรับคุณครู)</button>
+        <button onclick="window.location.href='admin.html'" style="background: transparent; border: 1px dashed #475569; color: #94a3b8; font-size: 0.85rem; width: 100%; box-shadow: none;">⚙️ จัดการระบบ</button>
     </div>
   </div>
 </div>
@@ -260,7 +260,7 @@ db.collection("database").doc("anatomy").get()
         renderQuizMenu(); 
         if (data.length > 0) loadSystem(0);
         
-        document.getElementById("loadingText").textContent = "ระบบพร้อมใช้งานแล้ว (ดึงข้อมูลจาก Cloud ☁️)";
+        document.getElementById("loadingText").textContent = "ระบบพร้อมใช้งาน";
         document.getElementById("loadingText").style.color = "#4ade80"; 
         document.getElementById("btnLearn").disabled = false;
         document.getElementById("btnQuizMenu").disabled = false;
@@ -270,7 +270,7 @@ db.collection("database").doc("anatomy").get()
 })
 .catch(err => {
     console.error("Error:", err);
-    document.getElementById("loadingText").textContent = "ไม่สามารถเชื่อมต่อฐานข้อมูลได้ กรุณาไปเพิ่มข้อมูลที่หน้า Admin ก่อนครับ";
+    document.getElementById("loadingText").textContent = "ไม่สามารถเชื่อมต่อฐานข้อมูลได้ ลองรีเฟรชหรือเช็คการเชื่อมต่ออินเทอร์เน็ต";
     document.getElementById("loadingText").style.color = "#ef4444";
 });
 
