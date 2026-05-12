@@ -135,7 +135,7 @@ model-viewer { width:100%; height:calc(100vh - 60px); margin-top: 60px; --poster
 <div id="infoModal" class="part-info-card">
   <h3 id="modalTitle" class="modal-title">ชื่อส่วนประกอบ</h3>
   <div id="modalDesc" class="modal-desc">รายละเอียด...</div>
-  <button class="close-modal-btn" onclick="closeInfoAndReset()">ปิดหน้าต่าง</button>
+  <button class="close-modal-btn" onclick="closeInfoAndUnfocus()">ปิดหน้าต่าง</button>
 </div>
 
 <div id="qrModal" class="modal-overlay">
@@ -167,7 +167,7 @@ model-viewer { width:100%; height:calc(100vh - 60px); margin-top: 60px; --poster
     <button onclick="showAppQRCode()" style="width: 100%; background: #0ea5e9; box-shadow: 0 10px 25px rgba(14, 165, 233, 0.4); margin-bottom: 25px;">📲 แสดง QR Code ของแอป</button>
 
     <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
-        <button onclick="window.location.href='admin.html'" style="background: transparent; border: 1px dashed #475569; color: #94a3b8; font-size: 0.85rem; width: 100%; box-shadow: none;">⚙️ จัดการระบบ</button>
+        <button onclick="window.location.href='admin.html'" style="background: transparent; border: 1px dashed #475569; color: #94a3b8; font-size: 0.85rem; width: 100%; box-shadow: none;">⚙️ จัดการระบบ (สำหรับคุณครู)</button>
     </div>
   </div>
 </div>
@@ -179,6 +179,17 @@ model-viewer { width:100%; height:calc(100vh - 60px); margin-top: 60px; --poster
     <h2 style="color:var(--primary); margin-top:0; border-bottom: 2px solid var(--border); padding-bottom: 15px;">เมนูแบบทดสอบ</h2>
     <p style="color: #94a3b8; font-size: 0.9rem; margin-bottom: 20px;">เลือกทำแบบทดสอบแยกตามระบบ หรือ ทำแบบทดสอบรวมเพื่อวัดความรู้ทั้งหมด</p>
     
+    <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border); border-radius: 16px; padding: 15px; margin-bottom: 20px; text-align: left;">
+        <h3 style="font-size: 0.95rem; color: #cbd5e1; margin-top: 0; margin-bottom: 10px; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 8px;">📊 เกณฑ์การประเมินผล</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.85rem; color: #94a3b8;">
+            <div><b style="color:#4ade80;">A</b> : 80 - 100% (ดีเยี่ยม)</div>
+            <div><b style="color:#60a5fa;">B</b> : 70 - 79% (ดี)</div>
+            <div><b style="color:#facc15;">C</b> : 60 - 69% (ปานกลาง)</div>
+            <div><b style="color:#fb923c;">D</b> : 50 - 59% (พอใช้)</div>
+            <div style="grid-column: span 2;"><b style="color:#f87171;">F</b> : ต่ำกว่า 50% (ต้องปรับปรุง)</div>
+        </div>
+    </div>
+
     <div id="quizMenuButtons" style="display:flex; flex-direction:column; gap:12px;"></div>
     
     <button onclick="closeQuizMenu()" style="background:none; border:1px solid #4b5563; color:#94a3b8; margin-top:20px; width: 100%;">🔙 กลับหน้าหลัก</button>
@@ -247,7 +258,6 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// 🌟 เพิ่มระบบจำข้อมูล (Cache) ตรงนี้ครับ ป้องกันปัญหากดรีเฟรชรัวๆ
 db.enablePersistence().catch(function(err) {
     console.log("Firebase Cache Error: ", err);
 });
@@ -260,7 +270,7 @@ db.collection("database").doc("anatomy").get()
         renderQuizMenu(); 
         if (data.length > 0) loadSystem(0);
         
-        document.getElementById("loadingText").textContent = "ระบบพร้อมใช้งาน";
+        document.getElementById("loadingText").textContent = "ระบบพร้อมใช้งานแล้ว (ดึงข้อมูลจาก Cloud ☁️)";
         document.getElementById("loadingText").style.color = "#4ade80"; 
         document.getElementById("btnLearn").disabled = false;
         document.getElementById("btnQuizMenu").disabled = false;
@@ -270,7 +280,7 @@ db.collection("database").doc("anatomy").get()
 })
 .catch(err => {
     console.error("Error:", err);
-    document.getElementById("loadingText").textContent = "ไม่สามารถเชื่อมต่อฐานข้อมูลได้ ลองรีเฟรชหรือเช็คการเชื่อมต่ออินเทอร์เน็ต";
+    document.getElementById("loadingText").textContent = "ไม่สามารถเชื่อมต่อฐานข้อมูลได้ กรุณาไปเพิ่มข้อมูลที่หน้า Admin ก่อนครับ";
     document.getElementById("loadingText").style.color = "#ef4444";
 });
 
@@ -304,6 +314,13 @@ function resetCamera() {
     }
 }
 
+function closeInfoAndUnfocus() {
+    closeModals();
+    if (viewer) {
+        viewer.cameraTarget = "auto auto auto"; 
+    }
+}
+
 const home = document.getElementById("home");
 const quizMenuPage = document.getElementById("quizMenuPage");
 const quizPage = document.getElementById("quizPage");
@@ -323,8 +340,6 @@ function closeModals() {
     infoModal.style.display = 'none'; qrModal.style.display = 'none'; resetHighlight(); 
     if (viewer) viewer.autoRotate = true;
 }
-
-function closeInfoAndReset() { closeModals(); resetCamera(); }
 
 function toggleInfoBox() {
     const panel = document.getElementById("mainInfoPanel");
@@ -409,13 +424,29 @@ function toggleModelMode() {
     viewer.addEventListener('load', unlockButton);
 }
 
-viewer.addEventListener('click', (event) => {
+let pointerDownX = 0;
+let pointerDownY = 0;
+
+viewer.addEventListener('pointerdown', (event) => {
+    pointerDownX = event.clientX;
+    pointerDownY = event.clientY;
+});
+
+viewer.addEventListener('pointerup', (event) => {
+    const diffX = Math.abs(event.clientX - pointerDownX);
+    const diffY = Math.abs(event.clientY - pointerDownY);
+    if (diffX > 5 || diffY > 5) return; 
+
     const material = viewer.materialFromPoint(event.clientX, event.clientY);
+    let isInteractivePartClicked = false;
+
     if (material != null) {
         const partsData = isAltMode ? currentOrganData.alt_mode.click_parts : currentOrganData.click_parts;
         if (partsData) {
             const clickedPart = partsData.find(p => p.material_name === material.name);
             if (clickedPart) {
+                isInteractivePartClicked = true;
+
                 for (const mat of viewer.model.materials) {
                     const origColor = originalColors.get(mat.name) || [1, 1, 1, 1];
                     if (mat.name !== material.name) {
@@ -426,14 +457,22 @@ viewer.addEventListener('click', (event) => {
                         mat.setEmissiveFactor([0, 0, 0]); 
                     }
                 }
+                
                 document.getElementById('modalTitle').innerHTML = clickedPart.name;
                 document.getElementById('modalDesc').innerHTML = clickedPart.info || "ไม่มีข้อมูลรายละเอียดเพิ่มเติม"; 
                 infoModal.style.display = 'flex';
-                viewer.cameraTarget = "auto auto auto"; viewer.autoRotate = false;
+                viewer.autoRotate = false;
+
+                const hit = viewer.positionAndNormalFromPoint(event.clientX, event.clientY);
+                if (hit != null) {
+                    viewer.cameraTarget = `${hit.position.x}m ${hit.position.y}m ${hit.position.z}m`;
+                }
             }
         }
-    } else {
-        closeModals();
+    } 
+
+    if (!isInteractivePartClicked) {
+        closeInfoAndUnfocus();
     }
 });
 
