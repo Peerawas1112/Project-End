@@ -247,6 +247,11 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
+// 🌟 เพิ่มระบบจำข้อมูล (Cache) ตรงนี้ครับ ป้องกันปัญหากดรีเฟรชรัวๆ
+db.enablePersistence().catch(function(err) {
+    console.log("Firebase Cache Error: ", err);
+});
+
 db.collection("database").doc("anatomy").get()
 .then((docSnap) => {
     if(docSnap.exists) {
