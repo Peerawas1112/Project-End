@@ -9,7 +9,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-storage-compat.js"></script> <style>
+    <style>
         html, body { height: 100%; margin: 0; font-family: 'Kanit', sans-serif; background: #0f172a; color: #f8fafc; overflow: hidden; }
         .input-box { background: #1e293b; border: 1px solid #334155; color: white; border-radius: 8px; padding: 8px 12px; width: 100%; outline: none; transition: 0.2s; font-size: 0.9rem; }
         .input-box:focus { border-color: #3b82f6; }
@@ -72,6 +72,7 @@
             </div>
         </div>
     </div>
+
     <div id="loginPage" class="flex flex-col items-center justify-center h-full w-full p-6 bg-slate-950 absolute inset-0 z-50">
         <button onclick="toggleFullScreen()" id="fsBtnLogin" class="absolute top-6 right-6 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white border border-slate-700 p-2 rounded-full transition shadow-lg w-10 h-10 flex justify-center items-center"></button>
         
@@ -153,9 +154,9 @@
                         <div class="border border-slate-700 rounded-lg overflow-hidden focus-within:border-blue-500 transition">
                             <div class="bg-slate-900 p-1.5 border-b border-slate-700 flex gap-2 items-center">
                                 <button type="button" onmousedown="event.preventDefault(); document.execCommand('bold', false, null);" class="bg-slate-700 hover:bg-slate-600 text-white text-[10px] px-2 py-1 rounded transition"><b>B</b> ตัวหนา</button>
-                                <span class="text-[9px] text-slate-500">*ลากคลุมข้อความแล้วกดปุ่มนี้</span>
+                                <span class="text-[9px] text-slate-500">*ลากคลุมข้อความแล้วกดปุ่มนี้ (หรือกด Enter เพื่อขึ้นบรรทัดใหม่)</span>
                             </div>
-                            <div id="frmDesc" class="rich-editor-content border-none" contenteditable="true"></div>
+                            <div id="frmDesc" class="rich-editor-content border-none" contenteditable="true" placeholder="ระบุเนื้อหา..."></div>
                         </div>
                     </div>
                 </div>
@@ -180,6 +181,9 @@
     </div>
 
 <script>
+// ==========================================
+// 🔥 FIREBASE CONFIG & INIT
+// ==========================================
 const firebaseConfig = {
   apiKey: "AIzaSyB9TZN4-yUb9Kfh0gdZNp6XglsbS-xEzfk",
   authDomain: "biolens-ar.firebaseapp.com",
@@ -191,7 +195,6 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
-const storage = firebase.storage(); // 🌟 เปิดใช้งานระบบอัปโหลดไฟล์
 
 let globalDatabase = null, currentSysIndex = null, currentItemIndex = null, currentItemData = null;
 let isDevMode = false;
@@ -245,11 +248,11 @@ function login() {
 function logout() { 
     openCustomConfirm("คุณต้องการออกจากระบบใช่หรือไม่?", "🚪 ออกจากระบบ", () => {
         auth.signOut(); 
-    }, false); // ใส่ false เพื่อให้ปุ่มยืนยันเป็นสีน้ำเงิน (ไม่ใช่อันตราย)
+    }, false); 
 }
 
 // ==========================================
-// 🛠️ CUSTOM MODAL LOGIC (หน้าต่างแทน Prompt/Confirm)
+// 🛠️ CUSTOM MODAL LOGIC 
 // ==========================================
 let promptCallback = null;
 function openCustomPrompt(title, placeholder, descHTML, callback) {
@@ -317,7 +320,7 @@ document.getElementById('confirmBtn').addEventListener('click', () => {
 
 
 // ==========================================
-// 🔓 ระบบสลับสิทธิ์การใช้งาน (Modal Password)
+// 🔓 ระบบสลับสิทธิ์การใช้งาน 
 // ==========================================
 function toggleDevMode() {
     if(isDevMode) {
@@ -343,7 +346,7 @@ function confirmDevPass() {
         const btn = document.getElementById('btnDevMode');
         btn.innerHTML = "🔓 โหมดนักพัฒนา";
         btn.className = "bg-emerald-600/20 hover:bg-emerald-600 text-emerald-400 hover:text-white px-3 py-1.5 rounded-lg text-xs transition border border-emerald-600/30 flex items-center gap-1 shadow-md shadow-emerald-500/20";
-        closeDevPassModal();
+        closeDevPassModal(); 
     } else {
         alert("❌ รหัสผ่านไม่ถูกต้อง!");
         document.getElementById('devPassInput').value = '';
@@ -357,8 +360,11 @@ document.getElementById('devPassInput').addEventListener('keypress', function (e
 
 
 // ==========================================
-// 📤 ระบบอัปโหลดโมเดลขึ้น Cloud Storage
+// 📤 ระบบอัปโหลดโมเดลขึ้น Cloudinary 
 // ==========================================
+const CLOUD_NAME = "dv9ejytrx"; 
+const UPLOAD_PRESET = "t1obw6ft"; 
+
 function uploadModelToCloud(inputElement) {
     const file = inputElement.files[0];
     if (!file) return;
@@ -372,30 +378,45 @@ function uploadModelToCloud(inputElement) {
     const statusText = document.getElementById('uploadStatus');
     statusText.classList.remove('hidden');
     statusText.style.color = "#818cf8"; 
+    statusText.innerText = "⏳ กำลังเตรียมอัปโหลด...";
 
-    const uniqueFileName = Date.now() + "_" + file.name;
-    const storageRef = storage.ref('models/' + uniqueFileName);
-    const uploadTask = storageRef.put(file);
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('upload_preset', UPLOAD_PRESET);
+    fd.append('resource_type', 'raw');
 
-    uploadTask.on('state_changed', 
-        (snapshot) => {
-            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-            statusText.innerText = `⏳ กำลังอัปโหลด... ${Math.round(progress)}%`;
-        }, 
-        (error) => {
-            console.error("Upload Error:", error);
-            statusText.innerText = `❌ อัปโหลดล้มเหลว: ${error.message}`;
-            statusText.style.color = "#f87171"; 
-        }, 
-        () => {
-            uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
-                document.getElementById('frmModelPath').value = downloadURL;
-                statusText.innerText = "✅ อัปโหลดเสร็จสมบูรณ์! (อย่าลืมกดปุ่ม 'บันทึกข้อมูล' ด้านบนด้วยนะครับ)";
-                statusText.style.color = "#4ade80"; 
-                inputElement.value = ''; 
-            });
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/upload`, true);
+
+    xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable) {
+            const progress = Math.round((e.loaded / e.total) * 100);
+            statusText.innerText = `⏳ กำลังอัปโหลด... ${progress}%`;
         }
-    );
+    };
+
+    xhr.onload = () => {
+        if (xhr.status === 200) {
+            const res = JSON.parse(xhr.responseText);
+            document.getElementById('frmModelPath').value = res.secure_url;
+            statusText.innerText = "✅ อัปโหลดเสร็จสมบูรณ์! (อย่าลืมกดปุ่ม 'บันทึกข้อมูล' ด้วยนะครับ)";
+            statusText.style.color = "#4ade80";
+            inputElement.value = ''; 
+        } else {
+            console.error("Upload Error:", xhr.responseText);
+            statusText.innerText = `❌ อัปโหลดล้มเหลว: กรุณาตรวจสอบการตั้งค่า Cloudinary`;
+            statusText.style.color = "#f87171";
+            inputElement.value = ''; 
+        }
+    };
+
+    xhr.onerror = () => {
+        statusText.innerText = "❌ เกิดข้อผิดพลาดในการเชื่อมต่ออินเทอร์เน็ต";
+        statusText.style.color = "#f87171";
+        inputElement.value = '';
+    };
+
+    xhr.send(fd);
 }
 
 // ==========================================
