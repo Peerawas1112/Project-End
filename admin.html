@@ -14,7 +14,7 @@
         html, body { height: 100%; margin: 0; font-family: 'Kanit', sans-serif; background: #0f172a; color: #f8fafc; overflow: hidden; }
         .input-box { background: #1e293b; border: 1px solid #334155; color: white; border-radius: 12px; padding: 12px; width: 100%; outline: none; transition: 0.2s; }
         .input-box:focus { border-color: #3b82f6; }
-        .rich-editor-content { padding: 15px; min-height: 100px; background: #1e293b; border: 1px solid #334155; border-radius: 12px; color: white; outline: none; line-height: 1.6; }
+        .rich-editor-content { padding: 15px; min-height: 100px; background: #1e293b; color: white; outline: none; line-height: 1.6; }
         .rich-editor-content b { color: #fbbf24; }
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
@@ -36,7 +36,7 @@
         </div>
     </div>
 
-    <header class="bg-slate-800 p-4 flex justify-between items-center border-b border-slate-700 shrink-0 z-10">
+    <header class="bg-slate-800 p-4 flex justify-between items-center border-b border-slate-700 shrink-0 z-10 shadow-sm">
         <div class="flex items-center gap-3">
             <h1 class="text-xl font-bold text-white">Admin Dashboard</h1>
         </div>
@@ -47,7 +47,7 @@
             <button onclick="clearAllData()" class="bg-rose-600/20 hover:bg-rose-600 text-rose-400 hover:text-white px-4 py-2 rounded-xl text-sm transition border border-rose-600/30">🧹 ล้าง Cloud</button>
             <div class="w-[1px] bg-slate-700 mx-2"></div>
             <button onclick="window.location.href='index.html'" class="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-xl text-sm">🏠 กลับหน้าหลัก</button>
-            <button onclick="logout()" class="bg-slate-900 hover:bg-rose-700 px-4 py-2 rounded-xl text-sm">🚪 ออก</button>
+            <button onclick="logout()" class="bg-slate-900 hover:bg-rose-700 px-4 py-2 rounded-xl text-sm border border-slate-700">🚪 ออก</button>
         </div>
     </header>
 
@@ -58,6 +58,7 @@
 
         <div class="flex-grow bg-slate-900 flex flex-col h-full overflow-hidden relative">
             <div id="welcomeScreen" class="absolute inset-0 flex flex-col items-center justify-center bg-slate-900 z-10 text-slate-500">
+                <span class="text-6xl mb-4">👈</span>
                 <p class="text-lg">เลือกบทเรียนจากเมนูด้านซ้ายเพื่อเริ่มจัดการ</p>
             </div>
 
@@ -65,38 +66,44 @@
                 <h2 id="editingTitle" class="text-2xl font-bold text-blue-400">Editor</h2>
                 <div class="flex gap-3">
                     <button onclick="deleteCurrentItem()" class="text-rose-400 hover:bg-rose-400/10 px-4 py-2 rounded-lg text-sm border border-rose-400/20">🗑️ ลบหน้านี้</button>
-                    <button onclick="saveData()" class="bg-emerald-600 hover:bg-emerald-500 px-10 py-3 rounded-2xl font-bold text-white shadow-lg">💾 บันทึกข้อมูล</button>
+                    <button onclick="saveData()" class="bg-emerald-600 hover:bg-emerald-500 px-10 py-3 rounded-2xl font-bold text-white shadow-lg flex items-center gap-2">💾 บันทึกข้อมูล</button>
                 </div>
             </div>
             
             <div class="flex-grow p-8 overflow-y-auto space-y-8">
-                <div class="bg-slate-800 p-8 rounded-[2rem] border border-slate-700">
+                <div class="bg-slate-800 p-8 rounded-[2rem] border border-slate-700 shadow-sm">
                     <div class="grid grid-cols-2 gap-6 mb-6">
                         <div>
-                            <label class="text-xs text-slate-400 mb-2 block">ชื่อหัวข้อ (Name)</label>
+                            <label class="text-xs text-slate-400 mb-2 block uppercase tracking-wider">ชื่อหัวข้อ (Name)</label>
                             <input type="text" id="frmName" class="input-box text-lg font-bold text-white">
                         </div>
                         <div>
-                            <label class="text-xs text-slate-400 mb-2 block">ลิงก์โมเดล (Model Path)</label>
+                            <label class="text-xs text-slate-400 mb-2 block uppercase tracking-wider">ลิงก์โมเดล (Model Path)</label>
                             <input type="text" id="frmModelPath" class="input-box font-mono text-emerald-400 text-sm">
                         </div>
                     </div>
                     <div>
-                        <label class="text-xs text-slate-400 mb-2 block">คำอธิบาย (ลากคลุมข้อความแล้วกด Ctrl+B เพื่อทำตัวหนาได้)</label>
-                        <div id="frmDesc" class="rich-editor-content" contenteditable="true"></div>
+                        <label class="text-xs text-slate-400 mb-2 block uppercase tracking-wider">คำอธิบาย (Description)</label>
+                        <div class="border border-slate-700 rounded-xl overflow-hidden focus-within:border-blue-500 transition">
+                            <div class="bg-slate-900 p-2 border-b border-slate-700 flex gap-2">
+                                <button type="button" onmousedown="event.preventDefault(); document.execCommand('bold', false, null);" class="bg-slate-700 hover:bg-slate-600 text-white text-xs px-3 py-1 rounded transition"><b>B</b> ทำตัวหนา</button>
+                                <span class="text-[10px] text-slate-500 self-center ml-2">*ลากเมาส์คลุมข้อความที่ต้องการแล้วกดปุ่มนี้</span>
+                            </div>
+                            <div id="frmDesc" class="rich-editor-content border-none" contenteditable="true"></div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="bg-slate-800 p-8 rounded-[2rem] border border-slate-700">
-                    <h3 class="text-amber-400 font-bold mb-6">🎯 จุดคลิกบนโมเดล (Click Parts)</h3>
+                <div class="bg-slate-800 p-8 rounded-[2rem] border border-slate-700 shadow-sm">
+                    <h3 class="text-amber-400 font-bold mb-6 flex items-center gap-2">🎯 จุดคลิกบนโมเดล (Click Parts)</h3>
                     <div id="clickPartsContainer" class="space-y-4"></div>
-                    <button onclick="addClickPart()" class="mt-4 text-sm text-amber-500 hover:text-amber-400">+ เพิ่มจุดคลิก</button>
+                    <button onclick="addClickPart()" class="mt-4 text-sm text-amber-500 hover:text-amber-400 font-medium">+ เพิ่มจุดคลิก</button>
                 </div>
 
-                <div class="bg-slate-800 p-8 rounded-[2rem] border border-slate-700 mb-20">
-                    <h3 class="text-rose-400 font-bold mb-6">📝 แบบทดสอบ (Quiz)</h3>
+                <div class="bg-slate-800 p-8 rounded-[2rem] border border-slate-700 shadow-sm mb-20">
+                    <h3 class="text-rose-400 font-bold mb-6 flex items-center gap-2">📝 แบบทดสอบ (Quiz)</h3>
                     <div id="quizContainer" class="space-y-6"></div>
-                    <button onclick="addQuiz()" class="mt-4 text-sm text-rose-500 hover:text-rose-400">+ เพิ่มข้อสอบ</button>
+                    <button onclick="addQuiz()" class="mt-4 text-sm text-rose-500 hover:text-rose-400 font-medium">+ เพิ่มข้อสอบ</button>
                 </div>
             </div>
         </div>
@@ -160,14 +167,16 @@ function syncInitialData() {
 
 function renderSidebar() {
     const menu = document.getElementById('sidebarMenu'); menu.innerHTML = '';
+    if (!globalDatabase || !globalDatabase.systems) return; // ป้องกัน Error ถ้าไม่มีข้อมูล
+    
     globalDatabase.systems.forEach((sys, sIdx) => {
         let html = `<div class="mb-4"><div class="flex justify-between items-center px-2 mb-2">
-                <h3 class="text-blue-500 font-bold text-[11px] uppercase">${sys.category}</h3>
-                <button onclick="deleteSystem(${sIdx})" class="text-[9px] text-slate-500 hover:text-rose-500">ลบกลุ่ม</button>
+                <h3 class="text-blue-500 font-bold text-[11px] uppercase tracking-wider">${sys.category}</h3>
+                <button onclick="deleteSystem(${sIdx})" class="text-[9px] text-slate-500 hover:text-rose-500 transition">ลบกลุ่ม</button>
             </div><div class="flex flex-col gap-1">`;
         sys.items.forEach((item, iIdx) => {
             const isActive = (currentSysIndex === sIdx && currentItemIndex === iIdx);
-            html += `<button onclick="editItem(${sIdx}, ${iIdx})" class="sidebar-item text-left p-3 rounded-xl text-sm transition border border-transparent ${isActive ? 'active' : 'bg-slate-900/30 text-slate-400'}">📄 ${item.name}</button>`;
+            html += `<button onclick="editItem(${sIdx}, ${iIdx})" class="sidebar-item text-left p-3 rounded-xl text-sm transition border border-transparent ${isActive ? 'active' : 'bg-slate-900/30 text-slate-400 hover:bg-slate-700/50'}">📄 ${item.name}</button>`;
         });
         html += `</div></div>`;
         menu.innerHTML += html;
@@ -177,6 +186,11 @@ function renderSidebar() {
 function editItem(sIdx, iIdx) {
     currentSysIndex = sIdx; currentItemIndex = iIdx;
     currentItemData = JSON.parse(JSON.stringify(globalDatabase.systems[sIdx].items[iIdx]));
+    
+    // ป้องกัน Error หากข้อมูลในระบบไม่มี Array ของ click_parts และ quiz
+    if (!currentItemData.click_parts) currentItemData.click_parts = [];
+    if (!currentItemData.quiz) currentItemData.quiz = [];
+
     document.getElementById('welcomeScreen').classList.add('hidden');
     document.getElementById('editingTitle').textContent = currentItemData.name;
     document.getElementById('frmName').value = currentItemData.name;
@@ -198,7 +212,7 @@ function renderParts() {
                 <input type="text" class="input-box text-xs" value="${p.name}" oninput="currentItemData.click_parts[${idx}].name=this.value" placeholder="ชื่อเรียก (รองรับ HTML)">
                 <input type="text" class="input-box text-xs" value="${p.info}" oninput="currentItemData.click_parts[${idx}].info=this.value" placeholder="รายละเอียด (รองรับ HTML)">
             </div>
-            <button onclick="currentItemData.click_parts.splice(${idx},1);renderParts()" class="col-span-1 text-rose-500">✕</button>
+            <button onclick="currentItemData.click_parts.splice(${idx},1);renderParts()" class="col-span-1 text-rose-500 hover:text-rose-400 transition">✕</button>
         </div>`;
     });
 }
@@ -213,7 +227,7 @@ function renderQuiz() {
                 ${q.choices.map((c, cIdx) => `<div class="flex gap-2 items-center"><input type="radio" name="ans-${idx}" ${q.answer===cIdx?'checked':''} onchange="currentItemData.quiz[${idx}].answer=${cIdx}">
                 <input type="text" class="input-box text-xs ${q.answer===cIdx?'border-emerald-500':''}" value="${c}" oninput="currentItemData.quiz[${idx}].choices[${cIdx}]=this.value"></div>`).join('')}
             </div>
-            <button onclick="currentItemData.quiz.splice(${idx},1);renderQuiz()" class="mt-4 text-[10px] text-rose-500 opacity-50 hover:opacity-100">ลบข้อสอบนี้</button>
+            <button onclick="currentItemData.quiz.splice(${idx},1);renderQuiz()" class="mt-4 text-[10px] text-rose-500 opacity-50 hover:opacity-100 transition">ลบข้อสอบนี้</button>
         </div>`;
     });
 }
@@ -224,7 +238,7 @@ function saveData() {
     currentItemData.model_file = document.getElementById('frmModelPath').value;
     currentItemData.description = document.getElementById('frmDesc').innerHTML;
     globalDatabase.systems[currentSysIndex].items[currentItemIndex] = currentItemData;
-    db.collection("database").doc("anatomy").set(globalDatabase).then(() => { alert("บันทึกสำเร็จ! ✅"); renderSidebar(); });
+    db.collection("database").doc("anatomy").set(globalDatabase).then(() => { alert("บันทึกข้อมูลเรียบร้อยแล้ว! ✅"); renderSidebar(); });
 }
 
 // ==========================================
@@ -254,7 +268,8 @@ function deleteSystem(idx) {
 }
 
 function clearAllData() { 
-    const conf = prompt("🔥 คำเตือนขั้นสูงสุด: หากต้องการลบข้อมูลบทเรียนทั้งหมดใน Cloud\\nโปรดพิมพ์คำว่า 'CONFIRM DELETE'");
+    // แก้ไขการขึ้นบรรทัดใหม่จาก \\n เป็น \n
+    const conf = prompt("🔥 คำเตือนขั้นสูงสุด: หากต้องการลบข้อมูลบทเรียนทั้งหมดใน Cloud\nโปรดพิมพ์คำว่า 'CONFIRM DELETE'");
     if(conf === "CONFIRM DELETE") {
         db.collection("database").doc("anatomy").delete().then(() => location.reload()); 
     } else if (conf !== null) {
@@ -262,8 +277,20 @@ function clearAllData() {
     }
 }
 
-function addNewSystem() { const n = prompt("ชื่อระบบใหม่:"); if(n) { globalDatabase.systems.push({category: n, items: []}); db.collection("database").doc("anatomy").set(globalDatabase).then(() => renderSidebar()); } }
-function addNewItem() { if(currentSysIndex === null) return alert("เลือกกลุ่มก่อน"); globalDatabase.systems[currentSysIndex].items.push({name: "อวัยวะใหม่", model_file: "models/brain.glb", description: "", click_parts: [], quiz: []}); db.collection("database").doc("anatomy").set(globalDatabase).then(() => renderSidebar()); }
+function addNewSystem() { 
+    const n = prompt("ชื่อระบบใหม่:"); 
+    if(n) { 
+        if(!globalDatabase) globalDatabase = { systems: [] }; // ป้องกันบั๊กกรณีฐานข้อมูลว่างเปล่า
+        globalDatabase.systems.push({category: n, items: []}); 
+        db.collection("database").doc("anatomy").set(globalDatabase).then(() => renderSidebar()); 
+    } 
+}
+
+function addNewItem() { 
+    if(currentSysIndex === null) return alert("โปรดเลือกกลุ่มก่อนเพิ่มอวัยวะ"); 
+    globalDatabase.systems[currentSysIndex].items.push({name: "อวัยวะใหม่", model_file: "models/brain.glb", description: "", click_parts: [], quiz: []}); 
+    db.collection("database").doc("anatomy").set(globalDatabase).then(() => renderSidebar()); 
+}
 
 // 🌟 ป้องกันการก๊อปปี้สไตล์แปลกๆ จากเว็บอื่นมาวางในช่อง Editor
 document.addEventListener('paste', function(e) {
