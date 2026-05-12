@@ -22,12 +22,12 @@
         .delete-btn-sm { position: absolute; top: 8px; right: 8px; width: 24px; height: 24px; display: flex; justify-content: center; align-items: center; border-radius: 6px; background: rgba(225, 29, 72, 0.1); color: #fb7185; transition: 0.2s; cursor: pointer; }
         .delete-btn-sm:hover { background: rgba(225, 29, 72, 0.8); color: white; }
 
+        [contenteditable="true"]:empty:before { content: attr(placeholder); color: #64748b; pointer-events: none; display: block; }
+
         /* -------------------------------------
            🔒 ระบบซ่อน/ล็อกสิทธิ์ผู้สอน 
            ------------------------------------- */
-        /* ซ่อนปุ่มต่างๆ หากไม่ได้อยู่ใน dev-mode */
         body:not(.dev-mode) .dev-only { display: none !important; }
-        /* ล็อกช่องกรอกข้อความ หากไม่ได้อยู่ใน dev-mode */
         body:not(.dev-mode) .dev-lock-input { 
             pointer-events: none; 
             opacity: 0.5; 
@@ -38,7 +38,21 @@
 </head>
 <body class="h-screen w-screen flex flex-col">
 
+    <div id="devPassModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] flex justify-center items-center p-4 transition-opacity">
+        <div class="bg-slate-900 border border-slate-700 p-6 rounded-2xl shadow-2xl w-full max-w-xs transform scale-100">
+            <h3 class="text-white text-lg font-bold mb-2 flex items-center gap-2">🔑 ปลดล็อกสิทธิ์</h3>
+            <p class="text-slate-400 text-xs mb-4">กรุณาใส่รหัสผ่านนักพัฒนาเพื่อดำเนินการต่อ</p>
+            <input type="password" id="devPassInput" class="input-box mb-4 text-center text-lg tracking-[0.3em]" placeholder="••••">
+            <div class="flex justify-end gap-2">
+                <button onclick="closeDevPassModal()" class="px-4 py-2 rounded-lg text-xs text-slate-400 hover:text-white hover:bg-slate-800 transition">ยกเลิก</button>
+                <button onclick="confirmDevPass()" class="bg-blue-600 hover:bg-blue-500 px-6 py-2 rounded-lg text-xs text-white font-bold transition shadow-lg">ยืนยัน</button>
+            </div>
+        </div>
+    </div>
+
     <div id="loginPage" class="flex flex-col items-center justify-center h-full w-full p-6 bg-slate-950 absolute inset-0 z-50">
+        <button onclick="toggleFullScreen()" id="fsBtnLogin" class="absolute top-6 right-6 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white border border-slate-700 p-2 rounded-full transition shadow-lg w-10 h-10 flex justify-center items-center"></button>
+        
         <div class="bg-slate-900 p-8 rounded-3xl shadow-2xl w-full max-w-md text-center border border-slate-800">
             <div class="text-5xl mb-4">⚙️</div>
             <h1 class="text-2xl font-bold text-white mb-2">BioLens Admin</h1>
@@ -55,15 +69,18 @@
         <div class="flex items-center gap-3">
             <h1 class="text-lg font-bold text-white ml-2">Admin Dashboard</h1>
         </div>
-        <div class="flex gap-2">
+        <div class="flex gap-2 items-center">
             <button onclick="toggleDevMode()" id="btnDevMode" class="bg-slate-600/20 hover:bg-slate-600 text-slate-400 hover:text-white px-3 py-1.5 rounded-lg text-xs transition border border-slate-600/30 flex items-center gap-1">🔒 โหมดปกติ</button>
             
             <button onclick="syncInitialData()" class="bg-amber-600 hover:bg-amber-500 px-3 py-1.5 rounded-lg text-xs dev-only hidden" id="btnSync">📥 โหลดข้อมูลเริ่มต้น</button>
-            <button onclick="addNewSystem()" class="bg-blue-600/20 hover:bg-blue-600 text-blue-400 hover:text-white px-3 py-1.5 rounded-lg text-xs transition border border-blue-600/30 dev-only">➕ เพิ่มระบบ</button>
-            <button onclick="addNewItem()" class="bg-emerald-600/20 hover:bg-emerald-600 text-emerald-400 hover:text-white px-3 py-1.5 rounded-lg text-xs transition border border-emerald-600/30 dev-only">➕ เพิ่มอวัยวะ</button>
+            <button onclick="addNewSystem()" class="bg-blue-600/20 hover:bg-blue-600 text-blue-400 hover:text-white px-3 py-1.5 rounded-lg text-xs transition border border-blue-600/30 dev-only">➕ เพิ่มระบบ (หมวดหมู่)</button>
             <button onclick="clearAllData()" class="bg-rose-600/20 hover:bg-rose-600 text-rose-400 hover:text-white px-3 py-1.5 rounded-lg text-xs transition border border-rose-600/30 dev-only">🧹 ล้าง Cloud</button>
-            <div class="w-[1px] bg-slate-700 mx-1"></div>
-            <button onclick="window.location.href='index.html'" class="bg-slate-700 hover:bg-slate-600 px-3 py-1.5 rounded-lg text-xs">🏠 กลับหน้าหลัก</button>
+            
+            <div class="w-[1px] bg-slate-700 mx-1 h-6"></div>
+            
+            <button onclick="toggleFullScreen()" id="fsBtnHeader" class="bg-slate-700 hover:bg-slate-600 text-white w-8 h-8 rounded-lg flex items-center justify-center transition" title="ขยายเต็มจอ"></button>
+            
+            <button onclick="window.location.href='index.html'" class="bg-slate-700 hover:bg-slate-600 px-3 py-1.5 rounded-lg text-xs">🏠 หน้าหลัก</button>
             <button onclick="logout()" class="bg-slate-900 hover:bg-rose-700 px-3 py-1.5 rounded-lg text-xs border border-slate-700">🚪 ออก</button>
         </div>
     </header>
@@ -82,7 +99,7 @@
             <div id="editorHeader" class="bg-slate-800 px-6 py-4 border-b border-slate-700 flex justify-between items-center shrink-0">
                 <h2 id="editingTitle" class="text-xl font-bold text-blue-400 truncate w-1/2">Editor</h2>
                 <div class="flex gap-2">
-                    <button onclick="deleteCurrentItem()" class="text-rose-400 hover:bg-rose-400/10 px-3 py-2 rounded-lg text-xs border border-rose-400/20 transition dev-only">🗑️ ลบหน้านี้</button>
+                    <button onclick="deleteCurrentItem()" class="text-rose-400 hover:bg-rose-400/10 px-3 py-2 rounded-lg text-xs border border-rose-400/20 transition dev-only">🗑️ ลบหน้านี้ทิ้ง</button>
                     <button onclick="saveData()" class="bg-emerald-600 hover:bg-emerald-500 px-6 py-2 rounded-lg font-bold text-white text-sm shadow-md transition flex items-center gap-2">💾 บันทึกข้อมูล</button>
                 </div>
             </div>
@@ -100,11 +117,11 @@
                         </div>
                     </div>
                     <div>
-                        <label class="text-[10px] text-slate-400 mb-1 block uppercase">คำอธิบายประกอบ</label>
+                        <label class="text-[10px] text-slate-400 mb-1 block uppercase">คำอธิบายประกอบภาพรวม</label>
                         <div class="border border-slate-700 rounded-lg overflow-hidden focus-within:border-blue-500 transition">
-                            <div class="bg-slate-900 p-1.5 border-b border-slate-700 flex gap-2">
+                            <div class="bg-slate-900 p-1.5 border-b border-slate-700 flex gap-2 items-center">
                                 <button type="button" onmousedown="event.preventDefault(); document.execCommand('bold', false, null);" class="bg-slate-700 hover:bg-slate-600 text-white text-[10px] px-2 py-1 rounded transition"><b>B</b> ตัวหนา</button>
-                                <span class="text-[9px] text-slate-500 self-center ml-1">*ลากคลุมข้อความแล้วกดปุ่มนี้</span>
+                                <span class="text-[9px] text-slate-500">*ลากคลุมข้อความแล้วกดปุ่มนี้</span>
                             </div>
                             <div id="frmDesc" class="rich-editor-content border-none" contenteditable="true"></div>
                         </div>
@@ -116,7 +133,7 @@
                         <h3 class="text-amber-400 font-bold text-sm">🎯 จุดคลิกบนโมเดล</h3>
                         <button onclick="addClickPart()" class="bg-amber-500/20 text-amber-400 hover:bg-amber-500 hover:text-white px-3 py-1 rounded-lg text-xs transition dev-only">+ เพิ่มจุดคลิก</button>
                     </div>
-                    <div id="clickPartsContainer" class="space-y-3"></div>
+                    <div id="clickPartsContainer" class="space-y-4"></div>
                 </div>
 
                 <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-sm mb-10">
@@ -144,7 +161,36 @@ const auth = firebase.auth();
 const db = firebase.firestore();
 
 let globalDatabase = null, currentSysIndex = null, currentItemIndex = null, currentItemData = null;
-let isDevMode = false; // สถานะการปลดล็อกสิทธิ์
+let isDevMode = false;
+
+// ==========================================
+// 📺 ระบบเต็มจอ (Fullscreen Logic)
+// ==========================================
+const svgExpand = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>`;
+const svgCollapse = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><polyline points="4 14 10 14 10 20"></polyline><polyline points="20 10 14 10 14 4"></polyline><line x1="14" y1="10" x2="21" y2="3"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>`;
+
+function updateFsBtn() {
+    const isFs = !!document.fullscreenElement;
+    const icon = isFs ? svgCollapse : svgExpand;
+    if(document.getElementById('fsBtnHeader')) document.getElementById('fsBtnHeader').innerHTML = icon;
+    if(document.getElementById('fsBtnLogin')) document.getElementById('fsBtnLogin').innerHTML = icon;
+}
+
+function toggleFullScreen() {
+    const doc = document.documentElement;
+    if (!document.fullscreenElement) {
+        if (doc.requestFullscreen) doc.requestFullscreen();
+        else if (doc.webkitRequestFullscreen) doc.webkitRequestFullscreen();
+        else if (doc.msRequestFullscreen) doc.msRequestFullscreen();
+    } else {
+        if (document.exitFullscreen) document.exitFullscreen();
+        else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+        else if (document.msExitFullscreen) document.msExitFullscreen();
+    }
+}
+document.addEventListener('fullscreenchange', updateFsBtn);
+document.addEventListener('webkitfullscreenchange', updateFsBtn);
+document.addEventListener('DOMContentLoaded', updateFsBtn);
 
 auth.onAuthStateChanged(user => {
     if (user) {
@@ -162,9 +208,16 @@ function login() {
     const e = document.getElementById('email').value, p = document.getElementById('pass').value;
     auth.signInWithEmailAndPassword(e, p).catch(() => document.getElementById('errorMsg').classList.remove('hidden'));
 }
-function logout() { auth.signOut(); }
 
-// 🔓 ระบบสลับสิทธิ์การใช้งาน
+function logout() { 
+    if(confirm("🚪 คุณต้องการออกจากระบบใช่หรือไม่?")) {
+        auth.signOut(); 
+    }
+}
+
+// ==========================================
+// 🔓 ระบบสลับสิทธิ์การใช้งาน (Modal Password)
+// ==========================================
 function toggleDevMode() {
     if(isDevMode) {
         isDevMode = false;
@@ -173,18 +226,35 @@ function toggleDevMode() {
         btn.innerHTML = "🔒 โหมดปกติ";
         btn.className = "bg-slate-600/20 hover:bg-slate-600 text-slate-400 hover:text-white px-3 py-1.5 rounded-lg text-xs transition border border-slate-600/30 flex items-center gap-1";
     } else {
-        const pass = prompt("🔑 ปลดล็อกสิทธิ์นักพัฒนา\nกรุณาใส่รหัสผ่าน");
-        if(pass === "122026") { // สามารถแก้ไขรหัสผ่านปลดล็อกได้ที่นี่
-            isDevMode = true;
-            document.body.classList.add('dev-mode');
-            const btn = document.getElementById('btnDevMode');
-            btn.innerHTML = "🔓 โหมดนักพัฒนา";
-            btn.className = "bg-emerald-600/20 hover:bg-emerald-600 text-emerald-400 hover:text-white px-3 py-1.5 rounded-lg text-xs transition border border-emerald-600/30 flex items-center gap-1 shadow-md shadow-emerald-500/20";
-        } else if (pass !== null) {
-            alert("❌ รหัสผ่านไม่ถูกต้อง!");
-        }
+        document.getElementById('devPassModal').classList.remove('hidden');
+        document.getElementById('devPassInput').value = '';
+        setTimeout(() => document.getElementById('devPassInput').focus(), 100);
     }
 }
+
+function closeDevPassModal() {
+    document.getElementById('devPassModal').classList.add('hidden');
+}
+
+function confirmDevPass() {
+    const pass = document.getElementById('devPassInput').value;
+    if(pass === "122026") { 
+        isDevMode = true;
+        document.body.classList.add('dev-mode');
+        const btn = document.getElementById('btnDevMode');
+        btn.innerHTML = "🔓 โหมดนักพัฒนา";
+        btn.className = "bg-emerald-600/20 hover:bg-emerald-600 text-emerald-400 hover:text-white px-3 py-1.5 rounded-lg text-xs transition border border-emerald-600/30 flex items-center gap-1 shadow-md shadow-emerald-500/20";
+        closeDevPassModal();
+    } else {
+        alert("❌ รหัสผ่านไม่ถูกต้อง!");
+        document.getElementById('devPassInput').value = '';
+        document.getElementById('devPassInput').focus();
+    }
+}
+
+document.getElementById('devPassInput').addEventListener('keypress', function (e) {
+    if (e.key === 'Enter') confirmDevPass();
+});
 
 function loadData() {
     db.collection("database").doc("anatomy").get().then(doc => {
@@ -206,19 +276,32 @@ function syncInitialData() {
     }
 }
 
+// 🌟 สร้าง Sidebar พร้อมปุ่มเพิ่มบทเรียนเข้าไปในกลุ่มโดยตรง
 function renderSidebar() {
     const menu = document.getElementById('sidebarMenu'); menu.innerHTML = '';
     if (!globalDatabase || !globalDatabase.systems) return; 
     
     globalDatabase.systems.forEach((sys, sIdx) => {
-        let html = `<div class="mb-4"><div class="flex justify-between items-center px-1 mb-2">
-                <h3 class="text-blue-500 font-bold text-[10px] uppercase">${sys.category}</h3>
-                <button onclick="deleteSystem(${sIdx})" class="text-[9px] text-slate-500 hover:text-rose-500 transition dev-only">ลบกลุ่ม</button>
-            </div><div class="flex flex-col gap-1">`;
-        sys.items.forEach((item, iIdx) => {
-            const isActive = (currentSysIndex === sIdx && currentItemIndex === iIdx);
-            html += `<button onclick="editItem(${sIdx}, ${iIdx})" class="sidebar-item text-left px-3 py-2 rounded-lg text-xs transition border border-transparent ${isActive ? 'active' : 'bg-slate-900/50 text-slate-400 hover:bg-slate-700'}">📄 ${item.name}</button>`;
-        });
+        let html = `
+        <div class="mb-5">
+            <div class="flex justify-between items-center px-1 mb-2 border-b border-slate-700/50 pb-1">
+                <h3 class="text-blue-500 font-bold text-[11px] uppercase">${sys.category}</h3>
+                <div class="flex gap-2 dev-only">
+                    <button onclick="addNewItemToSys(${sIdx})" class="text-[10px] text-emerald-500 hover:text-emerald-400 transition font-medium">+ เพิ่มบทเรียน</button>
+                    <button onclick="deleteSystem(${sIdx})" class="text-[10px] text-slate-500 hover:text-rose-500 transition">ลบกลุ่ม</button>
+                </div>
+            </div>
+            <div class="flex flex-col gap-1">`;
+        
+        if (sys.items && sys.items.length > 0) {
+            sys.items.forEach((item, iIdx) => {
+                const isActive = (currentSysIndex === sIdx && currentItemIndex === iIdx);
+                html += `<button onclick="editItem(${sIdx}, ${iIdx})" class="sidebar-item text-left px-3 py-2 rounded-lg text-xs transition border border-transparent ${isActive ? 'active' : 'bg-slate-900/50 text-slate-400 hover:bg-slate-700'}">📄 ${item.name}</button>`;
+            });
+        } else {
+            html += `<p class="text-slate-600 text-[10px] italic px-2 py-1">ยังไม่มีบทเรียนในหมวดนี้</p>`;
+        }
+        
         html += `</div></div>`;
         menu.innerHTML += html;
     });
@@ -245,14 +328,36 @@ function renderParts() {
     const container = document.getElementById('clickPartsContainer'); container.innerHTML = '';
     const parts = currentItemData.click_parts || [];
     parts.forEach((p, idx) => {
-        container.innerHTML += `<div class="bg-slate-900/50 p-4 rounded-xl border border-slate-700 relative pr-12 flex gap-3 items-start">
+        container.innerHTML += `<div class="bg-slate-900/50 p-4 rounded-xl border border-slate-700 relative pr-12 flex flex-col md:flex-row gap-4 items-start">
             <button onclick="deleteClickPart(${idx})" class="delete-btn-sm dev-only" title="ลบจุดคลิก">✕</button>
-            <div class="w-1/3">
+            
+            <div class="w-full md:w-1/3">
+                <label class="text-[10px] text-slate-400 mb-1 block uppercase">ID ในโมเดล</label>
                 <input type="text" class="input-box text-xs font-mono dev-lock-input" value="${p.material_name}" oninput="currentItemData.click_parts[${idx}].material_name=this.value" placeholder="ID โมเดล">
             </div>
-            <div class="w-2/3 space-y-2">
-                <input type="text" class="input-box text-xs" value="${p.name}" oninput="currentItemData.click_parts[${idx}].name=this.value" placeholder="ชื่อที่แสดง (รองรับ HTML)">
-                <input type="text" class="input-box text-xs" value="${p.info}" oninput="currentItemData.click_parts[${idx}].info=this.value" placeholder="รายละเอียดเพิ่มเติม">
+
+            <div class="w-full md:w-2/3 space-y-4">
+                <div>
+                    <label class="text-[10px] text-slate-400 block uppercase mb-1">ชื่อที่แสดง</label>
+                    <div class="border border-slate-700 rounded-lg overflow-hidden focus-within:border-blue-500 transition">
+                        <div class="bg-slate-900 p-1.5 border-b border-slate-700 flex gap-2 items-center">
+                            <button type="button" onmousedown="event.preventDefault(); document.execCommand('bold', false, null);" class="bg-slate-700 hover:bg-slate-600 text-white text-[10px] px-2 py-1 rounded transition"><b>B</b> ตัวหนา</button>
+                            <span class="text-[9px] text-slate-500">*ลากคลุมข้อความแล้วกดปุ่มนี้ (หรือกด Enter เพื่อขึ้นบรรทัดใหม่)</span>
+                        </div>
+                        <div class="rich-editor-content border-none text-xs min-h-[40px] leading-relaxed p-2" contenteditable="true" placeholder="ระบุชื่อ..." oninput="currentItemData.click_parts[${idx}].name=this.innerHTML">${p.name || ''}</div>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-[10px] text-slate-400 block uppercase mb-1">รายละเอียดเพิ่มเติม</label>
+                    <div class="border border-slate-700 rounded-lg overflow-hidden focus-within:border-blue-500 transition">
+                        <div class="bg-slate-900 p-1.5 border-b border-slate-700 flex gap-2 items-center">
+                            <button type="button" onmousedown="event.preventDefault(); document.execCommand('bold', false, null);" class="bg-slate-700 hover:bg-slate-600 text-white text-[10px] px-2 py-1 rounded transition"><b>B</b> ตัวหนา</button>
+                            <span class="text-[9px] text-slate-500">*ลากคลุมข้อความแล้วกดปุ่มนี้</span>
+                        </div>
+                        <div class="rich-editor-content border-none text-xs min-h-[60px] leading-relaxed p-2" contenteditable="true" placeholder="ระบุรายละเอียด..." oninput="currentItemData.click_parts[${idx}].info=this.innerHTML">${p.info || ''}</div>
+                    </div>
+                </div>
             </div>
         </div>`;
     });
@@ -302,7 +407,7 @@ function deleteCurrentItem() {
 }
 function deleteSystem(idx) { 
     const sysName = globalDatabase.systems[idx].category;
-    const conf = prompt(`⚠️ พิมพ์ชื่อ "${sysName}" ด้านล่างเพื่อยืนยันการลบหมวดหมู่นี้ทิ้ง:`);
+    const conf = prompt(`⚠️ พิมพ์ชื่อ "${sysName}" ด้านล่างเพื่อยืนยันการลบหมวดหมู่นี้ทิ้ง:\n(การลบหมวดหมู่จะทำให้บทเรียนในหมวดนี้หายไปทั้งหมด)`);
     if(conf === sysName) { 
         globalDatabase.systems.splice(idx, 1); db.collection("database").doc("anatomy").set(globalDatabase).then(() => renderSidebar()); 
     } else if (conf !== null) alert("พิมพ์ชื่อไม่ถูกต้อง ยกเลิกการลบ");
@@ -313,16 +418,23 @@ function clearAllData() {
     else if (conf !== null) alert("รหัสยืนยันไม่ถูกต้อง ยกเลิกการล้างข้อมูล");
 }
 function addNewSystem() { 
-    const n = prompt("ชื่อระบบใหม่:"); 
+    const n = prompt("ชื่อระบบหมวดหมู่ใหม่:"); 
     if(n) { 
         if(!globalDatabase) globalDatabase = { systems: [] };
         globalDatabase.systems.push({category: n, items: []}); db.collection("database").doc("anatomy").set(globalDatabase).then(() => renderSidebar()); 
     } 
 }
-function addNewItem() { 
-    if(currentSysIndex === null) return alert("โปรดเลือกกลุ่มก่อนเพิ่มอวัยวะ"); 
-    globalDatabase.systems[currentSysIndex].items.push({name: "อวัยวะใหม่", model_file: "models/brain.glb", description: "", click_parts: [], quiz: []}); 
-    db.collection("database").doc("anatomy").set(globalDatabase).then(() => renderSidebar()); 
+
+// 🌟 ฟังก์ชันสำหรับเพิ่มบทเรียนเข้าไปในกลุ่ม (System) ที่กำหนด
+function addNewItemToSys(sysIdx) { 
+    if(!globalDatabase.systems[sysIdx].items) globalDatabase.systems[sysIdx].items = [];
+    globalDatabase.systems[sysIdx].items.push({name: "บทเรียนใหม่", model_file: "models/new_model.glb", description: "รายละเอียดบทเรียน...", click_parts: [], quiz: []}); 
+    db.collection("database").doc("anatomy").set(globalDatabase).then(() => {
+        renderSidebar();
+        // ให้มันคลิกเลือกบทเรียนใหม่ที่เพิ่งสร้างให้อัตโนมัติ
+        const newItemIdx = globalDatabase.systems[sysIdx].items.length - 1;
+        editItem(sysIdx, newItemIdx); 
+    }); 
 }
 
 document.addEventListener('paste', function(e) {
