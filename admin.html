@@ -173,8 +173,8 @@ function toggleDevMode() {
         btn.innerHTML = "🔒 โหมดปกติ";
         btn.className = "bg-slate-600/20 hover:bg-slate-600 text-slate-400 hover:text-white px-3 py-1.5 rounded-lg text-xs transition border border-slate-600/30 flex items-center gap-1";
     } else {
-        const pass = prompt("🔑 ปลดล็อกสิทธิ์นักพัฒนา\nกรุณาใส่รหัสผ่าน (ค่าเริ่มต้นคือ: 1234)");
-        if(pass === "1234") { // สามารถแก้ไขรหัสผ่านปลดล็อกได้ที่นี่
+        const pass = prompt("🔑 ปลดล็อกสิทธิ์นักพัฒนา\nกรุณาใส่รหัสผ่าน");
+        if(pass === "122026") { // สามารถแก้ไขรหัสผ่านปลดล็อกได้ที่นี่
             isDevMode = true;
             document.body.classList.add('dev-mode');
             const btn = document.getElementById('btnDevMode');
