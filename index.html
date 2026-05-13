@@ -169,7 +169,7 @@ model-viewer { width:100%; height:calc(100vh - 60px); margin-top: 60px; --poster
     <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; display: flex; flex-direction: column; gap: 10px;">
         <button onclick="window.location.href='admin.html'" 
             style="background: transparent; border: 1px dashed #475569; color: #94a3b8; font-size: 0.85rem; width: 100%; box-shadow: none;">
-            ⚙️ จัดการระบบ (สำหรับคุณครู)
+            ⚙️ จัดการระบบ
         </button>
     </div>
   </div>
@@ -273,7 +273,7 @@ db.collection("database").doc("anatomy").get()
         renderQuizMenu(); 
         if (data.length > 0) loadSystem(0);
         
-        document.getElementById("loadingText").textContent = "ระบบพร้อมใช้งานแล้ว (ดึงข้อมูลจาก Cloud ☁️)";
+        document.getElementById("loadingText").textContent = "ระบบพร้อมใช้งานแล้ว";
         document.getElementById("loadingText").style.color = "#4ade80"; 
         document.getElementById("btnLearn").disabled = false;
         document.getElementById("btnQuizMenu").disabled = false;
@@ -283,7 +283,7 @@ db.collection("database").doc("anatomy").get()
 })
 .catch(err => {
     console.error("Error:", err);
-    document.getElementById("loadingText").textContent = "ไม่สามารถเชื่อมต่อฐานข้อมูลได้ กรุณาไปเพิ่มข้อมูลที่หน้า Admin ก่อนครับ";
+    document.getElementById("loadingText").textContent = "ไม่สามารถเชื่อมต่อฐานข้อมูลได้ กรุณาลองใหม่อีกครั้ง";
     document.getElementById("loadingText").style.color = "#ef4444";
 });
 
