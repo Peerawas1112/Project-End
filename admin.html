@@ -244,15 +244,20 @@ function login() {
     const e = document.getElementById('email').value;
     const p = document.getElementById('pass').value;
     
-    // สั่งล็อกอิน
-    auth.signInWithEmailAndPassword(e, p)
+    // 1. สั่งให้ Firebase จำการล็อกอินแค่ "ชั่วคราว" (ปิดแท็บ/เบราว์เซอร์ = ล็อกเอาต์ทันที)
+    auth.setPersistence(firebase.auth.Auth.Persistence.SESSION)
     .then(() => {
-        // ถ้ารหัสถูก ให้รีเฟรชหน้า 1 ครั้งเพื่อซิงค์กุญแจกับฐานข้อมูล
+        // 2. เมื่อตั้งค่าเสร็จ ค่อยสั่งล็อกอิน
+        return auth.signInWithEmailAndPassword(e, p);
+    })
+    .then(() => {
+        // 3. ถ้ารหัสถูก รีเฟรชหน้า 1 ครั้งเพื่อซิงค์ข้อมูล
         window.location.reload();
     })
-    .catch(() => {
-        // ถ้ารหัสผิด ให้โชว์ข้อความแจ้งเตือน
+    .catch((error) => {
+        // ถ้ารหัสผิด หรือเกิดข้อผิดพลาด ให้โชว์ข้อความแจ้งเตือน
         document.getElementById('errorMsg').classList.remove('hidden');
+        console.error("Login Error:", error);
     });
 }
 
