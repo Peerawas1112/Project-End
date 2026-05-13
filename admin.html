@@ -9,30 +9,31 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
     <style>
         html, body { height: 100%; margin: 0; font-family: 'Kanit', sans-serif; background: #0f172a; color: #f8fafc; overflow: hidden; }
         .input-box { background: #1e293b; border: 1px solid #334155; color: white; border-radius: 8px; padding: 8px 12px; width: 100%; outline: none; transition: 0.2s; font-size: 0.9rem; }
         .input-box:focus { border-color: #3b82f6; }
         .rich-editor-content { padding: 12px; min-height: 80px; background: #1e293b; color: white; outline: none; line-height: 1.5; font-size: 0.9rem; }
         .rich-editor-content b { color: #fbbf24; }
+        
+        /* Custom Scrollbar พื้นฐาน */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        
+        /* Custom Scrollbar สำหรับการ์ดพรีวิว */
+        .preview-scroll::-webkit-scrollbar { width: 4px; }
+        .preview-scroll::-webkit-scrollbar-track { background: transparent; }
+        .preview-scroll::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 10px; }
+        .preview-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.4); }
+
         .sidebar-item.active { background: #2563eb; color: white; border-color: #3b82f6; }
         .delete-btn-sm { position: absolute; top: 8px; right: 8px; width: 24px; height: 24px; display: flex; justify-content: center; align-items: center; border-radius: 6px; background: rgba(225, 29, 72, 0.1); color: #fb7185; transition: 0.2s; cursor: pointer; }
         .delete-btn-sm:hover { background: rgba(225, 29, 72, 0.8); color: white; }
 
         [contenteditable="true"]:empty:before { content: attr(placeholder); color: #64748b; pointer-events: none; display: block; }
-
-        /* -------------------------------------
-           🔒 ระบบซ่อน/ล็อกสิทธิ์ผู้สอน 
-           ------------------------------------- */
         body:not(.dev-mode) .dev-only { display: none !important; }
-        body:not(.dev-mode) .dev-lock-input { 
-            pointer-events: none; 
-            opacity: 0.5; 
-            background-color: #0f172a; 
-            border-color: #1e293b; 
-        }
+        body:not(.dev-mode) .dev-lock-input { pointer-events: none; opacity: 0.5; background-color: #0f172a; border-color: #1e293b; }
     </style>
 </head>
 <body class="h-screen w-screen flex flex-col">
@@ -75,7 +76,6 @@
 
     <div id="loginPage" class="flex flex-col items-center justify-center h-full w-full p-6 bg-slate-950 absolute inset-0 z-50">
         <button onclick="toggleFullScreen()" id="fsBtnLogin" class="absolute top-6 right-6 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white border border-slate-700 p-2 rounded-full transition shadow-lg w-10 h-10 flex justify-center items-center"></button>
-        
         <div class="bg-slate-900 p-8 rounded-3xl shadow-2xl w-full max-w-md text-center border border-slate-800">
             <div class="text-5xl mb-4">⚙️</div>
             <h1 class="text-2xl font-bold text-white mb-2">BioLens Admin</h1>
@@ -94,21 +94,18 @@
         </div>
         <div class="flex gap-2 items-center">
             <button onclick="toggleDevMode()" id="btnDevMode" class="bg-slate-600/20 hover:bg-slate-600 text-slate-400 hover:text-white px-3 py-1.5 rounded-lg text-xs transition border border-slate-600/30 flex items-center gap-1">🔒 โหมดปกติ</button>
-            
             <button onclick="syncInitialData()" class="bg-amber-600 hover:bg-amber-500 px-3 py-1.5 rounded-lg text-xs dev-only hidden" id="btnSync">📥 โหลดข้อมูลเริ่มต้น</button>
             <button onclick="addNewSystem()" class="bg-blue-600/20 hover:bg-blue-600 text-blue-400 hover:text-white px-3 py-1.5 rounded-lg text-xs transition border border-blue-600/30 dev-only">➕ เพิ่มระบบ (หมวดหมู่)</button>
             <button onclick="clearAllData()" class="bg-rose-600/20 hover:bg-rose-600 text-rose-400 hover:text-white px-3 py-1.5 rounded-lg text-xs transition border border-rose-600/30 dev-only">🧹 ล้าง Cloud</button>
-            
             <div class="w-[1px] bg-slate-700 mx-1 h-6"></div>
-            
             <button onclick="toggleFullScreen()" id="fsBtnHeader" class="bg-slate-700 hover:bg-slate-600 text-white w-8 h-8 rounded-lg flex items-center justify-center transition" title="ขยายเต็มจอ"></button>
-            
             <button onclick="returnToHomeSecurely()" class="bg-slate-700 hover:bg-slate-600 px-3 py-1.5 rounded-lg text-xs">🏠 หน้าหลัก</button>
             <button onclick="logout()" class="bg-slate-900 hover:bg-rose-700 px-3 py-1.5 rounded-lg text-xs border border-slate-700">🚪 ออกจากระบบ</button>
         </div>
     </header>
 
     <div id="dashboard" class="hidden flex-col md:flex-row h-full overflow-hidden">
+        
         <div class="w-full md:w-72 h-1/3 md:h-full bg-slate-800 border-b md:border-b-0 md:border-r border-slate-700 p-4 overflow-y-auto shrink-0">
             <div id="sidebarMenu" class="space-y-4"></div>
         </div>
@@ -128,6 +125,46 @@
             </div>
             
             <div class="flex-grow px-6 py-4 overflow-y-auto space-y-4">
+                
+                <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-sm relative">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="text-indigo-400 font-bold text-sm">📺 จอพรีวิวแอปพลิเคชัน (WYSIWYG)</h3>
+                        <span class="text-[10px] bg-slate-700 text-slate-300 px-2 py-1 rounded">อัปเดตเรียลไทม์</span>
+                    </div>
+                    <p class="text-xs text-slate-400 mb-4 leading-relaxed">
+                        💡 <b>ทริค:</b> ลอง <b>"คลิก"</b> ชิ้นส่วนบนโมเดล 3D ด้านซ้าย เพื่อดูผลลัพธ์ในการ์ดจำลองด้านขวา และดึง ID มาใช้งานครับ
+                    </p>
+                    
+                    <div id="allMaterialsContainer" class="hidden mb-4 p-3 bg-slate-900/50 rounded-xl border border-slate-700">
+                        <div class="text-[10px] text-slate-400 mb-2 uppercase flex justify-between items-center">
+                            <span>🏷️ รายชื่อ ID ทั้งหมดที่พบในโมเดล (คลิกปุ่มแทนการจิ้มโมเดลได้เลย)</span>
+                        </div>
+                        <div id="materialChips" class="flex flex-wrap gap-1.5"></div>
+                    </div>
+                    
+                    <div class="flex flex-col lg:flex-row gap-4 h-[400px]">
+                        
+                        <div class="flex-grow bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] bg-slate-950 rounded-xl overflow-hidden border border-slate-700 relative shadow-inner">
+                            <model-viewer id="adminViewer" class="w-full h-full" camera-controls auto-rotate shadow-intensity="1" exposure="1.2" environment-image="neutral" disable-pan></model-viewer>
+                            
+                            <div id="clickedIdDisplay" class="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-slate-900/90 backdrop-blur-md text-white px-4 py-2 rounded-full text-xs font-mono shadow-[0_10px_20px_rgba(0,0,0,0.5)] border border-slate-600 hidden flex items-center gap-2 transition-all pointer-events-none whitespace-nowrap z-10">
+                                📌 ID: <span id="idTextSpan" class="bg-indigo-600/50 text-indigo-300 px-2 py-1 rounded font-bold">Name</span>
+                            </div>
+                        </div>
+
+                        <div class="w-full lg:w-[350px] bg-[rgba(15,23,42,0.85)] border border-[rgba(255,255,255,0.15)] rounded-xl p-5 text-white shadow-lg flex flex-col shrink-0 relative overflow-hidden">
+                            <div id="previewBadge" class="absolute top-0 right-0 bg-blue-500 text-white text-[10px] font-bold px-3 py-1.5 rounded-bl-xl shadow-md">โหมดภาพรวม</div>
+                            
+                            <h3 id="previewTitle" class="text-[1.2rem] font-medium border-b border-[#ff4757] pb-2 mb-3 mt-2 shrink-0 leading-[1.3]">ชื่อหัวข้อ...</h3>
+                            
+                            <div id="previewDesc" class="text-[0.9rem] text-[#cbd5e1] leading-[1.6] overflow-y-auto flex-grow pr-2 preview-scroll">รายละเอียด...</div>
+                            
+                            <button id="resetPreviewBtn" onclick="resetLivePreview()" class="mt-4 w-full bg-slate-700/50 hover:bg-[#ff4757] text-white text-xs px-3 py-2 rounded-lg border border-slate-600 transition shadow-sm hidden shrink-0 font-medium">🔙 ย้อนกลับไปหน้าภาพรวม</button>
+                        </div>
+                        
+                    </div>
+                </div>
+
                 <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-sm">
                     <div class="grid grid-cols-2 gap-4 mb-4">
                         <div>
@@ -137,24 +174,20 @@
                         <div>
                             <label class="text-[10px] text-slate-400 mb-1 block uppercase">ลิงก์โมเดล (GLB Path) <span class="dev-only text-emerald-400">🔓 ปลดล็อกแล้ว</span></label>
                             <div class="flex gap-2 items-center">
-                                <input type="text" id="frmModelPath" class="input-box font-mono text-emerald-400 dev-lock-input" placeholder="อัปโหลดเพื่อสร้างลิงก์อัตโนมัติ">
-                                
+                                <input type="text" id="frmModelPath" class="input-box font-mono text-emerald-400 dev-lock-input" placeholder="อัปโหลดเพื่อสร้างลิงก์อัตโนมัติ" onchange="updateLiveModel()">
                                 <div class="dev-only shrink-0 flex items-center gap-2">
                                     <input type="file" id="modelUploader" accept=".glb" class="hidden" onchange="uploadModelToCloud(this)">
-                                    <button onclick="document.getElementById('modelUploader').click()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-2 rounded-lg text-xs font-bold transition shadow-md whitespace-nowrap">
-                                        📤 อัปโหลด .GLB
-                                    </button>
+                                    <button onclick="document.getElementById('modelUploader').click()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-2 rounded-lg text-xs font-bold transition shadow-md whitespace-nowrap">📤 อัปโหลด .GLB</button>
                                 </div>
                             </div>
                             <p id="uploadStatus" class="text-[10px] text-indigo-400 mt-2 font-medium hidden">กำลังอัปโหลด... 0%</p>
-                            </div>
+                        </div>
                     </div>
                     <div>
                         <label class="text-[10px] text-slate-400 mb-1 block uppercase">คำอธิบายประกอบภาพรวม</label>
                         <div class="border border-slate-700 rounded-lg overflow-hidden focus-within:border-blue-500 transition">
                             <div class="bg-slate-900 p-1.5 border-b border-slate-700 flex gap-2 items-center">
                                 <button type="button" onmousedown="event.preventDefault(); document.execCommand('bold', false, null);" class="bg-slate-700 hover:bg-slate-600 text-white text-[10px] px-2 py-1 rounded transition"><b>B</b> ตัวหนา</button>
-                                <span class="text-[9px] text-slate-500">*ลากคลุมข้อความแล้วกดปุ่มนี้ (หรือกด Enter เพื่อขึ้นบรรทัดใหม่)</span>
                             </div>
                             <div id="frmDesc" class="rich-editor-content border-none" contenteditable="true" placeholder="ระบุเนื้อหา..."></div>
                         </div>
@@ -181,320 +214,222 @@
     </div>
 
 <script>
-// ==========================================
-// 🔥 FIREBASE CONFIG & INIT
-// ==========================================
-const firebaseConfig = {
-  apiKey: "AIzaSyB9TZN4-yUb9Kfh0gdZNp6XglsbS-xEzfk",
-  authDomain: "biolens-ar.firebaseapp.com",
-  projectId: "biolens-ar",
-  storageBucket: "biolens-ar.firebasestorage.app",
-  messagingSenderId: "1088692183155",
-  appId: "1:1088692183155:web:d139f94812eca627e08a06"
-};
+const firebaseConfig = { apiKey: "AIzaSyB9TZN4-yUb9Kfh0gdZNp6XglsbS-xEzfk", authDomain: "biolens-ar.firebaseapp.com", projectId: "biolens-ar", storageBucket: "biolens-ar.firebasestorage.app", messagingSenderId: "1088692183155", appId: "1:1088692183155:web:d139f94812eca627e08a06" };
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
 let globalDatabase = null, currentSysIndex = null, currentItemIndex = null, currentItemData = null;
 let isDevMode = false;
+let activePreviewMaterial = null; 
 
-// ==========================================
-// 📺 ระบบเต็มจอ
-// ==========================================
+// 🌟 ตัวแปรเก็บสีดั้งเดิมของโมเดลสำหรับการทำไฮไลต์ 🌟
+let adminOriginalColors = new Map();
+
 const svgExpand = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>`;
 const svgCollapse = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><polyline points="4 14 10 14 10 20"></polyline><polyline points="20 10 14 10 14 4"></polyline><line x1="14" y1="10" x2="21" y2="3"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>`;
 
 function updateFsBtn() {
     const isFs = !!document.fullscreenElement;
-    const icon = isFs ? svgCollapse : svgExpand;
-    if(document.getElementById('fsBtnHeader')) document.getElementById('fsBtnHeader').innerHTML = icon;
-    if(document.getElementById('fsBtnLogin')) document.getElementById('fsBtnLogin').innerHTML = icon;
+    if(document.getElementById('fsBtnHeader')) document.getElementById('fsBtnHeader').innerHTML = isFs ? svgCollapse : svgExpand;
+    if(document.getElementById('fsBtnLogin')) document.getElementById('fsBtnLogin').innerHTML = isFs ? svgCollapse : svgExpand;
 }
-
 function toggleFullScreen() {
     const doc = document.documentElement;
-    if (!document.fullscreenElement) {
-        if (doc.requestFullscreen) doc.requestFullscreen();
-        else if (doc.webkitRequestFullscreen) doc.webkitRequestFullscreen();
-        else if (doc.msRequestFullscreen) doc.msRequestFullscreen();
-    } else {
-        if (document.exitFullscreen) document.exitFullscreen();
-        else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
-        else if (document.msExitFullscreen) document.msExitFullscreen();
-    }
+    if (!document.fullscreenElement) { if (doc.requestFullscreen) doc.requestFullscreen(); else if (doc.webkitRequestFullscreen) doc.webkitRequestFullscreen(); } 
+    else { if (document.exitFullscreen) document.exitFullscreen(); else if (document.webkitExitFullscreen) document.webkitExitFullscreen(); }
 }
-document.addEventListener('fullscreenchange', updateFsBtn);
-document.addEventListener('webkitfullscreenchange', updateFsBtn);
-document.addEventListener('DOMContentLoaded', updateFsBtn);
+document.addEventListener('fullscreenchange', updateFsBtn); document.addEventListener('webkitfullscreenchange', updateFsBtn); document.addEventListener('DOMContentLoaded', updateFsBtn);
 
 auth.onAuthStateChanged(user => {
-    if (user) {
-        document.getElementById('loginPage').classList.add('hidden');
-        document.getElementById('dashboard').classList.remove('hidden');
-        document.getElementById('dashboard').classList.add('flex');
-        loadData();
-    } else {
-        document.getElementById('loginPage').classList.remove('hidden');
-        document.getElementById('dashboard').classList.add('hidden');
-    }
+    if (user) { document.getElementById('loginPage').classList.add('hidden'); document.getElementById('dashboard').classList.remove('hidden'); document.getElementById('dashboard').classList.add('flex'); loadData(); } 
+    else { document.getElementById('loginPage').classList.remove('hidden'); document.getElementById('dashboard').classList.add('hidden'); }
 });
 
 function login() {
-    const e = document.getElementById('email').value;
-    const p = document.getElementById('pass').value;
-    
-    // 1. สั่งให้ Firebase จำการล็อกอินแค่ "ชั่วคราว" (ปิดแท็บ/เบราว์เซอร์ = ล็อกเอาต์ทันที)
     auth.setPersistence(firebase.auth.Auth.Persistence.SESSION)
-    .then(() => {
-        // 2. เมื่อตั้งค่าเสร็จ ค่อยสั่งล็อกอิน
-        return auth.signInWithEmailAndPassword(e, p);
-    })
-    .then(() => {
-        // 3. ถ้ารหัสถูก รีเฟรชหน้า 1 ครั้งเพื่อซิงค์ข้อมูล
-        window.location.reload();
-    })
-    .catch((error) => {
-        // ถ้ารหัสผิด หรือเกิดข้อผิดพลาด ให้โชว์ข้อความแจ้งเตือน
-        document.getElementById('errorMsg').classList.remove('hidden');
-        console.error("Login Error:", error);
-    });
+    .then(() => auth.signInWithEmailAndPassword(document.getElementById('email').value, document.getElementById('pass').value))
+    .then(() => window.location.reload())
+    .catch(() => document.getElementById('errorMsg').classList.remove('hidden'));
 }
+function returnToHomeSecurely() { auth.signOut().then(() => window.location.href = 'index.html').catch(() => window.location.href = 'index.html'); }
+function logout() { openCustomConfirm("คุณต้องการออกจากระบบใช่หรือไม่?", "🚪 ออกจากระบบ", () => { auth.signOut(); }, false); }
 
-function logout() { 
-    openCustomConfirm("คุณต้องการออกจากระบบใช่หรือไม่?", "🚪 ออกจากระบบ", () => {
-        auth.signOut(); 
-    }, false); 
-}
-
-// 🌟 ฟังก์ชันกลับหน้าหลัก พร้อมทำลายการล็อกอินทันทีเพื่อความปลอดภัย
-function returnToHomeSecurely() {
-    auth.signOut().then(() => {
-        window.location.href = 'index.html';
-    }).catch((error) => {
-        console.error("Logout Error:", error);
-        window.location.href = 'index.html'; // ถึง Error ก็บังคับกลับ
-    });
-}
-
-// ==========================================
-// 🛠️ CUSTOM MODAL LOGIC 
-// ==========================================
+// ================== Modal Logic ==================
 let promptCallback = null;
-function openCustomPrompt(title, placeholder, descHTML, callback) {
-    document.getElementById('promptTitle').innerText = title;
-    document.getElementById('promptInput').placeholder = placeholder || '';
-    document.getElementById('promptInput').value = '';
-    
-    const descEl = document.getElementById('promptDesc');
-    if(descHTML) {
-        descEl.innerHTML = descHTML;
-        descEl.classList.remove('hidden');
-    } else {
-        descEl.classList.add('hidden');
-    }
-    
-    promptCallback = callback;
-    document.getElementById('customPromptModal').classList.remove('hidden');
-    setTimeout(() => document.getElementById('promptInput').focus(), 100);
-}
-
-function closeCustomPrompt() {
-    document.getElementById('customPromptModal').classList.add('hidden');
-    promptCallback = null;
-}
-
-document.getElementById('promptConfirmBtn').addEventListener('click', () => {
-    const val = document.getElementById('promptInput').value;
-    if(promptCallback) promptCallback(val);
-    closeCustomPrompt();
-});
-
-document.getElementById('promptInput').addEventListener('keypress', function (e) {
-    if (e.key === 'Enter') document.getElementById('promptConfirmBtn').click();
-});
+function openCustomPrompt(t, p, d, cb) { document.getElementById('promptTitle').innerText = t; document.getElementById('promptInput').placeholder = p||''; document.getElementById('promptInput').value = ''; const dEl = document.getElementById('promptDesc'); if(d){dEl.innerHTML = d; dEl.classList.remove('hidden');}else{dEl.classList.add('hidden');} promptCallback = cb; document.getElementById('customPromptModal').classList.remove('hidden'); setTimeout(()=>document.getElementById('promptInput').focus(),100); }
+function closeCustomPrompt() { document.getElementById('customPromptModal').classList.add('hidden'); promptCallback = null; }
+document.getElementById('promptConfirmBtn').addEventListener('click', () => { if(promptCallback) promptCallback(document.getElementById('promptInput').value); closeCustomPrompt(); });
+document.getElementById('promptInput').addEventListener('keypress', (e) => { if(e.key === 'Enter') document.getElementById('promptConfirmBtn').click(); });
 
 let confirmCallback = null;
-function openCustomConfirm(desc, title = "ยืนยันการดำเนินการ", callback, isDanger = true) {
-    document.getElementById('confirmTitle').innerText = title;
-    document.getElementById('confirmDesc').innerHTML = desc;
-    
-    const btn = document.getElementById('confirmBtn');
-    const icon = document.getElementById('confirmIcon');
-    
-    if(isDanger) {
-        btn.className = "bg-rose-600 hover:bg-rose-500 px-6 py-2 rounded-lg text-sm text-white font-bold transition shadow-lg";
-        icon.innerText = "⚠️";
-    } else {
-        btn.className = "bg-blue-600 hover:bg-blue-500 px-6 py-2 rounded-lg text-sm text-white font-bold transition shadow-lg";
-        icon.innerText = "❓";
-    }
-    
-    confirmCallback = callback;
-    document.getElementById('customConfirmModal').classList.remove('hidden');
-}
+function openCustomConfirm(d, t="ยืนยันการดำเนินการ", cb, isD=true) { document.getElementById('confirmTitle').innerText = t; document.getElementById('confirmDesc').innerHTML = d; const btn = document.getElementById('confirmBtn'); const icon = document.getElementById('confirmIcon'); if(isD){btn.className="bg-rose-600 hover:bg-rose-500 px-6 py-2 rounded-lg text-sm text-white font-bold shadow-lg"; icon.innerText="⚠️";}else{btn.className="bg-blue-600 hover:bg-blue-500 px-6 py-2 rounded-lg text-sm text-white font-bold shadow-lg"; icon.innerText="❓";} confirmCallback = cb; document.getElementById('customConfirmModal').classList.remove('hidden'); }
+function closeCustomConfirm() { document.getElementById('customConfirmModal').classList.add('hidden'); confirmCallback = null; }
+document.getElementById('confirmBtn').addEventListener('click', () => { if(confirmCallback) confirmCallback(); closeCustomConfirm(); });
 
-function closeCustomConfirm() {
-    document.getElementById('customConfirmModal').classList.add('hidden');
-    confirmCallback = null;
-}
-
-document.getElementById('confirmBtn').addEventListener('click', () => {
-    if(confirmCallback) confirmCallback();
-    closeCustomConfirm();
-});
-
-
-// ==========================================
-// 🔓 ระบบสลับสิทธิ์การใช้งาน 
-// ==========================================
-function toggleDevMode() {
-    if(isDevMode) {
-        isDevMode = false;
-        document.body.classList.remove('dev-mode');
-        const btn = document.getElementById('btnDevMode');
-        btn.innerHTML = "🔒 โหมดปกติ";
-        btn.className = "bg-slate-600/20 hover:bg-slate-600 text-slate-400 hover:text-white px-3 py-1.5 rounded-lg text-xs transition border border-slate-600/30 flex items-center gap-1";
-    } else {
-        document.getElementById('devPassModal').classList.remove('hidden');
-        document.getElementById('devPassInput').value = '';
-        setTimeout(() => document.getElementById('devPassInput').focus(), 100);
-    }
-}
-
+// ================== Dev Mode ==================
+function toggleDevMode() { if(isDevMode){isDevMode=false; document.body.classList.remove('dev-mode'); const btn=document.getElementById('btnDevMode'); btn.innerHTML="🔒 โหมดปกติ"; btn.className="bg-slate-600/20 hover:bg-slate-600 text-slate-400 hover:text-white px-3 py-1.5 rounded-lg text-xs border border-slate-600/30 flex items-center gap-1";}else{document.getElementById('devPassModal').classList.remove('hidden'); document.getElementById('devPassInput').value=''; setTimeout(()=>document.getElementById('devPassInput').focus(),100);} }
 function closeDevPassModal() { document.getElementById('devPassModal').classList.add('hidden'); }
+function confirmDevPass() { if(document.getElementById('devPassInput').value==="122026"){isDevMode=true; document.body.classList.add('dev-mode'); const btn=document.getElementById('btnDevMode'); btn.innerHTML="🔓 โหมดนักพัฒนา"; btn.className="bg-emerald-600/20 hover:bg-emerald-600 text-emerald-400 hover:text-white px-3 py-1.5 rounded-lg text-xs border border-emerald-600/30 flex items-center gap-1 shadow-md"; closeDevPassModal();}else{alert("❌ รหัสผ่านไม่ถูกต้อง!"); document.getElementById('devPassInput').value=''; document.getElementById('devPassInput').focus();} }
+document.getElementById('devPassInput').addEventListener('keypress', (e) => { if(e.key==='Enter') confirmDevPass(); });
 
-function confirmDevPass() {
-    const pass = document.getElementById('devPassInput').value;
-    if(pass === "122026") { 
-        isDevMode = true;
-        document.body.classList.add('dev-mode');
-        const btn = document.getElementById('btnDevMode');
-        btn.innerHTML = "🔓 โหมดนักพัฒนา";
-        btn.className = "bg-emerald-600/20 hover:bg-emerald-600 text-emerald-400 hover:text-white px-3 py-1.5 rounded-lg text-xs transition border border-emerald-600/30 flex items-center gap-1 shadow-md shadow-emerald-500/20";
-        closeDevPassModal(); 
-    } else {
-        alert("❌ รหัสผ่านไม่ถูกต้อง!");
-        document.getElementById('devPassInput').value = '';
-        document.getElementById('devPassInput').focus();
+// ================== LIVE PREVIEW อัจฉริยะ ==================
+function updateLiveModel() {
+    const path = document.getElementById('frmModelPath').value;
+    document.getElementById('adminViewer').src = path || "";
+    resetLivePreview();
+}
+
+function updateOverviewPreview() {
+    if(!currentItemData) return;
+    document.getElementById('previewTitle').innerHTML = document.getElementById('frmName').value || 'ไม่มีชื่อ';
+    document.getElementById('previewDesc').innerHTML = document.getElementById('frmDesc').innerHTML || 'ไม่มีรายละเอียด';
+    const badge = document.getElementById('previewBadge');
+    badge.textContent = 'โหมดภาพรวม';
+    badge.className = 'absolute top-0 right-0 bg-blue-500 text-white text-[10px] font-bold px-3 py-1.5 rounded-bl-xl shadow-md';
+    document.getElementById('resetPreviewBtn').classList.add('hidden');
+    activePreviewMaterial = null;
+}
+
+function updatePartPreview(partName, partInfo) {
+    document.getElementById('previewTitle').innerHTML = partName || 'ไม่มีชื่อจุดคลิก';
+    document.getElementById('previewDesc').innerHTML = partInfo || 'ไม่มีรายละเอียด';
+    const badge = document.getElementById('previewBadge');
+    badge.textContent = '📍 โหมดจุดคลิก';
+    badge.className = 'absolute top-0 right-0 bg-[#ff4757] text-white text-[10px] font-bold px-3 py-1.5 rounded-bl-xl shadow-md';
+    document.getElementById('resetPreviewBtn').classList.remove('hidden');
+}
+
+// 🌟 ฟังก์ชันรีเซ็ตสีให้กลับเป็นปกติ
+function resetLivePreview() {
+    document.getElementById('clickedIdDisplay').classList.add('hidden');
+    updateOverviewPreview();
+    
+    // คืนค่าสีดั้งเดิมให้ทุกชิ้นส่วน
+    if (adminViewer && adminViewer.model && adminViewer.model.materials) {
+        for (const mat of adminViewer.model.materials) {
+            if (adminOriginalColors.has(mat.name)) {
+                mat.pbrMetallicRoughness.setBaseColorFactor(adminOriginalColors.get(mat.name));
+            } else {
+                mat.pbrMetallicRoughness.setBaseColorFactor([1, 1, 1, 1]); 
+            }
+            mat.setEmissiveFactor([0, 0, 0]); 
+        }
     }
 }
 
-document.getElementById('devPassInput').addEventListener('keypress', function (e) {
-    if (e.key === 'Enter') confirmDevPass();
+// ผูก Event ให้พิมพ์ปุ๊บเปลี่ยนปั๊บ
+document.getElementById('frmName').addEventListener('input', () => { if(!activePreviewMaterial) updateOverviewPreview(); });
+document.getElementById('frmDesc').addEventListener('input', () => { if(!activePreviewMaterial) updateOverviewPreview(); });
+
+const adminViewer = document.getElementById('adminViewer');
+let ptDownX = 0, ptDownY = 0;
+
+// 🌟 สร้างรายการปุ่ม ID และดึงค่าสีต้นฉบับเก็บไว้เมื่อโมเดลโหลดเสร็จ
+adminViewer.addEventListener('load', () => {
+    const container = document.getElementById('allMaterialsContainer');
+    const chips = document.getElementById('materialChips');
+    chips.innerHTML = '';
+    
+    // เคลียร์และเก็บค่าสีเริ่มต้นใหม่
+    if(adminViewer.model && adminViewer.model.materials) {
+        adminOriginalColors.clear();
+        const mats = adminViewer.model.materials;
+        
+        if(mats.length > 0) {
+            mats.forEach(mat => {
+                // เก็บสีต้นฉบับไว้
+                adminOriginalColors.set(mat.name, mat.pbrMetallicRoughness.baseColorFactor.slice());
+                
+                const btn = document.createElement('button');
+                btn.className = "bg-slate-700 hover:bg-indigo-500 text-slate-200 hover:text-white text-[10px] px-2 py-1 rounded transition border border-slate-600";
+                btn.innerText = mat.name;
+                btn.onclick = () => forcePreviewMaterial(mat.name);
+                chips.appendChild(btn);
+            });
+            container.classList.remove('hidden');
+        } else {
+            container.classList.add('hidden');
+        }
+    }
 });
 
-
-// ==========================================
-// 📤 ระบบอัปโหลดโมเดลขึ้น Cloudinary 
-// ==========================================
-const CLOUD_NAME = "dv9ejytrx"; 
-const UPLOAD_PRESET = "t1obw6ft"; 
-
-function uploadModelToCloud(inputElement) {
-    const file = inputElement.files[0];
-    if (!file) return;
-
-    if (!file.name.toLowerCase().endsWith('.glb')) {
-        alert("❌ กรุณาอัปโหลดเฉพาะไฟล์นามสกุล .glb เท่านั้นครับ");
-        inputElement.value = ''; 
-        return;
+// ฟังก์ชันเรียกดูข้อมูลและ **ทำไฮไลต์โชว์เฉพาะสีจริง ไม่เรืองแสง**
+function forcePreviewMaterial(matName) {
+    const disp = document.getElementById('clickedIdDisplay');
+    document.getElementById('idTextSpan').textContent = matName;
+    disp.classList.remove('hidden');
+    
+    activePreviewMaterial = matName;
+    
+    // 🌟 ระบบทำไฮไลต์สี (โชว์สีจริง ไม่เรืองแสง) 🌟
+    if (adminViewer.model && adminViewer.model.materials) {
+        for (const mat of adminViewer.model.materials) {
+            const origColor = adminOriginalColors.get(mat.name) || [1, 1, 1, 1];
+            if (mat.name !== matName) {
+                // ชิ้นอื่นที่ไม่ได้คลิก -> ทำให้มืดและจางลงมาก (Dim)
+                mat.pbrMetallicRoughness.setBaseColorFactor([origColor[0] * 0.1, origColor[1] * 0.1, origColor[2] * 0.1, origColor[3]]); 
+                mat.setEmissiveFactor([0, 0, 0]); 
+            } else {
+                // ชิ้นที่ถูกคลิก -> คืนสีเดิมของโมเดล 100% (สดใสตามธรรมชาติ ไม่เพี้ยน)
+                mat.pbrMetallicRoughness.setBaseColorFactor(origColor);
+                mat.setEmissiveFactor([0, 0, 0]); 
+            }
+        }
     }
-
-    const statusText = document.getElementById('uploadStatus');
-    statusText.classList.remove('hidden');
-    statusText.style.color = "#818cf8"; 
-    statusText.innerText = "⏳ กำลังเตรียมอัปโหลด...";
-
-    const fd = new FormData();
-    fd.append('file', file);
-    fd.append('upload_preset', UPLOAD_PRESET);
-    fd.append('resource_type', 'raw');
-
-    const xhr = new XMLHttpRequest();
-    xhr.open('POST', `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/upload`, true);
-
-    xhr.upload.onprogress = (e) => {
-        if (e.lengthComputable) {
-            const progress = Math.round((e.loaded / e.total) * 100);
-            statusText.innerText = `⏳ กำลังอัปโหลด... ${progress}%`;
-        }
-    };
-
-    xhr.onload = () => {
-        if (xhr.status === 200) {
-            const res = JSON.parse(xhr.responseText);
-            document.getElementById('frmModelPath').value = res.secure_url;
-            statusText.innerText = "✅ อัปโหลดเสร็จสมบูรณ์! (อย่าลืมกดปุ่ม 'บันทึกข้อมูล' ด้วยนะครับ)";
-            statusText.style.color = "#4ade80";
-            inputElement.value = ''; 
+    
+    if(currentItemData && currentItemData.click_parts) {
+        const foundPart = currentItemData.click_parts.find(p => p.material_name === matName);
+        if(foundPart) {
+            updatePartPreview(foundPart.name, foundPart.info);
         } else {
-            console.error("Upload Error:", xhr.responseText);
-            statusText.innerText = `❌ อัปโหลดล้มเหลว: กรุณาตรวจสอบการตั้งค่า Cloudinary`;
-            statusText.style.color = "#f87171";
-            inputElement.value = ''; 
+            updatePartPreview('<span class="text-rose-400">ยังไม่ได้ตั้งชื่อ</span>', '<span class="text-slate-400">พบ ID นี้บนโมเดล แต่คุณยังไม่ได้กด +เพิ่มจุดคลิก ด้านล่างครับ</span>');
         }
-    };
+    }
+    disp.style.transform = 'translate(-50%, -10px)'; 
+    setTimeout(() => { disp.style.transform = 'translate(-50%, 0)'; }, 150);
+}
 
-    xhr.onerror = () => {
-        statusText.innerText = "❌ เกิดข้อผิดพลาดในการเชื่อมต่ออินเทอร์เน็ต";
-        statusText.style.color = "#f87171";
-        inputElement.value = '';
-    };
+// ระบบคลิกบนโมเดล
+adminViewer.addEventListener('pointerdown', (e) => { ptDownX = e.clientX; ptDownY = e.clientY; });
+adminViewer.addEventListener('pointerup', (e) => {
+    if (Math.abs(e.clientX - ptDownX) > 15 || Math.abs(e.clientY - ptDownY) > 15) return; 
+    const material = adminViewer.materialFromPoint(e.clientX, e.clientY);
+    
+    if (material != null) {
+        forcePreviewMaterial(material.name);
+    } else {
+        resetLivePreview(); 
+    }
+});
 
+// ================== Cloudinary ==================
+function uploadModelToCloud(inputElement) {
+    const file = inputElement.files[0]; if(!file) return;
+    if(!file.name.toLowerCase().endsWith('.glb')) { alert("❌ กรุณาอัปโหลดเฉพาะ .glb ครับ"); inputElement.value=''; return; }
+    const st = document.getElementById('uploadStatus'); st.classList.remove('hidden'); st.style.color="#818cf8"; st.innerText="⏳ กำลังเตรียมอัปโหลด...";
+    const fd = new FormData(); fd.append('file', file); fd.append('upload_preset', UPLOAD_PRESET); fd.append('resource_type', 'raw');
+    const xhr = new XMLHttpRequest(); xhr.open('POST', `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/upload`, true);
+    xhr.upload.onprogress = (e) => { if(e.lengthComputable) st.innerText=`⏳ กำลังอัปโหลด... ${Math.round((e.loaded/e.total)*100)}%`; };
+    xhr.onload = () => {
+        if(xhr.status===200){ document.getElementById('frmModelPath').value=JSON.parse(xhr.responseText).secure_url; st.innerText="✅ อัปโหลดเสร็จสมบูรณ์!"; st.style.color="#4ade80"; inputElement.value=''; updateLiveModel(); }
+        else{ st.innerText=`❌ อัปโหลดล้มเหลว`; st.style.color="#f87171"; inputElement.value=''; }
+    };
+    xhr.onerror = () => { st.innerText="❌ เกิดข้อผิดพลาดการเชื่อมต่อ"; st.style.color="#f87171"; inputElement.value=''; };
     xhr.send(fd);
 }
 
-// ==========================================
-// 🔄 DATABASE & RENDER LOGIC
-// ==========================================
-function loadData() {
-    db.collection("database").doc("anatomy").get().then(doc => {
-        if(doc.exists) { 
-            globalDatabase = doc.data(); 
-            renderSidebar(); 
-            document.getElementById('btnSync').classList.add('hidden');
-        } else {
-            document.getElementById('btnSync').classList.remove('hidden');
-        }
-    }).catch(err => { console.error(err); alert("เชื่อมต่อฐานข้อมูลไม่สำเร็จ"); });
-}
-
-function syncInitialData() {
-    openCustomConfirm("ดึงข้อมูลเริ่มต้นจาก anatomy_data.json ขึ้น Cloud ใช่หรือไม่?", "📥 โหลดข้อมูลตั้งต้น", () => {
-        fetch("anatomy_data.json").then(r => r.json()).then(data => {
-            db.collection("database").doc("anatomy").set(data).then(() => { alert("โหลดข้อมูลสำเร็จ!"); loadData(); });
-        });
-    }, false);
-}
+// ================== DATA & RENDER ==================
+function loadData() { db.collection("database").doc("anatomy").get().then(doc => { if(doc.exists){ globalDatabase=doc.data(); renderSidebar(); document.getElementById('btnSync').classList.add('hidden'); }else{ document.getElementById('btnSync').classList.remove('hidden'); } }); }
+function syncInitialData() { openCustomConfirm("ดึงข้อมูลเริ่มต้นจาก anatomy_data.json ขึ้น Cloud ใช่หรือไม่?", "📥 โหลดข้อมูลตั้งต้น", () => { fetch("anatomy_data.json").then(r=>r.json()).then(data=>{db.collection("database").doc("anatomy").set(data).then(()=>{alert("สำเร็จ!"); loadData();});}); }, false); }
 
 function renderSidebar() {
-    const menu = document.getElementById('sidebarMenu'); menu.innerHTML = '';
-    if (!globalDatabase || !globalDatabase.systems) return; 
-    
+    const menu = document.getElementById('sidebarMenu'); menu.innerHTML = ''; if (!globalDatabase || !globalDatabase.systems) return; 
     globalDatabase.systems.forEach((sys, sIdx) => {
-        let html = `
-        <div class="mb-5">
-            <div class="flex justify-between items-center px-1 mb-2 border-b border-slate-700/50 pb-1">
-                <h3 class="text-blue-500 font-bold text-[11px] uppercase">${sys.category}</h3>
-                <div class="flex gap-2 dev-only">
-                    <button onclick="addNewItemToSys(${sIdx})" class="text-[10px] text-emerald-500 hover:text-emerald-400 transition font-medium">+ เพิ่มบทเรียน</button>
-                    <button onclick="deleteSystem(${sIdx})" class="text-[10px] text-slate-500 hover:text-rose-500 transition">ลบกลุ่ม</button>
-                </div>
-            </div>
-            <div class="flex flex-col gap-1">`;
-        
-        if (sys.items && sys.items.length > 0) {
-            sys.items.forEach((item, iIdx) => {
-                const isActive = (currentSysIndex === sIdx && currentItemIndex === iIdx);
-                html += `<button onclick="editItem(${sIdx}, ${iIdx})" class="sidebar-item text-left px-3 py-2 rounded-lg text-xs transition border border-transparent ${isActive ? 'active' : 'bg-slate-900/50 text-slate-400 hover:bg-slate-700'}">📄 ${item.name}</button>`;
-            });
-        } else {
-            html += `<p class="text-slate-600 text-[10px] italic px-2 py-1">ยังไม่มีบทเรียนในหมวดนี้</p>`;
-        }
-        
-        html += `</div></div>`;
-        menu.innerHTML += html;
+        let html = `<div class="mb-5"><div class="flex justify-between items-center px-1 mb-2 border-b border-slate-700/50 pb-1"><h3 class="text-blue-500 font-bold text-[11px] uppercase">${sys.category}</h3><div class="flex gap-2 dev-only"><button onclick="addNewItemToSys(${sIdx})" class="text-[10px] text-emerald-500 hover:text-emerald-400">+ เพิ่มบทเรียน</button><button onclick="deleteSystem(${sIdx})" class="text-[10px] text-slate-500 hover:text-rose-500">ลบกลุ่ม</button></div></div><div class="flex flex-col gap-1">`;
+        if (sys.items && sys.items.length > 0) { sys.items.forEach((item, iIdx) => { const isActive=(currentSysIndex===sIdx && currentItemIndex===iIdx); html += `<button onclick="editItem(${sIdx}, ${iIdx})" class="sidebar-item text-left px-3 py-2 rounded-lg text-xs transition border border-transparent ${isActive ? 'active' : 'bg-slate-900/50 text-slate-400 hover:bg-slate-700'}">📄 ${item.name}</button>`; }); } 
+        else { html += `<p class="text-slate-600 text-[10px] italic px-2 py-1">ยังไม่มีบทเรียน</p>`; }
+        html += `</div></div>`; menu.innerHTML += html;
     });
 }
 
@@ -509,10 +444,9 @@ function editItem(sIdx, iIdx) {
     document.getElementById('frmName').value = currentItemData.name;
     document.getElementById('frmModelPath').value = currentItemData.model_file;
     document.getElementById('frmDesc').innerHTML = currentItemData.description || '';
-    
-    // ซ่อนข้อความแจ้งเตือนอัปโหลดทุกครั้งที่เปลี่ยนหน้า
     document.getElementById('uploadStatus').classList.add('hidden');
     
+    updateLiveModel(); 
     renderSidebar(); renderParts(); renderQuiz();
 }
 
@@ -524,33 +458,24 @@ function renderParts() {
     const parts = currentItemData.click_parts || [];
     parts.forEach((p, idx) => {
         container.innerHTML += `<div class="bg-slate-900/50 p-4 rounded-xl border border-slate-700 relative pr-12 flex flex-col md:flex-row gap-4 items-start">
-            <button onclick="deleteClickPart(${idx})" class="delete-btn-sm dev-only" title="ลบจุดคลิก">✕</button>
-            
+            <button onclick="deleteClickPart(${idx})" class="delete-btn-sm dev-only">✕</button>
             <div class="w-full md:w-1/3">
                 <label class="text-[10px] text-slate-400 mb-1 block uppercase">ID ในโมเดล</label>
                 <input type="text" class="input-box text-xs font-mono dev-lock-input" value="${p.material_name}" oninput="currentItemData.click_parts[${idx}].material_name=this.value" placeholder="ID โมเดล">
             </div>
-
             <div class="w-full md:w-2/3 space-y-4">
                 <div>
                     <label class="text-[10px] text-slate-400 block uppercase mb-1">ชื่อที่แสดง</label>
-                    <div class="border border-slate-700 rounded-lg overflow-hidden focus-within:border-blue-500 transition">
-                        <div class="bg-slate-900 p-1.5 border-b border-slate-700 flex gap-2 items-center">
-                            <button type="button" onmousedown="event.preventDefault(); document.execCommand('bold', false, null);" class="bg-slate-700 hover:bg-slate-600 text-white text-[10px] px-2 py-1 rounded transition"><b>B</b> ตัวหนา</button>
-                            <span class="text-[9px] text-slate-500">*ลากคลุมข้อความแล้วกดปุ่มนี้ (หรือกด Enter เพื่อขึ้นบรรทัดใหม่)</span>
-                        </div>
-                        <div class="rich-editor-content border-none text-xs min-h-[40px] leading-relaxed p-2" contenteditable="true" placeholder="ระบุชื่อ..." oninput="currentItemData.click_parts[${idx}].name=this.innerHTML">${p.name || ''}</div>
+                    <div class="border border-slate-700 rounded-lg overflow-hidden">
+                        <div class="bg-slate-900 p-1.5 border-b border-slate-700 flex gap-2"><button type="button" onmousedown="event.preventDefault(); document.execCommand('bold', false, null);" class="bg-slate-700 text-white text-[10px] px-2 py-1 rounded"><b>B</b> ตัวหนา</button></div>
+                        <div class="rich-editor-content border-none text-xs min-h-[40px] p-2" contenteditable="true" placeholder="ระบุชื่อ..." oninput="currentItemData.click_parts[${idx}].name=this.innerHTML; if(activePreviewMaterial === currentItemData.click_parts[${idx}].material_name) updatePartPreview(this.innerHTML, currentItemData.click_parts[${idx}].info);">${p.name || ''}</div>
                     </div>
                 </div>
-
                 <div>
                     <label class="text-[10px] text-slate-400 block uppercase mb-1">รายละเอียดเพิ่มเติม</label>
-                    <div class="border border-slate-700 rounded-lg overflow-hidden focus-within:border-blue-500 transition">
-                        <div class="bg-slate-900 p-1.5 border-b border-slate-700 flex gap-2 items-center">
-                            <button type="button" onmousedown="event.preventDefault(); document.execCommand('bold', false, null);" class="bg-slate-700 hover:bg-slate-600 text-white text-[10px] px-2 py-1 rounded transition"><b>B</b> ตัวหนา</button>
-                            <span class="text-[9px] text-slate-500">*ลากคลุมข้อความแล้วกดปุ่มนี้</span>
-                        </div>
-                        <div class="rich-editor-content border-none text-xs min-h-[60px] leading-relaxed p-2" contenteditable="true" placeholder="ระบุรายละเอียด..." oninput="currentItemData.click_parts[${idx}].info=this.innerHTML">${p.info || ''}</div>
+                    <div class="border border-slate-700 rounded-lg overflow-hidden">
+                        <div class="bg-slate-900 p-1.5 border-b border-slate-700 flex gap-2"><button type="button" onmousedown="event.preventDefault(); document.execCommand('bold', false, null);" class="bg-slate-700 text-white text-[10px] px-2 py-1 rounded"><b>B</b> ตัวหนา</button></div>
+                        <div class="rich-editor-content border-none text-xs min-h-[60px] p-2" contenteditable="true" placeholder="ระบุรายละเอียด..." oninput="currentItemData.click_parts[${idx}].info=this.innerHTML; if(activePreviewMaterial === currentItemData.click_parts[${idx}].material_name) updatePartPreview(currentItemData.click_parts[${idx}].name, this.innerHTML);">${p.info || ''}</div>
                     </div>
                 </div>
             </div>
@@ -563,96 +488,25 @@ function renderQuiz() {
     const quiz = currentItemData.quiz || [];
     quiz.forEach((q, idx) => {
         container.innerHTML += `<div class="bg-slate-900/50 p-4 rounded-xl border border-slate-700 relative pr-12">
-            <button onclick="deleteQuizPart(${idx})" class="delete-btn-sm" title="ลบข้อสอบ">✕</button>
-            <input type="text" class="input-box mb-3 font-medium text-sm" value="${q.question}" oninput="currentItemData.quiz[${idx}].question=this.value" placeholder="โจทย์คำถาม">
+            <button onclick="deleteQuizPart(${idx})" class="delete-btn-sm">✕</button>
+            <input type="text" class="input-box mb-3 font-medium text-sm" value="${q.question}" oninput="currentItemData.quiz[${idx}].question=this.value" placeholder="โจทย์">
             <div class="grid grid-cols-2 gap-2">
-                ${q.choices.map((c, cIdx) => `
-                <div class="flex gap-2 items-center bg-slate-800 p-1.5 rounded-lg border ${q.answer===cIdx ? 'border-emerald-500' : 'border-transparent'}">
-                    <input type="radio" name="ans-${idx}" ${q.answer===cIdx?'checked':''} onchange="currentItemData.quiz[${idx}].answer=${cIdx}" class="ml-1 cursor-pointer">
-                    <input type="text" class="bg-transparent text-xs text-white w-full outline-none" value="${c}" oninput="currentItemData.quiz[${idx}].choices[${cIdx}]=this.value" placeholder="ตัวเลือก">
-                </div>`).join('')}
+                ${q.choices.map((c, cIdx) => `<div class="flex gap-2 items-center bg-slate-800 p-1.5 rounded-lg border ${q.answer===cIdx ? 'border-emerald-500' : 'border-transparent'}"><input type="radio" name="ans-${idx}" ${q.answer===cIdx?'checked':''} onchange="currentItemData.quiz[${idx}].answer=${cIdx}" class="ml-1 cursor-pointer"><input type="text" class="bg-transparent text-xs text-white w-full outline-none" value="${c}" oninput="currentItemData.quiz[${idx}].choices[${cIdx}]=this.value" placeholder="ตัวเลือก"></div>`).join('')}
             </div>
         </div>`;
     });
 }
 
-function saveData() {
-    if(currentSysIndex === null) return;
-    currentItemData.name = document.getElementById('frmName').value;
-    currentItemData.model_file = document.getElementById('frmModelPath').value;
-    currentItemData.description = document.getElementById('frmDesc').innerHTML;
-    globalDatabase.systems[currentSysIndex].items[currentItemIndex] = currentItemData;
-    db.collection("database").doc("anatomy").set(globalDatabase).then(() => { alert("บันทึกข้อมูลเรียบร้อยแล้ว! ✅"); renderSidebar(); });
-}
+function saveData() { if(currentSysIndex===null)return; currentItemData.name=document.getElementById('frmName').value; currentItemData.model_file=document.getElementById('frmModelPath').value; currentItemData.description=document.getElementById('frmDesc').innerHTML; globalDatabase.systems[currentSysIndex].items[currentItemIndex]=currentItemData; db.collection("database").doc("anatomy").set(globalDatabase).then(() => { alert("บันทึกข้อมูลเรียบร้อยแล้ว! ✅"); renderSidebar(); }); }
+function deleteClickPart(idx) { openCustomConfirm("ลบ <b>'จุดคลิก'</b> ใช่หรือไม่?", "ลบจุดคลิก", () => { currentItemData.click_parts.splice(idx, 1); renderParts(); }); }
+function deleteQuizPart(idx) { openCustomConfirm("ลบ <b>'ข้อสอบ'</b> ใช่หรือไม่?", "ลบข้อสอบ", () => { currentItemData.quiz.splice(idx, 1); renderQuiz(); }); }
+function deleteCurrentItem() { openCustomConfirm(`ลบอวัยวะ <b class="text-rose-400">[${currentItemData.name}]</b> แน่ใจหรือไม่?`, "ลบหน้านี้ทิ้ง", () => { globalDatabase.systems[currentSysIndex].items.splice(currentItemIndex, 1); db.collection("database").doc("anatomy").set(globalDatabase).then(() => { currentItemData=null; currentSysIndex=null; currentItemIndex=null; renderSidebar(); document.getElementById('welcomeScreen').classList.remove('hidden'); }); }); }
+function deleteSystem(idx) { const sysName=globalDatabase.systems[idx].category; openCustomPrompt("⚠️ ลบหมวดหมู่", `พิมพ์: ${sysName}`, `<span class="text-rose-400">ระวัง! บทเรียนในหมวดนี้หายหมด</span><br>พิมพ์ <b>${sysName}</b> เพื่อยืนยัน:`, (conf) => { if(conf===sysName) { globalDatabase.systems.splice(idx, 1); db.collection("database").doc("anatomy").set(globalDatabase).then(() => renderSidebar()); } else if(conf!==null&&conf.trim()!==""){alert("พิมพ์ชื่อไม่ถูกต้อง");} }); }
+function clearAllData() { openCustomPrompt("🔥 ล้าง Cloud", "พิมพ์ CONFIRM DELETE", `พิมพ์ <b>CONFIRM DELETE</b>`, (conf) => { if(conf==="CONFIRM DELETE"){ db.collection("database").doc("anatomy").delete().then(()=>location.reload()); } }); }
+function addNewSystem() { openCustomPrompt("✨ เพิ่มหมวดหมู่", "ชื่อหมวดหมู่...", null, (n) => { if(n&&n.trim()!==""){ if(!globalDatabase) globalDatabase={systems:[]}; globalDatabase.systems.push({category: n.trim(), items: []}); db.collection("database").doc("anatomy").set(globalDatabase).then(()=>renderSidebar()); } }); }
+function addNewItemToSys(sysIdx) { if(!globalDatabase.systems[sysIdx].items) globalDatabase.systems[sysIdx].items=[]; globalDatabase.systems[sysIdx].items.push({name: "บทเรียนใหม่", model_file: "models/new_model.glb", description: "รายละเอียดบทเรียน...", click_parts: [], quiz: []}); db.collection("database").doc("anatomy").set(globalDatabase).then(()=>{ renderSidebar(); editItem(sysIdx, globalDatabase.systems[sysIdx].items.length-1); }); }
 
-function deleteClickPart(idx) {
-    openCustomConfirm("คุณต้องการลบ <b>'จุดคลิก'</b> นี้ออกจากระบบใช่หรือไม่?", "ลบจุดคลิก", () => { 
-        currentItemData.click_parts.splice(idx, 1); renderParts(); 
-    });
-}
-
-function deleteQuizPart(idx) {
-    openCustomConfirm("คุณต้องการลบ <b>'ข้อสอบ'</b> ข้อนี้ออกจากระบบใช่หรือไม่?", "ลบข้อสอบ", () => { 
-        currentItemData.quiz.splice(idx, 1); renderQuiz(); 
-    });
-}
-
-function deleteCurrentItem() {
-    openCustomConfirm(`การลบอวัยวะ <b class="text-rose-400">[${currentItemData.name}]</b> จะทำให้ข้อมูลในหน้านี้หายไปทั้งหมด คุณแน่ใจหรือไม่?`, "ลบหน้านี้ทิ้ง", () => {
-        globalDatabase.systems[currentSysIndex].items.splice(currentItemIndex, 1);
-        db.collection("database").doc("anatomy").set(globalDatabase).then(() => { 
-            currentItemData = null; currentSysIndex = null; currentItemIndex = null;
-            renderSidebar(); document.getElementById('welcomeScreen').classList.remove('hidden'); 
-        });
-    });
-}
-
-function deleteSystem(idx) { 
-    const sysName = globalDatabase.systems[idx].category;
-    openCustomPrompt("⚠️ ยืนยันการลบหมวดหมู่", `พิมพ์คำว่า: ${sysName}`, `<span class="text-rose-400">การลบหมวดหมู่จะทำให้บทเรียนในหมวดนี้หายไปทั้งหมด!</span><br>พิมพ์ชื่อหมวดหมู่ <b>${sysName}</b> ด้านล่างเพื่อยืนยัน:`, (conf) => {
-        if(conf === sysName) { 
-            globalDatabase.systems.splice(idx, 1); db.collection("database").doc("anatomy").set(globalDatabase).then(() => renderSidebar()); 
-        } else if (conf !== null && conf.trim() !== "") {
-            alert("พิมพ์ชื่อไม่ถูกต้อง ยกเลิกการลบ");
-        }
-    });
-}
-
-function clearAllData() { 
-    openCustomPrompt("🔥 ล้างข้อมูลทั้งหมดใน Cloud", "พิมพ์ CONFIRM DELETE", `<span class="text-rose-500 font-bold">คำเตือนขั้นสูงสุด:</span> หากต้องการลบข้อมูลบทเรียนทั้งหมด<br>โปรดพิมพ์คำว่า <b>CONFIRM DELETE</b>`, (conf) => {
-        if(conf === "CONFIRM DELETE") { 
-            db.collection("database").doc("anatomy").delete().then(() => location.reload()); 
-        } else if (conf !== null && conf.trim() !== "") {
-            alert("รหัสยืนยันไม่ถูกต้อง ยกเลิกการล้างข้อมูล");
-        }
-    });
-}
-
-function addNewSystem() { 
-    openCustomPrompt("✨ เพิ่มหมวดหมู่ระบบใหม่", "ตัวอย่าง: ระบบกล้ามเนื้อ...", null, (n) => {
-        if(n && n.trim() !== "") { 
-            if(!globalDatabase) globalDatabase = { systems: [] };
-            globalDatabase.systems.push({category: n.trim(), items: []}); 
-            db.collection("database").doc("anatomy").set(globalDatabase).then(() => renderSidebar()); 
-        } 
-    });
-}
-
-function addNewItemToSys(sysIdx) { 
-    if(!globalDatabase.systems[sysIdx].items) globalDatabase.systems[sysIdx].items = [];
-    globalDatabase.systems[sysIdx].items.push({name: "บทเรียนใหม่", model_file: "models/new_model.glb", description: "รายละเอียดบทเรียน...", click_parts: [], quiz: []}); 
-    db.collection("database").doc("anatomy").set(globalDatabase).then(() => {
-        renderSidebar();
-        const newItemIdx = globalDatabase.systems[sysIdx].items.length - 1;
-        editItem(sysIdx, newItemIdx); 
-    }); 
-}
-
-document.addEventListener('paste', function(e) {
-    if (e.target.isContentEditable) {
-        e.preventDefault(); let text = (e.originalEvent || e).clipboardData.getData('text/plain'); document.execCommand('insertText', false, text);
-    }
-});
+document.addEventListener('paste', function(e) { if(e.target.isContentEditable) { e.preventDefault(); let text=(e.originalEvent||e).clipboardData.getData('text/plain'); document.execCommand('insertText', false, text); } });
 </script>
 </body>
 </html>
