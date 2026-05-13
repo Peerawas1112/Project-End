@@ -241,8 +241,19 @@ auth.onAuthStateChanged(user => {
 });
 
 function login() {
-    const e = document.getElementById('email').value, p = document.getElementById('pass').value;
-    auth.signInWithEmailAndPassword(e, p).catch(() => document.getElementById('errorMsg').classList.remove('hidden'));
+    const e = document.getElementById('email').value;
+    const p = document.getElementById('pass').value;
+    
+    // สั่งล็อกอิน
+    auth.signInWithEmailAndPassword(e, p)
+    .then(() => {
+        // ถ้ารหัสถูก ให้รีเฟรชหน้า 1 ครั้งเพื่อซิงค์กุญแจกับฐานข้อมูล
+        window.location.reload();
+    })
+    .catch(() => {
+        // ถ้ารหัสผิด ให้โชว์ข้อความแจ้งเตือน
+        document.getElementById('errorMsg').classList.remove('hidden');
+    });
 }
 
 function logout() { 
