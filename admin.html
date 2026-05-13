@@ -154,11 +154,8 @@
 
                         <div class="w-full lg:w-[350px] bg-[rgba(15,23,42,0.85)] border border-[rgba(255,255,255,0.15)] rounded-xl p-5 text-white shadow-lg flex flex-col shrink-0 relative overflow-hidden">
                             <div id="previewBadge" class="absolute top-0 right-0 bg-blue-500 text-white text-[10px] font-bold px-3 py-1.5 rounded-bl-xl shadow-md">โหมดภาพรวม</div>
-                            
                             <h3 id="previewTitle" class="text-[1.2rem] font-medium border-b border-[#ff4757] pb-2 mb-3 mt-2 shrink-0 leading-[1.3]">ชื่อหัวข้อ...</h3>
-                            
                             <div id="previewDesc" class="text-[0.9rem] text-[#cbd5e1] leading-[1.6] overflow-y-auto flex-grow pr-2 preview-scroll">รายละเอียด...</div>
-                            
                             <button id="resetPreviewBtn" onclick="resetLivePreview()" class="mt-4 w-full bg-slate-700/50 hover:bg-[#ff4757] text-white text-xs px-3 py-2 rounded-lg border border-slate-600 transition shadow-sm hidden shrink-0 font-medium">🔙 ย้อนกลับไปหน้าภาพรวม</button>
                         </div>
                         
@@ -223,7 +220,6 @@ let globalDatabase = null, currentSysIndex = null, currentItemIndex = null, curr
 let isDevMode = false;
 let activePreviewMaterial = null; 
 
-// 🌟 ตัวแปรเก็บสีดั้งเดิมของโมเดลสำหรับการทำไฮไลต์ 🌟
 let adminOriginalColors = new Map();
 
 const svgExpand = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>`;
@@ -276,7 +272,16 @@ document.getElementById('devPassInput').addEventListener('keypress', (e) => { if
 // ================== LIVE PREVIEW อัจฉริยะ ==================
 function updateLiveModel() {
     const path = document.getElementById('frmModelPath').value;
-    document.getElementById('adminViewer').src = path || "";
+    const viewer = document.getElementById('adminViewer');
+    
+    if (path) {
+        viewer.src = path;
+    } else {
+        viewer.src = "";
+        // ซ่อนปุ่ม ID ต่างๆ เวลาไม่มีโมเดล
+        document.getElementById('allMaterialsContainer').classList.add('hidden');
+        document.getElementById('materialChips').innerHTML = '';
+    }
     resetLivePreview();
 }
 
@@ -300,12 +305,10 @@ function updatePartPreview(partName, partInfo) {
     document.getElementById('resetPreviewBtn').classList.remove('hidden');
 }
 
-// 🌟 ฟังก์ชันรีเซ็ตสีให้กลับเป็นปกติ
 function resetLivePreview() {
     document.getElementById('clickedIdDisplay').classList.add('hidden');
     updateOverviewPreview();
     
-    // คืนค่าสีดั้งเดิมให้ทุกชิ้นส่วน
     if (adminViewer && adminViewer.model && adminViewer.model.materials) {
         for (const mat of adminViewer.model.materials) {
             if (adminOriginalColors.has(mat.name)) {
@@ -318,27 +321,24 @@ function resetLivePreview() {
     }
 }
 
-// ผูก Event ให้พิมพ์ปุ๊บเปลี่ยนปั๊บ
 document.getElementById('frmName').addEventListener('input', () => { if(!activePreviewMaterial) updateOverviewPreview(); });
 document.getElementById('frmDesc').addEventListener('input', () => { if(!activePreviewMaterial) updateOverviewPreview(); });
 
 const adminViewer = document.getElementById('adminViewer');
 let ptDownX = 0, ptDownY = 0;
 
-// 🌟 สร้างรายการปุ่ม ID และดึงค่าสีต้นฉบับเก็บไว้เมื่อโมเดลโหลดเสร็จ
 adminViewer.addEventListener('load', () => {
     const container = document.getElementById('allMaterialsContainer');
     const chips = document.getElementById('materialChips');
     chips.innerHTML = '';
     
-    // เคลียร์และเก็บค่าสีเริ่มต้นใหม่
-    if(adminViewer.model && adminViewer.model.materials) {
+    // เคลียร์และเก็บค่าสีเริ่มต้นใหม่ เฉพาะตอนที่มีโมเดล
+    if(adminViewer.src && adminViewer.model && adminViewer.model.materials) {
         adminOriginalColors.clear();
         const mats = adminViewer.model.materials;
         
         if(mats.length > 0) {
             mats.forEach(mat => {
-                // เก็บสีต้นฉบับไว้
                 adminOriginalColors.set(mat.name, mat.pbrMetallicRoughness.baseColorFactor.slice());
                 
                 const btn = document.createElement('button');
@@ -354,7 +354,6 @@ adminViewer.addEventListener('load', () => {
     }
 });
 
-// ฟังก์ชันเรียกดูข้อมูลและ **ทำไฮไลต์โชว์เฉพาะสีจริง ไม่เรืองแสง**
 function forcePreviewMaterial(matName) {
     const disp = document.getElementById('clickedIdDisplay');
     document.getElementById('idTextSpan').textContent = matName;
@@ -362,16 +361,13 @@ function forcePreviewMaterial(matName) {
     
     activePreviewMaterial = matName;
     
-    // 🌟 ระบบทำไฮไลต์สี (โชว์สีจริง ไม่เรืองแสง) 🌟
     if (adminViewer.model && adminViewer.model.materials) {
         for (const mat of adminViewer.model.materials) {
             const origColor = adminOriginalColors.get(mat.name) || [1, 1, 1, 1];
             if (mat.name !== matName) {
-                // ชิ้นอื่นที่ไม่ได้คลิก -> ทำให้มืดและจางลงมาก (Dim)
                 mat.pbrMetallicRoughness.setBaseColorFactor([origColor[0] * 0.1, origColor[1] * 0.1, origColor[2] * 0.1, origColor[3]]); 
                 mat.setEmissiveFactor([0, 0, 0]); 
             } else {
-                // ชิ้นที่ถูกคลิก -> คืนสีเดิมของโมเดล 100% (สดใสตามธรรมชาติ ไม่เพี้ยน)
                 mat.pbrMetallicRoughness.setBaseColorFactor(origColor);
                 mat.setEmissiveFactor([0, 0, 0]); 
             }
@@ -390,7 +386,6 @@ function forcePreviewMaterial(matName) {
     setTimeout(() => { disp.style.transform = 'translate(-50%, 0)'; }, 150);
 }
 
-// ระบบคลิกบนโมเดล
 adminViewer.addEventListener('pointerdown', (e) => { ptDownX = e.clientX; ptDownY = e.clientY; });
 adminViewer.addEventListener('pointerup', (e) => {
     if (Math.abs(e.clientX - ptDownX) > 15 || Math.abs(e.clientY - ptDownY) > 15) return; 
@@ -442,7 +437,7 @@ function editItem(sIdx, iIdx) {
     document.getElementById('welcomeScreen').classList.add('hidden');
     document.getElementById('editingTitle').textContent = currentItemData.name;
     document.getElementById('frmName').value = currentItemData.name;
-    document.getElementById('frmModelPath').value = currentItemData.model_file;
+    document.getElementById('frmModelPath').value = currentItemData.model_file || ''; // กันบั๊ก
     document.getElementById('frmDesc').innerHTML = currentItemData.description || '';
     document.getElementById('uploadStatus').classList.add('hidden');
     
@@ -504,7 +499,22 @@ function deleteCurrentItem() { openCustomConfirm(`ลบอวัยวะ <b cl
 function deleteSystem(idx) { const sysName=globalDatabase.systems[idx].category; openCustomPrompt("⚠️ ลบหมวดหมู่", `พิมพ์: ${sysName}`, `<span class="text-rose-400">ระวัง! บทเรียนในหมวดนี้หายหมด</span><br>พิมพ์ <b>${sysName}</b> เพื่อยืนยัน:`, (conf) => { if(conf===sysName) { globalDatabase.systems.splice(idx, 1); db.collection("database").doc("anatomy").set(globalDatabase).then(() => renderSidebar()); } else if(conf!==null&&conf.trim()!==""){alert("พิมพ์ชื่อไม่ถูกต้อง");} }); }
 function clearAllData() { openCustomPrompt("🔥 ล้าง Cloud", "พิมพ์ CONFIRM DELETE", `พิมพ์ <b>CONFIRM DELETE</b>`, (conf) => { if(conf==="CONFIRM DELETE"){ db.collection("database").doc("anatomy").delete().then(()=>location.reload()); } }); }
 function addNewSystem() { openCustomPrompt("✨ เพิ่มหมวดหมู่", "ชื่อหมวดหมู่...", null, (n) => { if(n&&n.trim()!==""){ if(!globalDatabase) globalDatabase={systems:[]}; globalDatabase.systems.push({category: n.trim(), items: []}); db.collection("database").doc("anatomy").set(globalDatabase).then(()=>renderSidebar()); } }); }
-function addNewItemToSys(sysIdx) { if(!globalDatabase.systems[sysIdx].items) globalDatabase.systems[sysIdx].items=[]; globalDatabase.systems[sysIdx].items.push({name: "บทเรียนใหม่", model_file: "models/new_model.glb", description: "รายละเอียดบทเรียน...", click_parts: [], quiz: []}); db.collection("database").doc("anatomy").set(globalDatabase).then(()=>{ renderSidebar(); editItem(sysIdx, globalDatabase.systems[sysIdx].items.length-1); }); }
+
+// 🌟 สร้างบทเรียนใหม่โดยตั้งค่า model_file ให้เป็นช่องว่าง (ไม่โชว์หุ่นเก่า)
+function addNewItemToSys(sysIdx) { 
+    if(!globalDatabase.systems[sysIdx].items) globalDatabase.systems[sysIdx].items=[]; 
+    globalDatabase.systems[sysIdx].items.push({
+        name: "บทเรียนใหม่", 
+        model_file: "", // 🌟 แก้ตรงนี้เป็นค่าว่าง
+        description: "รายละเอียดบทเรียน...", 
+        click_parts: [], 
+        quiz: []
+    }); 
+    db.collection("database").doc("anatomy").set(globalDatabase).then(()=>{ 
+        renderSidebar(); 
+        editItem(sysIdx, globalDatabase.systems[sysIdx].items.length-1); 
+    }); 
+}
 
 document.addEventListener('paste', function(e) { if(e.target.isContentEditable) { e.preventDefault(); let text=(e.originalEvent||e).clipboardData.getData('text/plain'); document.execCommand('insertText', false, text); } });
 </script>
