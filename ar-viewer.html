@@ -3,25 +3,154 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>AR Mode - Anatomy Learning</title>
+    <title>AR Mode - BioLens</title>
     <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
-        body { margin: 0; padding: 0; background-color: #020617; height: 100vh; width: 100vw; overflow: hidden; font-family: 'Kanit', sans-serif; }
-        model-viewer { width: 100%; height: 100%; outline: none; }
-        
-        /* ตกแต่งปุ่มกดดู AR ให้อยู่ตรงกลางด้านล่างและใหญ่สะดุดตา */
-        model-viewer > button[slot="ar-button"] {
-            position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%);
-            background-color: #ff4757; color: white; border: none; border-radius: 20px;
-            padding: 15px 30px; font-size: 1.1rem; font-family: 'Kanit', sans-serif; font-weight: 500;
-            box-shadow: 0 10px 25px rgba(255, 71, 87, 0.5); cursor: pointer;
+        :root {
+            --primary: #ff4757;
+            --primary-light: #ff6b81;
+            --bg: #020617;
+            --glass: rgba(15, 23, 42, 0.7);
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        body { 
+            margin: 0; 
+            padding: 0; 
+            background-color: var(--bg); 
+            height: 100vh; 
+            width: 100vw; 
+            overflow: hidden; 
+            font-family: 'Kanit', sans-serif; 
+        }
+
+        model-viewer { 
+            width: 100%; 
+            height: 100%; 
+            outline: none; 
+            --poster-color: transparent;
         }
         
-        #error-msg { position: absolute; top: 50%; width: 100%; text-align: center; color: white; display: none; }
+        /* =========================================
+           ✨ ปุ่มโชว์ AR (AR Button)
+           ========================================= */
+        model-viewer > button[slot="ar-button"] {
+            position: absolute; 
+            bottom: 50px; 
+            left: 50%; 
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white; 
+            border: none; 
+            border-radius: 30px;
+            padding: 16px 32px; 
+            font-size: 1.1rem; 
+            font-family: 'Kanit', sans-serif; 
+            font-weight: 500;
+            box-shadow: 0 10px 25px rgba(255, 71, 87, 0.4); 
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            white-space: nowrap;
+            transition: all 0.3s ease;
+            animation: pulse-shadow 2s infinite;
+        }
+
+        model-viewer > button[slot="ar-button"]:active {
+            transform: translateX(-50%) scale(0.95);
+        }
+
+        @keyframes pulse-shadow {
+            0% { box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.4); }
+            70% { box-shadow: 0 0 0 15px rgba(255, 71, 87, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 71, 87, 0); }
+        }
+
+        /* =========================================
+           ⏳ หน้าจอโหลด (Loading State)
+           ========================================= */
+        #loading-ui {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-left-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .loading-text {
+            color: #cbd5e1;
+            font-size: 1rem;
+            letter-spacing: 1px;
+            animation: pulse-text 1.5s infinite;
+        }
+
+        @keyframes pulse-text { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+        /* =========================================
+           ❌ กล่องแจ้งเตือน Error (Error Card)
+           ========================================= */
+        #error-msg { 
+            position: absolute; 
+            top: 50%; 
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%; 
+            max-width: 350px;
+            background: var(--glass);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 40px 20px;
+            text-align: center; 
+            color: white; 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            display: none; 
+        }
+
+        #error-msg .icon {
+            font-size: 3.5rem;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        #error-msg h3 {
+            margin: 0 0 10px 0;
+            color: var(--primary);
+            font-size: 1.4rem;
+        }
+
+        #error-msg p {
+            margin: 0;
+            color: #94a3b8;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
     </style>
 </head>
 <body>
+
+    <div id="loading-ui">
+        <div class="spinner"></div>
+        <div class="loading-text">กำลังโหลดโมเดล 3D...</div>
+    </div>
 
     <model-viewer id="ar-viewer" 
         ar 
@@ -29,33 +158,50 @@
         ar-scale="auto" 
         camera-controls 
         auto-rotate 
-        shadow-intensity="1" 
+        rotation-per-second="30deg"
+        shadow-intensity="1.5" 
         exposure="1.2" 
         environment-image="neutral">
+        
         <button slot="ar-button">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                <line x1="12" y1="22.08" x2="12" y2="12"></line>
+            </svg>
             โชว์โมเดล AR บนโต๊ะ
         </button>
     </model-viewer>
 
     <div id="error-msg">
+        <span class="icon">🔍</span>
         <h3>ไม่พบข้อมูลโมเดล</h3>
-        <p>กรุณาสแกน QR Code ใหม่อีกครั้ง</p>
+        <p>คุณอาจสแกน QR Code ผิดพลาด<br>กรุณากลับไปที่หน้าจอหลักและลองสแกนใหม่อีกครั้งครับ</p>
     </div>
 
     <script>
-        // อ่านค่าพารามิเตอร์ URL ว่าคอมพิวเตอร์ส่งโมเดลชื่ออะไรมา
         const urlParams = new URLSearchParams(window.location.search);
         const modelUrl = urlParams.get('model');
         
         const viewer = document.getElementById('ar-viewer');
         const errorMsg = document.getElementById('error-msg');
+        const loadingUI = document.getElementById('loading-ui');
 
         if (modelUrl) {
-            // โหลดโมเดลนั้นขึ้นจอ
+            // โหลดโมเดล
             viewer.src = modelUrl;
+
+            // ซ่อนหน้าจอโหลดเมื่อโมเดลโหลดเสร็จ
+            viewer.addEventListener('progress', (e) => {
+                if (e.detail.totalProgress === 1) {
+                    loadingUI.style.opacity = '0';
+                    setTimeout(() => { loadingUI.style.display = 'none'; }, 500);
+                }
+            });
         } else {
-            // ถ้าเข้ามาหน้านี้โดยไม่มีลิงก์โมเดล ให้ซ่อน viewer แล้วโชว์ข้อความแจ้งเตือน
+            // กรณีไม่มีลิงก์โมเดล
             viewer.style.display = 'none';
+            loadingUI.style.display = 'none';
             errorMsg.style.display = 'block';
         }
     </script>
