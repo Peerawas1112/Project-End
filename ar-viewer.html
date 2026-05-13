@@ -37,7 +37,7 @@
            ========================================= */
         model-viewer > button[slot="ar-button"] {
             position: absolute; 
-            bottom: 50px; 
+            bottom: 40px; 
             left: 50%; 
             transform: translateX(-50%);
             background: linear-gradient(135deg, var(--primary), var(--primary-light));
@@ -56,6 +56,7 @@
             white-space: nowrap;
             transition: all 0.3s ease;
             animation: pulse-shadow 2s infinite;
+            z-index: 10;
         }
 
         model-viewer > button[slot="ar-button"]:active {
@@ -67,6 +68,21 @@
             70% { box-shadow: 0 0 0 15px rgba(255, 71, 87, 0); }
             100% { box-shadow: 0 0 0 0 rgba(255, 71, 87, 0); }
         }
+
+        /* คำแนะนำการใช้งาน */
+        .ar-hint {
+            position: absolute;
+            bottom: 110px;
+            width: 100%;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+            pointer-events: none;
+            z-index: 5;
+            animation: fadeIn 2s ease-in;
+        }
+
+        @keyframes fadeIn { 0% { opacity: 0; } 100% { opacity: 1; } }
 
         /* =========================================
            ⏳ หน้าจอโหลด (Loading State)
@@ -81,6 +97,7 @@
             align-items: center;
             pointer-events: none;
             transition: opacity 0.5s ease;
+            z-index: 20;
         }
 
         .spinner {
@@ -123,26 +140,12 @@
             color: white; 
             box-shadow: 0 20px 50px rgba(0,0,0,0.5);
             display: none; 
+            z-index: 30;
         }
 
-        #error-msg .icon {
-            font-size: 3.5rem;
-            margin-bottom: 15px;
-            display: block;
-        }
-
-        #error-msg h3 {
-            margin: 0 0 10px 0;
-            color: var(--primary);
-            font-size: 1.4rem;
-        }
-
-        #error-msg p {
-            margin: 0;
-            color: #94a3b8;
-            font-size: 0.95rem;
-            line-height: 1.5;
-        }
+        #error-msg .icon { font-size: 3.5rem; margin-bottom: 15px; display: block; }
+        #error-msg h3 { margin: 0 0 10px 0; color: var(--primary); font-size: 1.4rem; }
+        #error-msg p { margin: 0; color: #94a3b8; font-size: 0.95rem; line-height: 1.5; }
     </style>
 </head>
 <body>
@@ -154,8 +157,9 @@
 
     <model-viewer id="ar-viewer" 
         ar 
-        ar-modes="webxr scene-viewer quick-look" 
+        ar-modes="scene-viewer webxr quick-look" 
         ar-scale="auto" 
+        bounds="tight"
         camera-controls 
         auto-rotate 
         rotation-per-second="30deg"
@@ -163,6 +167,10 @@
         exposure="1.2" 
         environment-image="neutral">
         
+        <div class="ar-hint" slot="poster">
+            💡 ใช้ 2 นิ้วบิดเพื่อหมุน หรือ หยิกเพื่อซูมเข้า-ออก
+        </div>
+
         <button slot="ar-button">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
@@ -188,10 +196,8 @@
         const loadingUI = document.getElementById('loading-ui');
 
         if (modelUrl) {
-            // โหลดโมเดล
             viewer.src = modelUrl;
 
-            // ซ่อนหน้าจอโหลดเมื่อโมเดลโหลดเสร็จ
             viewer.addEventListener('progress', (e) => {
                 if (e.detail.totalProgress === 1) {
                     loadingUI.style.opacity = '0';
@@ -199,7 +205,6 @@
                 }
             });
         } else {
-            // กรณีไม่มีลิงก์โมเดล
             viewer.style.display = 'none';
             loadingUI.style.display = 'none';
             errorMsg.style.display = 'block';
