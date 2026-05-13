@@ -103,8 +103,8 @@
             
             <button onclick="toggleFullScreen()" id="fsBtnHeader" class="bg-slate-700 hover:bg-slate-600 text-white w-8 h-8 rounded-lg flex items-center justify-center transition" title="ขยายเต็มจอ"></button>
             
-            <button onclick="window.location.href='index.html'" class="bg-slate-700 hover:bg-slate-600 px-3 py-1.5 rounded-lg text-xs">🏠 หน้าหลัก</button>
-            <button onclick="logout()" class="bg-slate-900 hover:bg-rose-700 px-3 py-1.5 rounded-lg text-xs border border-slate-700">🚪 ออก</button>
+            <button onclick="returnToHomeSecurely()" class="bg-slate-700 hover:bg-slate-600 px-3 py-1.5 rounded-lg text-xs">🏠 หน้าหลัก</button>
+            <button onclick="logout()" class="bg-slate-900 hover:bg-rose-700 px-3 py-1.5 rounded-lg text-xs border border-slate-700">🚪 ออกจากระบบ</button>
         </div>
     </header>
 
@@ -265,6 +265,16 @@ function logout() {
     openCustomConfirm("คุณต้องการออกจากระบบใช่หรือไม่?", "🚪 ออกจากระบบ", () => {
         auth.signOut(); 
     }, false); 
+}
+
+// 🌟 ฟังก์ชันกลับหน้าหลัก พร้อมทำลายการล็อกอินทันทีเพื่อความปลอดภัย
+function returnToHomeSecurely() {
+    auth.signOut().then(() => {
+        window.location.href = 'index.html';
+    }).catch((error) => {
+        console.error("Logout Error:", error);
+        window.location.href = 'index.html'; // ถึง Error ก็บังคับกลับ
+    });
 }
 
 // ==========================================
