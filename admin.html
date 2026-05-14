@@ -17,11 +17,9 @@
         .rich-editor-content { padding: 12px; min-height: 80px; background: #1e293b; color: white; outline: none; line-height: 1.5; font-size: 0.9rem; }
         .rich-editor-content b { color: #fbbf24; }
         
-        /* Custom Scrollbar พื้นฐาน */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
         
-        /* Custom Scrollbar สำหรับการ์ดพรีวิว */
         .preview-scroll::-webkit-scrollbar { width: 4px; }
         .preview-scroll::-webkit-scrollbar-track { background: transparent; }
         .preview-scroll::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 10px; }
@@ -251,7 +249,6 @@ function login() {
 function returnToHomeSecurely() { auth.signOut().then(() => window.location.href = 'index.html').catch(() => window.location.href = 'index.html'); }
 function logout() { openCustomConfirm("คุณต้องการออกจากระบบใช่หรือไม่?", "🚪 ออกจากระบบ", () => { auth.signOut(); }, false); }
 
-// ================== Modal Logic ==================
 let promptCallback = null;
 function openCustomPrompt(t, p, d, cb) { document.getElementById('promptTitle').innerText = t; document.getElementById('promptInput').placeholder = p||''; document.getElementById('promptInput').value = ''; const dEl = document.getElementById('promptDesc'); if(d){dEl.innerHTML = d; dEl.classList.remove('hidden');}else{dEl.classList.add('hidden');} promptCallback = cb; document.getElementById('customPromptModal').classList.remove('hidden'); setTimeout(()=>document.getElementById('promptInput').focus(),100); }
 function closeCustomPrompt() { document.getElementById('customPromptModal').classList.add('hidden'); promptCallback = null; }
@@ -263,13 +260,11 @@ function openCustomConfirm(d, t="ยืนยันการดำเนิน�
 function closeCustomConfirm() { document.getElementById('customConfirmModal').classList.add('hidden'); confirmCallback = null; }
 document.getElementById('confirmBtn').addEventListener('click', () => { if(confirmCallback) confirmCallback(); closeCustomConfirm(); });
 
-// ================== Dev Mode ==================
 function toggleDevMode() { if(isDevMode){isDevMode=false; document.body.classList.remove('dev-mode'); const btn=document.getElementById('btnDevMode'); btn.innerHTML="🔒 โหมดปกติ"; btn.className="bg-slate-600/20 hover:bg-slate-600 text-slate-400 hover:text-white px-3 py-1.5 rounded-lg text-xs border border-slate-600/30 flex items-center gap-1";}else{document.getElementById('devPassModal').classList.remove('hidden'); document.getElementById('devPassInput').value=''; setTimeout(()=>document.getElementById('devPassInput').focus(),100);} }
 function closeDevPassModal() { document.getElementById('devPassModal').classList.add('hidden'); }
 function confirmDevPass() { if(document.getElementById('devPassInput').value==="122026"){isDevMode=true; document.body.classList.add('dev-mode'); const btn=document.getElementById('btnDevMode'); btn.innerHTML="🔓 โหมดนักพัฒนา"; btn.className="bg-emerald-600/20 hover:bg-emerald-600 text-emerald-400 hover:text-white px-3 py-1.5 rounded-lg text-xs border border-emerald-600/30 flex items-center gap-1 shadow-md"; closeDevPassModal();}else{alert("❌ รหัสผ่านไม่ถูกต้อง!"); document.getElementById('devPassInput').value=''; document.getElementById('devPassInput').focus();} }
 document.getElementById('devPassInput').addEventListener('keypress', (e) => { if(e.key==='Enter') confirmDevPass(); });
 
-// ================== LIVE PREVIEW อัจฉริยะ ==================
 function updateLiveModel() {
     const path = document.getElementById('frmModelPath').value;
     const viewer = document.getElementById('adminViewer');
@@ -278,7 +273,6 @@ function updateLiveModel() {
         viewer.src = path;
     } else {
         viewer.src = "";
-        // ซ่อนปุ่ม ID ต่างๆ เวลาไม่มีโมเดล
         document.getElementById('allMaterialsContainer').classList.add('hidden');
         document.getElementById('materialChips').innerHTML = '';
     }
@@ -332,7 +326,6 @@ adminViewer.addEventListener('load', () => {
     const chips = document.getElementById('materialChips');
     chips.innerHTML = '';
     
-    // เคลียร์และเก็บค่าสีเริ่มต้นใหม่ เฉพาะตอนที่มีโมเดล
     if(adminViewer.src && adminViewer.model && adminViewer.model.materials) {
         adminOriginalColors.clear();
         const mats = adminViewer.model.materials;
@@ -398,7 +391,6 @@ adminViewer.addEventListener('pointerup', (e) => {
     }
 });
 
-// ================== Cloudinary ==================
 function uploadModelToCloud(inputElement) {
     const file = inputElement.files[0]; if(!file) return;
     if(!file.name.toLowerCase().endsWith('.glb')) { alert("❌ กรุณาอัปโหลดเฉพาะ .glb ครับ"); inputElement.value=''; return; }
@@ -414,7 +406,6 @@ function uploadModelToCloud(inputElement) {
     xhr.send(fd);
 }
 
-// ================== DATA & RENDER ==================
 function loadData() { db.collection("database").doc("anatomy").get().then(doc => { if(doc.exists){ globalDatabase=doc.data(); renderSidebar(); document.getElementById('btnSync').classList.add('hidden'); }else{ document.getElementById('btnSync').classList.remove('hidden'); } }); }
 function syncInitialData() { openCustomConfirm("ดึงข้อมูลเริ่มต้นจาก anatomy_data.json ขึ้น Cloud ใช่หรือไม่?", "📥 โหลดข้อมูลตั้งต้น", () => { fetch("anatomy_data.json").then(r=>r.json()).then(data=>{db.collection("database").doc("anatomy").set(data).then(()=>{alert("สำเร็จ!"); loadData();});}); }, false); }
 
@@ -437,7 +428,7 @@ function editItem(sIdx, iIdx) {
     document.getElementById('welcomeScreen').classList.add('hidden');
     document.getElementById('editingTitle').textContent = currentItemData.name;
     document.getElementById('frmName').value = currentItemData.name;
-    document.getElementById('frmModelPath').value = currentItemData.model_file || ''; // กันบั๊ก
+    document.getElementById('frmModelPath').value = currentItemData.model_file || ''; 
     document.getElementById('frmDesc').innerHTML = currentItemData.description || '';
     document.getElementById('uploadStatus').classList.add('hidden');
     
@@ -446,7 +437,9 @@ function editItem(sIdx, iIdx) {
 }
 
 function addClickPart() { currentItemData.click_parts.push({material_name:'', name:'', info:''}); renderParts(); }
-function addQuiz() { currentItemData.quiz.push({question:'', choices:['','','',''], answer:0}); renderQuiz(); }
+
+// 🌟 อัปเดตโครงสร้างเมื่อเพิ่มข้อสอบใหม่ ให้มีค่า points = 1 เป็นค่าเริ่มต้น
+function addQuiz() { currentItemData.quiz.push({question:'', choices:['','','',''], answer:0, points: 1}); renderQuiz(); }
 
 function renderParts() {
     const container = document.getElementById('clickPartsContainer'); container.innerHTML = '';
@@ -478,13 +471,19 @@ function renderParts() {
     });
 }
 
+// 🌟 อัปเดต UI หน้า Admin ให้มีช่องกรอกคะแนนกำกับแต่ละข้อ
 function renderQuiz() {
     const container = document.getElementById('quizContainer'); container.innerHTML = '';
     const quiz = currentItemData.quiz || [];
     quiz.forEach((q, idx) => {
         container.innerHTML += `<div class="bg-slate-900/50 p-4 rounded-xl border border-slate-700 relative pr-12">
             <button onclick="deleteQuizPart(${idx})" class="delete-btn-sm">✕</button>
-            <input type="text" class="input-box mb-3 font-medium text-sm" value="${q.question}" oninput="currentItemData.quiz[${idx}].question=this.value" placeholder="โจทย์">
+            
+            <div class="flex gap-2 mb-3">
+                <input type="text" class="input-box font-medium text-sm flex-grow" value="${q.question}" oninput="currentItemData.quiz[${idx}].question=this.value" placeholder="โจทย์คำถาม">
+                <input type="number" class="input-box font-bold text-sm w-24 text-center text-amber-400" value="${q.points || 1}" oninput="currentItemData.quiz[${idx}].points=Number(this.value)" placeholder="คะแนน" min="1" title="คะแนนสำหรับข้อนี้">
+            </div>
+
             <div class="grid grid-cols-2 gap-2">
                 ${q.choices.map((c, cIdx) => `<div class="flex gap-2 items-center bg-slate-800 p-1.5 rounded-lg border ${q.answer===cIdx ? 'border-emerald-500' : 'border-transparent'}"><input type="radio" name="ans-${idx}" ${q.answer===cIdx?'checked':''} onchange="currentItemData.quiz[${idx}].answer=${cIdx}" class="ml-1 cursor-pointer"><input type="text" class="bg-transparent text-xs text-white w-full outline-none" value="${c}" oninput="currentItemData.quiz[${idx}].choices[${cIdx}]=this.value" placeholder="ตัวเลือก"></div>`).join('')}
             </div>
@@ -499,22 +498,7 @@ function deleteCurrentItem() { openCustomConfirm(`ลบอวัยวะ <b cl
 function deleteSystem(idx) { const sysName=globalDatabase.systems[idx].category; openCustomPrompt("⚠️ ลบหมวดหมู่", `พิมพ์: ${sysName}`, `<span class="text-rose-400">ระวัง! บทเรียนในหมวดนี้หายหมด</span><br>พิมพ์ <b>${sysName}</b> เพื่อยืนยัน:`, (conf) => { if(conf===sysName) { globalDatabase.systems.splice(idx, 1); db.collection("database").doc("anatomy").set(globalDatabase).then(() => renderSidebar()); } else if(conf!==null&&conf.trim()!==""){alert("พิมพ์ชื่อไม่ถูกต้อง");} }); }
 function clearAllData() { openCustomPrompt("🔥 ล้าง Cloud", "พิมพ์ CONFIRM DELETE", `พิมพ์ <b>CONFIRM DELETE</b>`, (conf) => { if(conf==="CONFIRM DELETE"){ db.collection("database").doc("anatomy").delete().then(()=>location.reload()); } }); }
 function addNewSystem() { openCustomPrompt("✨ เพิ่มหมวดหมู่", "ชื่อหมวดหมู่...", null, (n) => { if(n&&n.trim()!==""){ if(!globalDatabase) globalDatabase={systems:[]}; globalDatabase.systems.push({category: n.trim(), items: []}); db.collection("database").doc("anatomy").set(globalDatabase).then(()=>renderSidebar()); } }); }
-
-// 🌟 สร้างบทเรียนใหม่โดยตั้งค่า model_file ให้เป็นช่องว่าง (ไม่โชว์หุ่นเก่า)
-function addNewItemToSys(sysIdx) { 
-    if(!globalDatabase.systems[sysIdx].items) globalDatabase.systems[sysIdx].items=[]; 
-    globalDatabase.systems[sysIdx].items.push({
-        name: "บทเรียนใหม่", 
-        model_file: "", // 🌟 แก้ตรงนี้เป็นค่าว่าง
-        description: "รายละเอียดบทเรียน...", 
-        click_parts: [], 
-        quiz: []
-    }); 
-    db.collection("database").doc("anatomy").set(globalDatabase).then(()=>{ 
-        renderSidebar(); 
-        editItem(sysIdx, globalDatabase.systems[sysIdx].items.length-1); 
-    }); 
-}
+function addNewItemToSys(sysIdx) { if(!globalDatabase.systems[sysIdx].items) globalDatabase.systems[sysIdx].items=[]; globalDatabase.systems[sysIdx].items.push({name: "บทเรียนใหม่", model_file: "", description: "รายละเอียดบทเรียน...", click_parts: [], quiz: []}); db.collection("database").doc("anatomy").set(globalDatabase).then(()=>{ renderSidebar(); editItem(sysIdx, globalDatabase.systems[sysIdx].items.length-1); }); }
 
 document.addEventListener('paste', function(e) { if(e.target.isContentEditable) { e.preventDefault(); let text=(e.originalEvent||e).clipboardData.getData('text/plain'); document.execCommand('insertText', false, text); } });
 </script>

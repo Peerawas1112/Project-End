@@ -218,15 +218,45 @@ model-viewer { width:100%; height:calc(100vh - 60px); margin-top: 60px; --poster
     <h2 style="color:var(--primary); margin-top:0; border-bottom: 2px solid var(--border); padding-bottom: 15px;">เมนูแบบทดสอบ</h2>
     <p style="color: #94a3b8; font-size: 0.9rem; margin-bottom: 20px;">เลือกทำแบบทดสอบแยกตามระบบ หรือ ทำแบบทดสอบรวมเพื่อวัดความรู้ทั้งหมด</p>
     
-    <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border); border-radius: 16px; padding: 15px; margin-bottom: 20px; text-align: left;">
-        <h3 style="font-size: 0.95rem; color: #cbd5e1; margin-top: 0; margin-bottom: 10px; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 8px;">📊 เกณฑ์การประเมินผล</h3>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.85rem; color: #94a3b8;">
-            <div><b style="color:#4ade80;">A</b> : 80 - 100% (ดีเยี่ยม)</div>
-            <div><b style="color:#60a5fa;">B</b> : 70 - 79% (ดี)</div>
-            <div><b style="color:#facc15;">C</b> : 60 - 69% (ปานกลาง)</div>
-            <div><b style="color:#fb923c;">D</b> : 50 - 59% (พอใช้)</div>
-            <div style="grid-column: span 2;"><b style="color:#f87171;">F</b> : ต่ำกว่า 50% (ต้องปรับปรุง)</div>
+    <div style="background: rgba(15, 23, 42, 0.4); border: 1px solid var(--border); border-radius: 16px; padding: 15px; margin-bottom: 20px; text-align: left;">
+        <h3 style="font-size: 0.95rem; color: #cbd5e1; margin-top: 0; margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
+            📊 เกณฑ์การประเมินผล
+        </h3>
+        
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+            <div style="display: flex; gap: 8px;">
+                <div style="flex: 1; background: rgba(74, 222, 128, 0.1); border: 1px solid rgba(74, 222, 128, 0.3); border-radius: 12px; padding: 10px; display: flex; align-items: center; gap: 12px;">
+                    <div style="background: #4ade80; color: #020617; font-weight: bold; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; box-shadow: 0 4px 10px rgba(74, 222, 128, 0.3);">A</div>
+                    <div style="font-size: 0.85rem; color: #cbd5e1; line-height: 1.3;">80-100%<br><span style="color:#4ade80; font-size: 0.75rem; font-weight: 500;">ดีเยี่ยม</span></div>
+                </div>
+                <div style="flex: 1; background: rgba(96, 165, 250, 0.1); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 12px; padding: 10px; display: flex; align-items: center; gap: 12px;">
+                    <div style="background: #60a5fa; color: #020617; font-weight: bold; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; box-shadow: 0 4px 10px rgba(96, 165, 250, 0.3);">B</div>
+                    <div style="font-size: 0.85rem; color: #cbd5e1; line-height: 1.3;">70-79%<br><span style="color:#60a5fa; font-size: 0.75rem; font-weight: 500;">ดี</span></div>
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: 8px;">
+                <div style="flex: 1; background: rgba(250, 204, 21, 0.1); border: 1px solid rgba(250, 204, 21, 0.3); border-radius: 12px; padding: 10px; display: flex; align-items: center; gap: 12px;">
+                    <div style="background: #facc15; color: #020617; font-weight: bold; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; box-shadow: 0 4px 10px rgba(250, 204, 21, 0.3);">C</div>
+                    <div style="font-size: 0.85rem; color: #cbd5e1; line-height: 1.3;">60-69%<br><span style="color:#facc15; font-size: 0.75rem; font-weight: 500;">ปานกลาง</span></div>
+                </div>
+                <div style="flex: 1; background: rgba(251, 146, 60, 0.1); border: 1px solid rgba(251, 146, 60, 0.3); border-radius: 12px; padding: 10px; display: flex; align-items: center; gap: 12px;">
+                    <div style="background: #fb923c; color: #020617; font-weight: bold; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; box-shadow: 0 4px 10px rgba(251, 146, 60, 0.3);">D</div>
+                    <div style="font-size: 0.85rem; color: #cbd5e1; line-height: 1.3;">50-59%<br><span style="color:#fb923c; font-size: 0.75rem; font-weight: 500;">พอใช้</span></div>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 8px;">
+                <div style="flex: 1; background: rgba(248, 113, 113, 0.1); border: 1px solid rgba(248, 113, 113, 0.3); border-radius: 12px; padding: 10px; display: flex; align-items: center; gap: 12px;">
+                    <div style="background: #f87171; color: #020617; font-weight: bold; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; box-shadow: 0 4px 10px rgba(248, 113, 113, 0.3);">F</div>
+                    <div style="font-size: 0.85rem; color: #cbd5e1; line-height: 1.3;">ต่ำกว่า 50%<br><span style="color:#f87171; font-size: 0.75rem; font-weight: 500;">ต้องปรับปรุง</span></div>
+                </div>
+            </div>
         </div>
+
+        <p style="font-size: 0.7rem; color: #64748b; margin-top: 14px; margin-bottom: 0; text-align: center;">
+            💡 ระบบจะนำคะแนนรวมทั้งหมดมาคำนวณเป็นร้อยละ (%)
+        </p>
     </div>
 
     <div id="quizMenuButtons" style="display:flex; flex-direction:column; gap:12px;"></div>
@@ -398,10 +428,21 @@ function renderTabs() {
 function renderQuizMenu() {
     const container = document.getElementById("quizMenuButtons");
     let html = "";
+    let totalQuestionsAllSystems = 0; 
+
     data.forEach((sys, idx) => {
-        html += `<button onclick="startQuiz(${idx})" style="background: #1e293b; border: 1px solid var(--border); text-align: left; padding-left: 20px;">📝 ${sys.category} (10 ข้อ)</button>`;
+        let questionCount = 0;
+        if(sys.items) {
+            sys.items.forEach(item => {
+                if (item.quiz) questionCount += item.quiz.length;
+            });
+        }
+        totalQuestionsAllSystems += questionCount;
+
+        html += `<button onclick="startQuiz(${idx})" style="background: #1e293b; border: 1px solid var(--border); text-align: left; padding-left: 20px;">📝 ${sys.category} (${questionCount} ข้อ)</button>`;
     });
-    html += `<button onclick="startQuiz('all')" style="background: var(--primary); text-align: left; padding-left: 20px; box-shadow: 0 5px 15px rgba(255, 71, 87, 0.4);">🏆 แบบทดสอบรวมทุกระบบ (10 ข้อ)</button>`;
+
+    html += `<button onclick="startQuiz('all')" style="background: var(--primary); text-align: left; padding-left: 20px; box-shadow: 0 5px 15px rgba(255, 71, 87, 0.4);">🏆 แบบทดสอบรวมทุกระบบ (${totalQuestionsAllSystems} ข้อ)</button>`;
     container.innerHTML = html;
 }
 
@@ -575,9 +616,10 @@ function startQuiz(index) {
         title = data[index].category;
         if(data[index].items) data[index].items.forEach(item => { if (item.quiz) pool = pool.concat(item.quiz); });
     }
+    
     if (pool.length === 0) return alert(`ยังไม่มีคำถามในหมวด "${title}" ครับ`);
     
-    currentQuizData = shuffleArray([...pool]).slice(0, 10);
+    currentQuizData = shuffleArray([...pool]); 
     qIndex = 0; score = 0; userAnswers = []; 
     
     document.getElementById("quizType").textContent = "แบบทดสอบ: " + title;
@@ -592,7 +634,9 @@ function showQuestion() {
     const q = currentQuizData[qIndex]; currentCorrectText = q.choices[q.answer];
     const shuffledChoices = shuffleArray([...q.choices]);
     
-    document.getElementById("qTitle").textContent = q.question;
+    const questionPoints = q.points || 1;
+    document.getElementById("qTitle").innerHTML = `${q.question} <span style="color:#fbbf24; font-size:0.85rem; font-weight:normal; margin-left:8px;">(${questionPoints} คะแนน)</span>`;
+    
     document.getElementById("qChoices").innerHTML = shuffledChoices.map(c => `<div class="choice" onclick="selectChoice(this)">${c}</div>`).join("");
     document.getElementById("qProgress").textContent = `ข้อที่ ${qIndex + 1} / ${currentQuizData.length}`;
     startTimer(); 
@@ -609,15 +653,21 @@ function nextQuestion() {
     if (!selectedAnswerText) selectedAnswerText = "⏳ หมดเวลา (ไม่ได้ตอบ)";
     const q = currentQuizData[qIndex];
     const isCorrect = (selectedAnswerText === currentCorrectText);
-    if (isCorrect) score++;
     
-    userAnswers.push({ question: q.question, selected: selectedAnswerText, correct: currentCorrectText, isCorrect: isCorrect });
+    const questionPoints = q.points || 1; 
+    if (isCorrect) score += questionPoints; 
+    
+    userAnswers.push({ question: q.question, selected: selectedAnswerText, correct: currentCorrectText, isCorrect: isCorrect, points: questionPoints });
     qIndex++; showQuestion();
 }
 
 function showResult() {
     clearInterval(timerInterval); document.getElementById("quizTimer").style.display = "none";
-    const percent = (score / currentQuizData.length) * 100;
+    
+    let totalMaxScore = 0;
+    currentQuizData.forEach(q => totalMaxScore += (q.points || 1));
+    
+    const percent = (score / totalMaxScore) * 100;
     const grade = percent >= 80 ? "A" : percent >= 70 ? "B" : percent >= 60 ? "C" : percent >= 50 ? "D" : "F";
     let summaryHTML = `<div style="max-height: 40vh; overflow-y: auto; padding-right: 5px; margin-bottom: 20px; text-align: left;">`;
     
@@ -626,11 +676,14 @@ function showResult() {
         const bgColor = isCorrect ? 'rgba(74, 222, 128, 0.1)' : 'rgba(248, 113, 113, 0.1)';
         const borderColor = isCorrect ? '#4ade80' : '#f87171';
         const icon = isCorrect ? '✅' : '❌';
+        
+        const ptsText = isCorrect ? `+${ans.points}` : `0`; 
+
         summaryHTML += `
             <div style="background: ${bgColor}; border: 1px solid ${borderColor}; padding: 15px; border-radius: 16px; margin-bottom: 15px;">
                 <div style="color: white; font-size: 1rem; margin-bottom: 12px; line-height: 1.4;">
                     <span style="background: ${borderColor}; color: #020617; padding: 3px 10px; border-radius: 8px; font-size: 0.85rem; font-weight: bold; margin-right: 8px;">ข้อ ${idx+1}</span>
-                    ${ans.question}
+                    ${ans.question} <span style="color:${borderColor}; font-size:0.85rem; margin-left:5px;">(${ptsText}/${ans.points} pt)</span>
                 </div>
                 <div style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: 12px;">
                     <div style="color: ${isCorrect ? '#4ade80' : '#f87171'}; font-size: 0.95rem; margin-bottom: ${isCorrect ? '0' : '8px'};">${icon} <b>นักเรียนตอบ:</b> ${ans.selected}</div>
@@ -644,7 +697,7 @@ function showResult() {
     document.getElementById("qChoices").innerHTML = `
         <div style="font-size: 1rem; color: #cbd5e1; margin-top:10px;">เกรดที่ได้</div>
         <div class="grade-text" style="font-size: 3rem;">${grade}</div>
-        <div style="font-size: 1.2rem; margin-bottom: 10px;">คะแนน: ${score} / ${currentQuizData.length}</div>
+        <div style="font-size: 1.2rem; margin-bottom: 10px;">คะแนน: ${score} / ${totalMaxScore}</div>
         <p style="color: ${percent >= 50 ? '#4ade80' : '#f87171'}; font-size: 1rem; margin-bottom: 25px;">
             ${percent >= 50 ? 'เยี่ยมมาก! ผ่านเกณฑ์แล้วครับ ✨' : 'สู้ๆ นะครับ ลองทบทวนเนื้อหาใหม่อีกครั้ง 📚'}
         </p>
