@@ -425,7 +425,45 @@ function uploadModelToCloud(inputElement) {
     xhr.send(fd);
 }
 
-function loadData() { db.collection("database").doc("anatomy").get().then(doc => { if(doc.exists){ globalDatabase=doc.data(); renderSidebar(); document.getElementById('btnSync').classList.add('hidden'); }else{ document.getElementById('btnSync').classList.remove('hidden'); } }); }
+function loadData() { 
+    db.collection("database").doc("anatomy").get().then(doc => { 
+        if(doc.exists){ 
+            globalDatabase = doc.data(); 
+
+            // 🌟 ระบบดูดข้อสอบเก่ามารวมที่หมวดหมู่อัตโนมัติ (Data Migration) 🌟
+            let isMigrated = false;
+            if (globalDatabase.systems) {
+                globalDatabase.systems.forEach(sys => {
+                    if (!sys.quiz) sys.quiz = []; // ถ้าหมวดนี้ยังไม่มีคลังข้อสอบ ให้สร้างกล่องรอไว้
+                    
+                    // วนลูปเข้าไปหาข้อสอบเก่าที่เคยซ่อนอยู่ในบทเรียนย่อย (Items)
+                    if (sys.items) {
+                        sys.items.forEach(item => {
+                            if (item.quiz && item.quiz.length > 0) {
+                                // ก๊อปปี้ข้อสอบเก่าทั้งหมด มาใส่ในคลังใหญ่ของหมวดนี้
+                                sys.quiz = sys.quiz.concat(item.quiz);
+                                item.quiz = []; // เคลียร์ข้อสอบเก่าในบทเรียนทิ้งเพื่อไม่ให้ไฟล์หนัก
+                                isMigrated = true;
+                            }
+                        });
+                    }
+                });
+            }
+
+            // ถ้ามีการดูดข้อสอบเก่ามารวม ให้แอบบันทึกขึ้น Cloud ทันที
+            if (isMigrated) {
+                db.collection("database").doc("anatomy").set(globalDatabase).then(() => {
+                    console.log("✅ ย้ายข้อสอบเก่าเข้าสู่คลังแบบใหม่สำเร็จ!");
+                });
+            }
+
+            renderSidebar(); 
+            document.getElementById('btnSync').classList.add('hidden'); 
+        } else { 
+            document.getElementById('btnSync').classList.remove('hidden'); 
+        } 
+    }); 
+}
 function syncInitialData() { openCustomConfirm("ดึงข้อมูลเริ่มต้นจาก anatomy_data.json ขึ้น Cloud ใช่หรือไม่?", "📥 โหลดข้อมูลตั้งต้น", () => { fetch("anatomy_data.json").then(r=>r.json()).then(data=>{db.collection("database").doc("anatomy").set(data).then(()=>{alert("สำเร็จ!"); loadData();});}); }, false); }
 
 // 🌟 อัปเดต Sidebar ให้มีปุ่มจัดการข้อสอบระดับ System
