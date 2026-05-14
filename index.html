@@ -317,9 +317,9 @@ let currentOrganData = null, isAltMode = false, currentActiveModelUrl = "";
 let originalColors = new Map();
 let timerInterval, timeLeft = 30; 
 
-// 🌟 ตัวแปรเก็บข้อมูลชั่วคราวเพื่อรอผู้ใช้กดยืนยันในหน้า Popup
 let pendingQuizPool = [];
 let pendingQuizTitle = "";
+let currentActiveQuizIndex = null; // 🌟 เพิ่มตัวแปรเก็บ Index
 
 const firebaseConfig = {
   apiKey: "AIzaSyB9TZN4-yUb9Kfh0gdZNp6XglsbS-xEzfk",
@@ -411,7 +411,6 @@ document.querySelectorAll('.modal-overlay').forEach(modal => {
     modal.addEventListener('click', function(e) { if (e.target === this) closeModals(); });
 });
 
-// 🌟 เพิ่มคำสั่งให้ปิด Popup แบบใหม่ด้วย
 function closeModals() {
     infoModal.style.display = 'none'; 
     qrModal.style.display = 'none'; 
@@ -435,7 +434,6 @@ function renderTabs() {
     tabs.innerHTML = data.map((s, i) => `<div class="tab-btn" id="t${i}" onclick="loadSystem(${i})">${s.category}</div>`).join("");
 }
 
-// 🌟 สร้างปุ่มเมนูแบบคลีน (เอาจำนวนข้อออก) และลิงก์ไปเปิด Popup
 function renderQuizMenu() {
     const container = document.getElementById("quizMenuButtons");
     let html = "";
@@ -448,9 +446,9 @@ function renderQuizMenu() {
     container.innerHTML = html;
 }
 
-// 🌟 ฟังก์ชันใหม่: แสดง Popup ข้อมูลก่อนเริ่มสอบ 🌟
 function openPreQuizInfo(index) {
     let pool = []; let title = "";
+    currentActiveQuizIndex = index; // 🌟 บันทึก Index ไว้เพื่อใช้ตอนกดปุ่มทำใหม่อีกครั้ง
     
     if (index === 'all') {
         title = "รวมทุกระบบ";
@@ -475,7 +473,6 @@ function openPreQuizInfo(index) {
     preQuizModal.style.display = "flex";
 }
 
-// 🌟 ฟังก์ชันกดยืนยันเริ่มทำข้อสอบ
 function startQuizConfirm() {
     closeModals(); 
     
@@ -691,12 +688,11 @@ function nextQuestion() {
     qIndex++; showQuestion();
 }
 
-// 🌟 อัปเดตการแสดงผล เพื่อโชว์สถิติละเอียดขึ้น และเพิ่มปุ่มทำซ้ำ
 function showResult() {
     clearInterval(timerInterval); document.getElementById("quizTimer").style.display = "none";
     
     let totalMaxScore = 0;
-    let correctCount = 0; // 🌟 เพิ่มตัวแปรนับจำนวนข้อที่ตอบถูก
+    let correctCount = 0; 
     
     currentQuizData.forEach(q => totalMaxScore += (q.points || 1));
     
@@ -706,7 +702,7 @@ function showResult() {
     
     userAnswers.forEach((ans, idx) => {
         const isCorrect = ans.isCorrect;
-        if (isCorrect) correctCount++; // นับข้อที่ตอบถูก
+        if (isCorrect) correctCount++; 
         
         const bgColor = isCorrect ? 'rgba(74, 222, 128, 0.1)' : 'rgba(248, 113, 113, 0.1)';
         const borderColor = isCorrect ? '#4ade80' : '#f87171';
@@ -731,7 +727,6 @@ function showResult() {
 
     document.getElementById("qTitle").textContent = "🎉 สรุปผลการทดสอบ";
     
-    // 🌟 อัปเดต UI หน้าสรุปผลให้มี กล่องสถิติ และปุ่มทำซ้ำ
     document.getElementById("qChoices").innerHTML = `
         <div style="font-size: 1rem; color: #cbd5e1; margin-top:10px;">เกรดที่ได้</div>
         <div class="grade-text" style="font-size: 3.5rem; margin-bottom: 5px;">${grade}</div>
@@ -760,7 +755,8 @@ function showResult() {
         
         <div style="display: flex; gap: 10px; margin-top: 20px;">
             <button onclick="closeQuiz()" style="flex: 1; background: #475569; padding: 14px; font-size: 1rem; box-shadow: none;">🏠 กลับหน้าหลัก</button>
-            <button onclick="startQuizConfirm()" style="flex: 1; background: #3b82f6; padding: 14px; font-size: 1rem; box-shadow: 0 4px 15px rgba(59,130,246,0.3);">🔄 ทำใหม่อีกครั้ง</button>
+            
+            <button onclick="openPreQuizInfo(currentActiveQuizIndex)" style="flex: 1; background: #3b82f6; padding: 14px; font-size: 1rem; box-shadow: 0 4px 15px rgba(59,130,246,0.3);">🔄 ทำใหม่อีกครั้ง</button>
         </div>
     `;
     
