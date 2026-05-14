@@ -688,6 +688,7 @@ function nextQuestion() {
     qIndex++; showQuestion();
 }
 
+// 🌟 อัปเดตฟังก์ชันสรุปผล ให้แสดงเปอร์เซ็นต์แบบปัดเศษไม่มีทศนิยม
 function showResult() {
     clearInterval(timerInterval); document.getElementById("quizTimer").style.display = "none";
     
@@ -697,6 +698,10 @@ function showResult() {
     currentQuizData.forEach(q => totalMaxScore += (q.points || 1));
     
     const percent = (score / totalMaxScore) * 100;
+    
+    // 🌟 เปลี่ยนมาใช้ Math.round() เพื่อปัดเศษเป็นจำนวนเต็ม (ไม่มีทศนิยม)
+    const displayPercent = Math.round(percent);
+    
     const grade = percent >= 80 ? "A" : percent >= 70 ? "B" : percent >= 60 ? "C" : percent >= 50 ? "D" : "F";
     let summaryHTML = `<div style="max-height: 40vh; overflow-y: auto; padding-right: 5px; margin-bottom: 20px; text-align: left;">`;
     
@@ -729,7 +734,9 @@ function showResult() {
     
     document.getElementById("qChoices").innerHTML = `
         <div style="font-size: 1rem; color: #cbd5e1; margin-top:10px;">เกรดที่ได้</div>
-        <div class="grade-text" style="font-size: 3.5rem; margin-bottom: 5px;">${grade}</div>
+        <div class="grade-text" style="font-size: 3.5rem; margin-bottom: 0;">${grade}</div>
+        
+        <div style="font-size: 1.2rem; color: #94a3b8; font-weight: 500; margin-bottom: 15px;">( ${displayPercent}% )</div>
         
         <div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 15px;">
             <div style="background: rgba(15,23,42,0.6); border: 1px solid var(--border); border-radius: 12px; padding: 10px; flex: 1;">
@@ -755,7 +762,6 @@ function showResult() {
         
         <div style="display: flex; gap: 10px; margin-top: 20px;">
             <button onclick="closeQuiz()" style="flex: 1; background: #475569; padding: 14px; font-size: 1rem; box-shadow: none;">🏠 กลับหน้าหลัก</button>
-            
             <button onclick="openPreQuizInfo(currentActiveQuizIndex)" style="flex: 1; background: #3b82f6; padding: 14px; font-size: 1rem; box-shadow: 0 4px 15px rgba(59,130,246,0.3);">🔄 ทำใหม่อีกครั้ง</button>
         </div>
     `;
