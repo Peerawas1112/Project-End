@@ -199,9 +199,10 @@
 
                 <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-sm mb-10">
                     <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-rose-400 font-bold text-sm">📝 แบบทดสอบ</h3>
+                        <h3 class="text-rose-400 font-bold text-sm">📝 คลังแบบทดสอบ</h3>
                         <button onclick="addQuiz()" class="bg-rose-500/20 text-rose-400 hover:bg-rose-500 hover:text-white px-3 py-1 rounded-lg text-xs transition">+ เพิ่มข้อสอบ</button>
                     </div>
+                    <p class="text-[11px] text-slate-400 mb-4">💡 <b>ระบบคลังสลับข้อ:</b> ข้อสอบที่คุณใส่ทั้งหมดจะถูกสลับลำดับข้อและตัวเลือกอัตโนมัติ เพื่อให้นักเรียนแต่ละคนได้ทำข้อสอบไม่เหมือนกัน (ป้องกันการลอกกัน) โดยที่คุณครูสามารถกำหนดค่าน้ำหนักคะแนนและคำอธิบายเฉลยแต่ละข้อได้ครับ</p>
                     <div id="quizContainer" class="space-y-3"></div>
                 </div>
             </div>
@@ -438,8 +439,8 @@ function editItem(sIdx, iIdx) {
 
 function addClickPart() { currentItemData.click_parts.push({material_name:'', name:'', info:''}); renderParts(); }
 
-// 🌟 อัปเดตโครงสร้างเมื่อเพิ่มข้อสอบใหม่ ให้มีค่า points = 1 เป็นค่าเริ่มต้น
-function addQuiz() { currentItemData.quiz.push({question:'', choices:['','','',''], answer:0, points: 1}); renderQuiz(); }
+// 🌟 ตั้งค่าเริ่มต้นให้มี points: 1 และ explanation: '' 🌟
+function addQuiz() { currentItemData.quiz.push({question:'', choices:['','','',''], answer:0, points: 1, explanation: ''}); renderQuiz(); }
 
 function renderParts() {
     const container = document.getElementById('clickPartsContainer'); container.innerHTML = '';
@@ -471,7 +472,7 @@ function renderParts() {
     });
 }
 
-// 🌟 อัปเดต UI หน้า Admin ให้มีช่องกรอกคะแนนกำกับแต่ละข้อ
+// 🌟 เพิ่มช่องคำอธิบายเฉลยในหน้า Admin 🌟
 function renderQuiz() {
     const container = document.getElementById('quizContainer'); container.innerHTML = '';
     const quiz = currentItemData.quiz || [];
@@ -484,8 +485,13 @@ function renderQuiz() {
                 <input type="number" class="input-box font-bold text-sm w-24 text-center text-amber-400" value="${q.points || 1}" oninput="currentItemData.quiz[${idx}].points=Number(this.value)" placeholder="คะแนน" min="1" title="คะแนนสำหรับข้อนี้">
             </div>
 
-            <div class="grid grid-cols-2 gap-2">
+            <div class="grid grid-cols-2 gap-2 mb-3">
                 ${q.choices.map((c, cIdx) => `<div class="flex gap-2 items-center bg-slate-800 p-1.5 rounded-lg border ${q.answer===cIdx ? 'border-emerald-500' : 'border-transparent'}"><input type="radio" name="ans-${idx}" ${q.answer===cIdx?'checked':''} onchange="currentItemData.quiz[${idx}].answer=${cIdx}" class="ml-1 cursor-pointer"><input type="text" class="bg-transparent text-xs text-white w-full outline-none" value="${c}" oninput="currentItemData.quiz[${idx}].choices[${cIdx}]=this.value" placeholder="ตัวเลือก"></div>`).join('')}
+            </div>
+            
+            <div class="bg-slate-800/50 p-2 rounded-lg border border-slate-700 mt-2">
+                <label class="text-[10px] text-slate-400 block uppercase mb-1">💡 คำอธิบายเฉลย (แสดงให้นักเรียนเห็นตอนดูสรุปผล)</label>
+                <input type="text" class="input-box text-xs text-indigo-300" value="${q.explanation || ''}" oninput="currentItemData.quiz[${idx}].explanation=this.value" placeholder="อธิบายเหตุผลของคำตอบที่ถูกต้อง...">
             </div>
         </div>`;
     });

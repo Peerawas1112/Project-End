@@ -127,7 +127,6 @@ model-viewer { width:100%; height:calc(100vh - 60px); margin-top: 60px; --poster
     .toggle-mode-btn { top: 125px; right: 10px; font-size: 0.8rem; padding: 8px 12px; }
     .fs-icon-btn { top: 15px; right: 15px; width: 40px; height: 40px; font-size: 1rem; }
 
-    /* 🌟 คำสั่งซ่อนปุ่ม 'จัดการระบบ' เมื่อเปิดผ่านมือถือ 🌟 */
     .hide-on-mobile { display: none !important; }
 }
 
@@ -649,6 +648,7 @@ function selectChoice(element) {
     nextBtn.innerHTML = "ส่งคำตอบ / ข้อต่อไป ➡️"; nextBtn.style.background = "#3b82f6"; nextBtn.style.display = "block";
 }
 
+// 🌟 บันทึกคำอธิบายลงใน userAnswers ด้วย
 function nextQuestion() {
     if (!selectedAnswerText) selectedAnswerText = "⏳ หมดเวลา (ไม่ได้ตอบ)";
     const q = currentQuizData[qIndex];
@@ -657,10 +657,18 @@ function nextQuestion() {
     const questionPoints = q.points || 1; 
     if (isCorrect) score += questionPoints; 
     
-    userAnswers.push({ question: q.question, selected: selectedAnswerText, correct: currentCorrectText, isCorrect: isCorrect, points: questionPoints });
+    userAnswers.push({ 
+        question: q.question, 
+        selected: selectedAnswerText, 
+        correct: currentCorrectText, 
+        isCorrect: isCorrect, 
+        points: questionPoints,
+        explanation: q.explanation || '' // 🌟 เก็บคำอธิบายเฉลย
+    });
     qIndex++; showQuestion();
 }
 
+// 🌟 อัปเดตการแสดงผล เพื่อโชว์คำอธิบายเฉลย
 function showResult() {
     clearInterval(timerInterval); document.getElementById("quizTimer").style.display = "none";
     
@@ -686,8 +694,9 @@ function showResult() {
                     ${ans.question} <span style="color:${borderColor}; font-size:0.85rem; margin-left:5px;">(${ptsText}/${ans.points} pt)</span>
                 </div>
                 <div style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: 12px;">
-                    <div style="color: ${isCorrect ? '#4ade80' : '#f87171'}; font-size: 0.95rem; margin-bottom: ${isCorrect ? '0' : '8px'};">${icon} <b>นักเรียนตอบ:</b> ${ans.selected}</div>
+                    <div style="color: ${isCorrect ? '#4ade80' : '#f87171'}; font-size: 0.95rem; margin-bottom: ${isCorrect && !ans.explanation ? '0' : '8px'};">${icon} <b>นักเรียนตอบ:</b> ${ans.selected}</div>
                     ${!isCorrect ? `<div style="color: #4ade80; font-size: 0.95rem; border-top: 1px dashed rgba(255,255,255,0.2); padding-top: 8px;">💡 <b>เฉลยที่ถูกต้อง:</b> ${ans.correct}</div>` : ''}
+                    ${ans.explanation ? `<div style="color: #cbd5e1; font-size: 0.85rem; border-top: 1px dashed rgba(255,255,255,0.2); padding-top: 8px; margin-top: 8px;">📝 <b>คำอธิบาย:</b> ${ans.explanation}</div>` : ''}
                 </div>
             </div>`;
     });
