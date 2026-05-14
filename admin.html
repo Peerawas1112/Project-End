@@ -114,7 +114,7 @@
                 <p class="text-base">เลือกบทเรียนจากเมนูด้านซ้ายเพื่อเริ่มจัดการ</p>
             </div>
 
-            <div id="editorHeader" class="bg-slate-800 px-6 py-4 flex justify-between items-center shrink-0">
+            <div id="editorHeader" class="bg-slate-800 px-6 py-4 border-b border-slate-700 flex justify-between items-center shrink-0">
                 <h2 id="editingTitle" class="text-xl font-bold text-blue-400 truncate w-1/2">Editor</h2>
                 <div class="flex gap-2">
                     <button onclick="deleteCurrentItem()" class="text-rose-400 hover:bg-rose-400/10 px-3 py-2 rounded-lg text-xs border border-rose-400/20 transition dev-only">🗑️ ลบหน้านี้ทิ้ง</button>
@@ -209,7 +209,7 @@
                             <h3 class="text-rose-400 font-bold text-sm">📝 คลังแบบทดสอบประจำบทเรียน</h3>
                             <button onclick="addQuiz()" class="bg-rose-500/20 text-rose-400 hover:bg-rose-500 hover:text-white px-3 py-1 rounded-lg text-xs transition">+ เพิ่มข้อสอบ</button>
                         </div>
-                        <p class="text-[11px] text-slate-400 mb-4">💡 <b>ระบบคลังสลับข้อ:</b> ข้อสอบที่คุณใส่ทั้งหมดจะถูกสลับลำดับข้อและตัวเลือกอัตโนมัติ เพื่อให้นักเรียนแต่ละคนได้ทำข้อสอบไม่เหมือนกัน (ป้องกันการลอกกัน) โดยที่คุณครูสามารถกำหนดค่าน้ำหนักคะแนนและคำอธิบายเฉลยแต่ละข้อได้ครับ</p>
+                        <p class="text-[11px] text-slate-400 mb-4">💡 <b>ระบบคลังสลับข้อ:</b> ข้อสอบที่คุณใส่ทั้งหมดจะถูกสลับลำดับข้อและตัวเลือกอัตโนมัติ เพื่อให้นักเรียนแต่ละคนได้ทำข้อสอบไม่เหมือนกัน โดยที่คุณครูสามารถเลือกเปิด-ปิดข้อสอบในคลังและกำหนดคำอธิบายเฉลยได้ครับ</p>
                         
                         <div id="quizContainer" class="space-y-3"></div>
                         
@@ -235,7 +235,6 @@ let isDevMode = false;
 let activePreviewMaterial = null; 
 let adminOriginalColors = new Map();
 
-// 🌟 ฟังก์ชันสลับ Tabs 🌟
 function switchAdminTab(tabName) {
     const btnContent = document.getElementById('tabContentBtn');
     const btnQuiz = document.getElementById('tabQuizBtn');
@@ -454,7 +453,6 @@ function renderSidebar() {
     });
 }
 
-// 🌟 อัปเดตเพื่อให้แสดงแท็บ "เนื้อหา" ทุกครั้งที่เปลี่ยนบทเรียน 🌟
 function editItem(sIdx, iIdx) {
     currentSysIndex = sIdx; currentItemIndex = iIdx;
     currentItemData = JSON.parse(JSON.stringify(globalDatabase.systems[sIdx].items[iIdx]));
@@ -463,9 +461,8 @@ function editItem(sIdx, iIdx) {
 
     document.getElementById('welcomeScreen').classList.add('hidden');
     
-    // โชว์เมนูแท็บ
     document.getElementById('editorTabs').classList.remove('hidden');
-    switchAdminTab('content'); // บังคับให้กลับมาหน้าเนื้อหาก่อนเสมอ
+    switchAdminTab('content'); 
 
     document.getElementById('editingTitle').textContent = currentItemData.name;
     document.getElementById('frmName').value = currentItemData.name;
@@ -479,7 +476,8 @@ function editItem(sIdx, iIdx) {
 
 function addClickPart() { currentItemData.click_parts.push({material_name:'', name:'', info:''}); renderParts(); }
 
-function addQuiz() { currentItemData.quiz.push({question:'', choices:['','','',''], answer:0, points: 1, explanation: ''}); renderQuiz(); }
+// 🌟 เพิ่มสถานะ active: true เป็นค่าเริ่มต้นตอนสร้างข้อสอบใหม่
+function addQuiz() { currentItemData.quiz.push({question:'', choices:['','','',''], answer:0, points: 1, explanation: '', active: true}); renderQuiz(); }
 
 function renderParts() {
     const container = document.getElementById('clickPartsContainer'); container.innerHTML = '';
@@ -521,9 +519,23 @@ function renderQuiz() {
     } else {
         msg.classList.add('hidden');
         quiz.forEach((q, idx) => {
-            container.innerHTML += `<div class="bg-slate-900/50 p-4 rounded-xl border border-slate-700 relative pr-12">
+            // 🌟 เช็กสถานะว่าข้อนี้ถูกเลือกอยู่หรือไม่
+            const isActive = q.active !== false; 
+
+            container.innerHTML += `<div class="bg-slate-900/50 p-4 rounded-xl border ${isActive ? 'border-indigo-500' : 'border-slate-700 opacity-60'} relative pr-12">
                 <button onclick="deleteQuizPart(${idx})" class="delete-btn-sm">✕</button>
                 
+                <div class="flex items-center gap-3 mb-4 border-b border-slate-700/50 pb-3">
+                    <label class="flex items-center gap-2 cursor-pointer group">
+                        <input type="checkbox" ${isActive ? 'checked' : ''} 
+                               onchange="currentItemData.quiz[${idx}].active=this.checked; renderQuiz();"
+                               class="w-4 h-4 rounded border-slate-700 text-indigo-600 focus:ring-indigo-500">
+                        <span class="text-xs ${isActive ? 'text-indigo-400 font-bold' : 'text-slate-500'} uppercase">
+                            ${isActive ? '✅ ใช้งานข้อนี้' : '📦 เก็บในคลัง (ไม่ใช้)'}
+                        </span>
+                    </label>
+                </div>
+
                 <div class="flex gap-2 mb-3">
                     <input type="text" class="input-box font-medium text-sm flex-grow" value="${q.question}" oninput="currentItemData.quiz[${idx}].question=this.value" placeholder="โจทย์คำถาม">
                     <input type="number" class="input-box font-bold text-sm w-24 text-center text-amber-400" value="${q.points || 1}" oninput="currentItemData.quiz[${idx}].points=Number(this.value)" placeholder="คะแนน" min="1" title="คะแนนสำหรับข้อนี้">

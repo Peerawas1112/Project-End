@@ -448,17 +448,25 @@ function renderQuizMenu() {
 
 function openPreQuizInfo(index) {
     let pool = []; let title = "";
-    currentActiveQuizIndex = index; // 🌟 บันทึก Index ไว้เพื่อใช้ตอนกดปุ่มทำใหม่อีกครั้ง
+    currentActiveQuizIndex = index;
     
     if (index === 'all') {
         title = "รวมทุกระบบ";
-        data.forEach(sys => { if(sys.items) sys.items.forEach(item => { if (item.quiz) pool = pool.concat(item.quiz); }); });
+        data.forEach(sys => { 
+            if(sys.items) sys.items.forEach(item => { 
+                // 🌟 กรองเอาเฉพาะข้อที่ active เท่านั้น
+                if (item.quiz) pool = pool.concat(item.quiz.filter(q => q.active !== false)); 
+            }); 
+        });
     } else {
         title = data[index].category;
-        if(data[index].items) data[index].items.forEach(item => { if (item.quiz) pool = pool.concat(item.quiz); });
+        if(data[index].items) data[index].items.forEach(item => { 
+            // 🌟 กรองเอาเฉพาะข้อที่ active เท่านั้น
+            if (item.quiz) pool = pool.concat(item.quiz.filter(q => q.active !== false)); 
+        });
     }
     
-    if (pool.length === 0) return alert(`ยังไม่มีคำถามในหมวด "${title}" ครับ`);
+    if (pool.length === 0) return alert(`ยังไม่มีคำถามที่ "เปิดใช้งาน" ในหมวด "${title}" ครับ`);
 
     let totalScore = 0;
     pool.forEach(q => totalScore += (q.points || 1));
