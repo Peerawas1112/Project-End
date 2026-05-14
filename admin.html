@@ -114,97 +114,112 @@
                 <p class="text-base">เลือกบทเรียนจากเมนูด้านซ้ายเพื่อเริ่มจัดการ</p>
             </div>
 
-            <div id="editorHeader" class="bg-slate-800 px-6 py-4 border-b border-slate-700 flex justify-between items-center shrink-0">
+            <div id="editorHeader" class="bg-slate-800 px-6 py-4 flex justify-between items-center shrink-0">
                 <h2 id="editingTitle" class="text-xl font-bold text-blue-400 truncate w-1/2">Editor</h2>
                 <div class="flex gap-2">
                     <button onclick="deleteCurrentItem()" class="text-rose-400 hover:bg-rose-400/10 px-3 py-2 rounded-lg text-xs border border-rose-400/20 transition dev-only">🗑️ ลบหน้านี้ทิ้ง</button>
                     <button onclick="saveData()" class="bg-emerald-600 hover:bg-emerald-500 px-6 py-2 rounded-lg font-bold text-white text-sm shadow-md transition flex items-center gap-2">💾 บันทึกข้อมูล</button>
                 </div>
             </div>
+
+            <div id="editorTabs" class="flex gap-2 px-6 bg-slate-800 border-b border-slate-700 shrink-0 hidden">
+                <button id="tabContentBtn" onclick="switchAdminTab('content')" class="px-5 py-3 text-sm font-bold text-blue-400 border-b-2 border-blue-500 transition">📚 จัดการเนื้อหา & โมเดล</button>
+                <button id="tabQuizBtn" onclick="switchAdminTab('quiz')" class="px-5 py-3 text-sm font-bold text-slate-400 border-b-2 border-transparent hover:text-slate-200 transition">📝 คลังแบบทดสอบ</button>
+            </div>
             
-            <div class="flex-grow px-6 py-4 overflow-y-auto space-y-4">
+            <div class="flex-grow px-6 py-4 overflow-y-auto">
                 
-                <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-sm relative">
-                    <div class="flex justify-between items-center mb-3">
-                        <h3 class="text-indigo-400 font-bold text-sm">📺 จอพรีวิวแอปพลิเคชัน (WYSIWYG)</h3>
-                        <span class="text-[10px] bg-slate-700 text-slate-300 px-2 py-1 rounded">อัปเดตเรียลไทม์</span>
-                    </div>
-                    <p class="text-xs text-slate-400 mb-4 leading-relaxed">
-                        💡 <b>ทริค:</b> ลอง <b>"คลิก"</b> ชิ้นส่วนบนโมเดล 3D ด้านซ้าย เพื่อดูผลลัพธ์ในการ์ดจำลองด้านขวา และดึง ID มาใช้งานครับ
-                    </p>
+                <div id="adminContentSection" class="space-y-4">
                     
-                    <div id="allMaterialsContainer" class="hidden mb-4 p-3 bg-slate-900/50 rounded-xl border border-slate-700">
-                        <div class="text-[10px] text-slate-400 mb-2 uppercase flex justify-between items-center">
-                            <span>🏷️ รายชื่อ ID ทั้งหมดที่พบในโมเดล (คลิกปุ่มแทนการจิ้มโมเดลได้เลย)</span>
+                    <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-sm relative">
+                        <div class="flex justify-between items-center mb-3">
+                            <h3 class="text-indigo-400 font-bold text-sm">📺 จอพรีวิวแอปพลิเคชัน (WYSIWYG)</h3>
+                            <span class="text-[10px] bg-slate-700 text-slate-300 px-2 py-1 rounded">อัปเดตเรียลไทม์</span>
                         </div>
-                        <div id="materialChips" class="flex flex-wrap gap-1.5"></div>
-                    </div>
-                    
-                    <div class="flex flex-col lg:flex-row gap-4 h-[400px]">
+                        <p class="text-xs text-slate-400 mb-4 leading-relaxed">
+                            💡 <b>ทริค:</b> ลอง <b>"คลิก"</b> ชิ้นส่วนบนโมเดล 3D ด้านซ้าย เพื่อดูผลลัพธ์ในการ์ดจำลองด้านขวา และดึง ID มาใช้งานครับ
+                        </p>
                         
-                        <div class="flex-grow bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] bg-slate-950 rounded-xl overflow-hidden border border-slate-700 relative shadow-inner">
-                            <model-viewer id="adminViewer" class="w-full h-full" camera-controls auto-rotate shadow-intensity="1" exposure="1.2" environment-image="neutral" disable-pan></model-viewer>
-                            
-                            <div id="clickedIdDisplay" class="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-slate-900/90 backdrop-blur-md text-white px-4 py-2 rounded-full text-xs font-mono shadow-[0_10px_20px_rgba(0,0,0,0.5)] border border-slate-600 hidden flex items-center gap-2 transition-all pointer-events-none whitespace-nowrap z-10">
-                                📌 ID: <span id="idTextSpan" class="bg-indigo-600/50 text-indigo-300 px-2 py-1 rounded font-bold">Name</span>
+                        <div id="allMaterialsContainer" class="hidden mb-4 p-3 bg-slate-900/50 rounded-xl border border-slate-700">
+                            <div class="text-[10px] text-slate-400 mb-2 uppercase flex justify-between items-center">
+                                <span>🏷️ รายชื่อ ID ทั้งหมดที่พบในโมเดล (คลิกปุ่มแทนการจิ้มโมเดลได้เลย)</span>
                             </div>
-                        </div>
-
-                        <div class="w-full lg:w-[350px] bg-[rgba(15,23,42,0.85)] border border-[rgba(255,255,255,0.15)] rounded-xl p-5 text-white shadow-lg flex flex-col shrink-0 relative overflow-hidden">
-                            <div id="previewBadge" class="absolute top-0 right-0 bg-blue-500 text-white text-[10px] font-bold px-3 py-1.5 rounded-bl-xl shadow-md">โหมดภาพรวม</div>
-                            <h3 id="previewTitle" class="text-[1.2rem] font-medium border-b border-[#ff4757] pb-2 mb-3 mt-2 shrink-0 leading-[1.3]">ชื่อหัวข้อ...</h3>
-                            <div id="previewDesc" class="text-[0.9rem] text-[#cbd5e1] leading-[1.6] overflow-y-auto flex-grow pr-2 preview-scroll">รายละเอียด...</div>
-                            <button id="resetPreviewBtn" onclick="resetLivePreview()" class="mt-4 w-full bg-slate-700/50 hover:bg-[#ff4757] text-white text-xs px-3 py-2 rounded-lg border border-slate-600 transition shadow-sm hidden shrink-0 font-medium">🔙 ย้อนกลับไปหน้าภาพรวม</button>
+                            <div id="materialChips" class="flex flex-wrap gap-1.5"></div>
                         </div>
                         
-                    </div>
-                </div>
-
-                <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-sm">
-                    <div class="grid grid-cols-2 gap-4 mb-4">
-                        <div>
-                            <label class="text-[10px] text-slate-400 mb-1 block uppercase">ชื่อหัวข้อ (Name)</label>
-                            <input type="text" id="frmName" class="input-box font-bold">
-                        </div>
-                        <div>
-                            <label class="text-[10px] text-slate-400 mb-1 block uppercase">ลิงก์โมเดล (GLB Path) <span class="dev-only text-emerald-400">🔓 ปลดล็อกแล้ว</span></label>
-                            <div class="flex gap-2 items-center">
-                                <input type="text" id="frmModelPath" class="input-box font-mono text-emerald-400 dev-lock-input" placeholder="อัปโหลดเพื่อสร้างลิงก์อัตโนมัติ" onchange="updateLiveModel()">
-                                <div class="dev-only shrink-0 flex items-center gap-2">
-                                    <input type="file" id="modelUploader" accept=".glb" class="hidden" onchange="uploadModelToCloud(this)">
-                                    <button onclick="document.getElementById('modelUploader').click()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-2 rounded-lg text-xs font-bold transition shadow-md whitespace-nowrap">📤 อัปโหลด .GLB</button>
+                        <div class="flex flex-col lg:flex-row gap-4 h-[400px]">
+                            <div class="flex-grow bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] bg-slate-950 rounded-xl overflow-hidden border border-slate-700 relative shadow-inner">
+                                <model-viewer id="adminViewer" class="w-full h-full" camera-controls auto-rotate shadow-intensity="1" exposure="1.2" environment-image="neutral" disable-pan></model-viewer>
+                                
+                                <div id="clickedIdDisplay" class="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-slate-900/90 backdrop-blur-md text-white px-4 py-2 rounded-full text-xs font-mono shadow-[0_10px_20px_rgba(0,0,0,0.5)] border border-slate-600 hidden flex items-center gap-2 transition-all pointer-events-none whitespace-nowrap z-10">
+                                    📌 ID: <span id="idTextSpan" class="bg-indigo-600/50 text-indigo-300 px-2 py-1 rounded font-bold">Name</span>
                                 </div>
                             </div>
-                            <p id="uploadStatus" class="text-[10px] text-indigo-400 mt-2 font-medium hidden">กำลังอัปโหลด... 0%</p>
-                        </div>
-                    </div>
-                    <div>
-                        <label class="text-[10px] text-slate-400 mb-1 block uppercase">คำอธิบายประกอบภาพรวม</label>
-                        <div class="border border-slate-700 rounded-lg overflow-hidden focus-within:border-blue-500 transition">
-                            <div class="bg-slate-900 p-1.5 border-b border-slate-700 flex gap-2 items-center">
-                                <button type="button" onmousedown="event.preventDefault(); document.execCommand('bold', false, null);" class="bg-slate-700 hover:bg-slate-600 text-white text-[10px] px-2 py-1 rounded transition"><b>B</b> ตัวหนา</button>
+
+                            <div class="w-full lg:w-[350px] bg-[rgba(15,23,42,0.85)] border border-[rgba(255,255,255,0.15)] rounded-xl p-5 text-white shadow-lg flex flex-col shrink-0 relative overflow-hidden">
+                                <div id="previewBadge" class="absolute top-0 right-0 bg-blue-500 text-white text-[10px] font-bold px-3 py-1.5 rounded-bl-xl shadow-md">โหมดภาพรวม</div>
+                                <h3 id="previewTitle" class="text-[1.2rem] font-medium border-b border-[#ff4757] pb-2 mb-3 mt-2 shrink-0 leading-[1.3]">ชื่อหัวข้อ...</h3>
+                                <div id="previewDesc" class="text-[0.9rem] text-[#cbd5e1] leading-[1.6] overflow-y-auto flex-grow pr-2 preview-scroll">รายละเอียด...</div>
+                                <button id="resetPreviewBtn" onclick="resetLivePreview()" class="mt-4 w-full bg-slate-700/50 hover:bg-[#ff4757] text-white text-xs px-3 py-2 rounded-lg border border-slate-600 transition shadow-sm hidden shrink-0 font-medium">🔙 ย้อนกลับไปหน้าภาพรวม</button>
                             </div>
-                            <div id="frmDesc" class="rich-editor-content border-none" contenteditable="true" placeholder="ระบุเนื้อหา..."></div>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-sm">
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label class="text-[10px] text-slate-400 mb-1 block uppercase">ชื่อหัวข้อ (Name)</label>
+                                <input type="text" id="frmName" class="input-box font-bold">
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-slate-400 mb-1 block uppercase">ลิงก์โมเดล (GLB Path) <span class="dev-only text-emerald-400">🔓 ปลดล็อกแล้ว</span></label>
+                                <div class="flex gap-2 items-center">
+                                    <input type="text" id="frmModelPath" class="input-box font-mono text-emerald-400 dev-lock-input" placeholder="อัปโหลดเพื่อสร้างลิงก์อัตโนมัติ" onchange="updateLiveModel()">
+                                    <div class="dev-only shrink-0 flex items-center gap-2">
+                                        <input type="file" id="modelUploader" accept=".glb" class="hidden" onchange="uploadModelToCloud(this)">
+                                        <button onclick="document.getElementById('modelUploader').click()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-2 rounded-lg text-xs font-bold transition shadow-md whitespace-nowrap">📤 อัปโหลด .GLB</button>
+                                    </div>
+                                </div>
+                                <p id="uploadStatus" class="text-[10px] text-indigo-400 mt-2 font-medium hidden">กำลังอัปโหลด... 0%</p>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-[10px] text-slate-400 mb-1 block uppercase">คำอธิบายประกอบภาพรวม</label>
+                            <div class="border border-slate-700 rounded-lg overflow-hidden focus-within:border-blue-500 transition">
+                                <div class="bg-slate-900 p-1.5 border-b border-slate-700 flex gap-2 items-center">
+                                    <button type="button" onmousedown="event.preventDefault(); document.execCommand('bold', false, null);" class="bg-slate-700 hover:bg-slate-600 text-white text-[10px] px-2 py-1 rounded transition"><b>B</b> ตัวหนา</button>
+                                </div>
+                                <div id="frmDesc" class="rich-editor-content border-none" contenteditable="true" placeholder="ระบุเนื้อหา..."></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-sm mb-10">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-amber-400 font-bold text-sm">🎯 จุดคลิกบนโมเดล</h3>
+                            <button onclick="addClickPart()" class="bg-amber-500/20 text-amber-400 hover:bg-amber-500 hover:text-white px-3 py-1 rounded-lg text-xs transition dev-only">+ เพิ่มจุดคลิก</button>
+                        </div>
+                        <div id="clickPartsContainer" class="space-y-4"></div>
+                    </div>
+                </div>
+
+                <div id="adminQuizSection" class="space-y-4 hidden mb-10">
+                    <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-sm">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-rose-400 font-bold text-sm">📝 คลังแบบทดสอบประจำบทเรียน</h3>
+                            <button onclick="addQuiz()" class="bg-rose-500/20 text-rose-400 hover:bg-rose-500 hover:text-white px-3 py-1 rounded-lg text-xs transition">+ เพิ่มข้อสอบ</button>
+                        </div>
+                        <p class="text-[11px] text-slate-400 mb-4">💡 <b>ระบบคลังสลับข้อ:</b> ข้อสอบที่คุณใส่ทั้งหมดจะถูกสลับลำดับข้อและตัวเลือกอัตโนมัติ เพื่อให้นักเรียนแต่ละคนได้ทำข้อสอบไม่เหมือนกัน (ป้องกันการลอกกัน) โดยที่คุณครูสามารถกำหนดค่าน้ำหนักคะแนนและคำอธิบายเฉลยแต่ละข้อได้ครับ</p>
+                        
+                        <div id="quizContainer" class="space-y-3"></div>
+                        
+                        <div id="emptyQuizMsg" class="hidden text-center py-10 bg-slate-900/50 rounded-xl border border-dashed border-slate-700 mt-4">
+                            <span class="text-4xl block mb-2">📋</span>
+                            <p class="text-slate-400 text-sm">ยังไม่มีข้อสอบในบทเรียนนี้<br>กดปุ่ม "+ เพิ่มข้อสอบ" ด้านบนเพื่อเริ่มสร้างแบบทดสอบ</p>
                         </div>
                     </div>
                 </div>
 
-                <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-sm">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-amber-400 font-bold text-sm">🎯 จุดคลิกบนโมเดล</h3>
-                        <button onclick="addClickPart()" class="bg-amber-500/20 text-amber-400 hover:bg-amber-500 hover:text-white px-3 py-1 rounded-lg text-xs transition dev-only">+ เพิ่มจุดคลิก</button>
-                    </div>
-                    <div id="clickPartsContainer" class="space-y-4"></div>
-                </div>
-
-                <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-sm mb-10">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-rose-400 font-bold text-sm">📝 คลังแบบทดสอบ</h3>
-                        <button onclick="addQuiz()" class="bg-rose-500/20 text-rose-400 hover:bg-rose-500 hover:text-white px-3 py-1 rounded-lg text-xs transition">+ เพิ่มข้อสอบ</button>
-                    </div>
-                    <p class="text-[11px] text-slate-400 mb-4">💡 <b>ระบบคลังสลับข้อ:</b> ข้อสอบที่คุณใส่ทั้งหมดจะถูกสลับลำดับข้อและตัวเลือกอัตโนมัติ เพื่อให้นักเรียนแต่ละคนได้ทำข้อสอบไม่เหมือนกัน (ป้องกันการลอกกัน) โดยที่คุณครูสามารถกำหนดค่าน้ำหนักคะแนนและคำอธิบายเฉลยแต่ละข้อได้ครับ</p>
-                    <div id="quizContainer" class="space-y-3"></div>
-                </div>
             </div>
         </div>
     </div>
@@ -218,8 +233,27 @@ const db = firebase.firestore();
 let globalDatabase = null, currentSysIndex = null, currentItemIndex = null, currentItemData = null;
 let isDevMode = false;
 let activePreviewMaterial = null; 
-
 let adminOriginalColors = new Map();
+
+// 🌟 ฟังก์ชันสลับ Tabs 🌟
+function switchAdminTab(tabName) {
+    const btnContent = document.getElementById('tabContentBtn');
+    const btnQuiz = document.getElementById('tabQuizBtn');
+    const secContent = document.getElementById('adminContentSection');
+    const secQuiz = document.getElementById('adminQuizSection');
+
+    if (tabName === 'content') {
+        secContent.style.display = 'block';
+        secQuiz.style.display = 'none';
+        btnContent.className = 'px-5 py-3 text-sm font-bold text-blue-400 border-b-2 border-blue-500 transition';
+        btnQuiz.className = 'px-5 py-3 text-sm font-bold text-slate-400 border-b-2 border-transparent hover:text-slate-200 transition';
+    } else {
+        secContent.style.display = 'none';
+        secQuiz.style.display = 'block';
+        btnQuiz.className = 'px-5 py-3 text-sm font-bold text-rose-400 border-b-2 border-rose-500 transition';
+        btnContent.className = 'px-5 py-3 text-sm font-bold text-slate-400 border-b-2 border-transparent hover:text-slate-200 transition';
+    }
+}
 
 const svgExpand = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>`;
 const svgCollapse = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><polyline points="4 14 10 14 10 20"></polyline><polyline points="20 10 14 10 14 4"></polyline><line x1="14" y1="10" x2="21" y2="3"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>`;
@@ -420,6 +454,7 @@ function renderSidebar() {
     });
 }
 
+// 🌟 อัปเดตเพื่อให้แสดงแท็บ "เนื้อหา" ทุกครั้งที่เปลี่ยนบทเรียน 🌟
 function editItem(sIdx, iIdx) {
     currentSysIndex = sIdx; currentItemIndex = iIdx;
     currentItemData = JSON.parse(JSON.stringify(globalDatabase.systems[sIdx].items[iIdx]));
@@ -427,6 +462,11 @@ function editItem(sIdx, iIdx) {
     if (!currentItemData.quiz) currentItemData.quiz = [];
 
     document.getElementById('welcomeScreen').classList.add('hidden');
+    
+    // โชว์เมนูแท็บ
+    document.getElementById('editorTabs').classList.remove('hidden');
+    switchAdminTab('content'); // บังคับให้กลับมาหน้าเนื้อหาก่อนเสมอ
+
     document.getElementById('editingTitle').textContent = currentItemData.name;
     document.getElementById('frmName').value = currentItemData.name;
     document.getElementById('frmModelPath').value = currentItemData.model_file || ''; 
@@ -439,7 +479,6 @@ function editItem(sIdx, iIdx) {
 
 function addClickPart() { currentItemData.click_parts.push({material_name:'', name:'', info:''}); renderParts(); }
 
-// 🌟 ตั้งค่าเริ่มต้นให้มี points: 1 และ explanation: '' 🌟
 function addQuiz() { currentItemData.quiz.push({question:'', choices:['','','',''], answer:0, points: 1, explanation: ''}); renderQuiz(); }
 
 function renderParts() {
@@ -472,35 +511,41 @@ function renderParts() {
     });
 }
 
-// 🌟 เพิ่มช่องคำอธิบายเฉลยในหน้า Admin 🌟
 function renderQuiz() {
     const container = document.getElementById('quizContainer'); container.innerHTML = '';
+    const msg = document.getElementById('emptyQuizMsg');
     const quiz = currentItemData.quiz || [];
-    quiz.forEach((q, idx) => {
-        container.innerHTML += `<div class="bg-slate-900/50 p-4 rounded-xl border border-slate-700 relative pr-12">
-            <button onclick="deleteQuizPart(${idx})" class="delete-btn-sm">✕</button>
-            
-            <div class="flex gap-2 mb-3">
-                <input type="text" class="input-box font-medium text-sm flex-grow" value="${q.question}" oninput="currentItemData.quiz[${idx}].question=this.value" placeholder="โจทย์คำถาม">
-                <input type="number" class="input-box font-bold text-sm w-24 text-center text-amber-400" value="${q.points || 1}" oninput="currentItemData.quiz[${idx}].points=Number(this.value)" placeholder="คะแนน" min="1" title="คะแนนสำหรับข้อนี้">
-            </div>
+    
+    if(quiz.length === 0) {
+        msg.classList.remove('hidden');
+    } else {
+        msg.classList.add('hidden');
+        quiz.forEach((q, idx) => {
+            container.innerHTML += `<div class="bg-slate-900/50 p-4 rounded-xl border border-slate-700 relative pr-12">
+                <button onclick="deleteQuizPart(${idx})" class="delete-btn-sm">✕</button>
+                
+                <div class="flex gap-2 mb-3">
+                    <input type="text" class="input-box font-medium text-sm flex-grow" value="${q.question}" oninput="currentItemData.quiz[${idx}].question=this.value" placeholder="โจทย์คำถาม">
+                    <input type="number" class="input-box font-bold text-sm w-24 text-center text-amber-400" value="${q.points || 1}" oninput="currentItemData.quiz[${idx}].points=Number(this.value)" placeholder="คะแนน" min="1" title="คะแนนสำหรับข้อนี้">
+                </div>
 
-            <div class="grid grid-cols-2 gap-2 mb-3">
-                ${q.choices.map((c, cIdx) => `<div class="flex gap-2 items-center bg-slate-800 p-1.5 rounded-lg border ${q.answer===cIdx ? 'border-emerald-500' : 'border-transparent'}"><input type="radio" name="ans-${idx}" ${q.answer===cIdx?'checked':''} onchange="currentItemData.quiz[${idx}].answer=${cIdx}" class="ml-1 cursor-pointer"><input type="text" class="bg-transparent text-xs text-white w-full outline-none" value="${c}" oninput="currentItemData.quiz[${idx}].choices[${cIdx}]=this.value" placeholder="ตัวเลือก"></div>`).join('')}
-            </div>
-            
-            <div class="bg-slate-800/50 p-2 rounded-lg border border-slate-700 mt-2">
-                <label class="text-[10px] text-slate-400 block uppercase mb-1">💡 คำอธิบายเฉลย (แสดงให้นักเรียนเห็นตอนดูสรุปผล)</label>
-                <input type="text" class="input-box text-xs text-indigo-300" value="${q.explanation || ''}" oninput="currentItemData.quiz[${idx}].explanation=this.value" placeholder="อธิบายเหตุผลของคำตอบที่ถูกต้อง...">
-            </div>
-        </div>`;
-    });
+                <div class="grid grid-cols-2 gap-2 mb-3">
+                    ${q.choices.map((c, cIdx) => `<div class="flex gap-2 items-center bg-slate-800 p-1.5 rounded-lg border ${q.answer===cIdx ? 'border-emerald-500' : 'border-transparent'}"><input type="radio" name="ans-${idx}" ${q.answer===cIdx?'checked':''} onchange="currentItemData.quiz[${idx}].answer=${cIdx}" class="ml-1 cursor-pointer"><input type="text" class="bg-transparent text-xs text-white w-full outline-none" value="${c}" oninput="currentItemData.quiz[${idx}].choices[${cIdx}]=this.value" placeholder="ตัวเลือก"></div>`).join('')}
+                </div>
+                
+                <div class="bg-slate-800/50 p-2 rounded-lg border border-slate-700 mt-2">
+                    <label class="text-[10px] text-slate-400 block uppercase mb-1">💡 คำอธิบายเฉลย (แสดงให้นักเรียนเห็นตอนดูสรุปผล)</label>
+                    <input type="text" class="input-box text-xs text-indigo-300" value="${q.explanation || ''}" oninput="currentItemData.quiz[${idx}].explanation=this.value" placeholder="อธิบายเหตุผลของคำตอบที่ถูกต้อง...">
+                </div>
+            </div>`;
+        });
+    }
 }
 
 function saveData() { if(currentSysIndex===null)return; currentItemData.name=document.getElementById('frmName').value; currentItemData.model_file=document.getElementById('frmModelPath').value; currentItemData.description=document.getElementById('frmDesc').innerHTML; globalDatabase.systems[currentSysIndex].items[currentItemIndex]=currentItemData; db.collection("database").doc("anatomy").set(globalDatabase).then(() => { alert("บันทึกข้อมูลเรียบร้อยแล้ว! ✅"); renderSidebar(); }); }
 function deleteClickPart(idx) { openCustomConfirm("ลบ <b>'จุดคลิก'</b> ใช่หรือไม่?", "ลบจุดคลิก", () => { currentItemData.click_parts.splice(idx, 1); renderParts(); }); }
 function deleteQuizPart(idx) { openCustomConfirm("ลบ <b>'ข้อสอบ'</b> ใช่หรือไม่?", "ลบข้อสอบ", () => { currentItemData.quiz.splice(idx, 1); renderQuiz(); }); }
-function deleteCurrentItem() { openCustomConfirm(`ลบอวัยวะ <b class="text-rose-400">[${currentItemData.name}]</b> แน่ใจหรือไม่?`, "ลบหน้านี้ทิ้ง", () => { globalDatabase.systems[currentSysIndex].items.splice(currentItemIndex, 1); db.collection("database").doc("anatomy").set(globalDatabase).then(() => { currentItemData=null; currentSysIndex=null; currentItemIndex=null; renderSidebar(); document.getElementById('welcomeScreen').classList.remove('hidden'); }); }); }
+function deleteCurrentItem() { openCustomConfirm(`ลบอวัยวะ <b class="text-rose-400">[${currentItemData.name}]</b> แน่ใจหรือไม่?`, "ลบหน้านี้ทิ้ง", () => { globalDatabase.systems[currentSysIndex].items.splice(currentItemIndex, 1); db.collection("database").doc("anatomy").set(globalDatabase).then(() => { currentItemData=null; currentSysIndex=null; currentItemIndex=null; renderSidebar(); document.getElementById('welcomeScreen').classList.remove('hidden'); document.getElementById('editorTabs').classList.add('hidden'); }); }); }
 function deleteSystem(idx) { const sysName=globalDatabase.systems[idx].category; openCustomPrompt("⚠️ ลบหมวดหมู่", `พิมพ์: ${sysName}`, `<span class="text-rose-400">ระวัง! บทเรียนในหมวดนี้หายหมด</span><br>พิมพ์ <b>${sysName}</b> เพื่อยืนยัน:`, (conf) => { if(conf===sysName) { globalDatabase.systems.splice(idx, 1); db.collection("database").doc("anatomy").set(globalDatabase).then(() => renderSidebar()); } else if(conf!==null&&conf.trim()!==""){alert("พิมพ์ชื่อไม่ถูกต้อง");} }); }
 function clearAllData() { openCustomPrompt("🔥 ล้าง Cloud", "พิมพ์ CONFIRM DELETE", `พิมพ์ <b>CONFIRM DELETE</b>`, (conf) => { if(conf==="CONFIRM DELETE"){ db.collection("database").doc("anatomy").delete().then(()=>location.reload()); } }); }
 function addNewSystem() { openCustomPrompt("✨ เพิ่มหมวดหมู่", "ชื่อหมวดหมู่...", null, (n) => { if(n&&n.trim()!==""){ if(!globalDatabase) globalDatabase={systems:[]}; globalDatabase.systems.push({category: n.trim(), items: []}); db.collection("database").doc("anatomy").set(globalDatabase).then(()=>renderSidebar()); } }); }
