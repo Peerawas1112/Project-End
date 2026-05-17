@@ -128,7 +128,7 @@
                 <div id="adminContentSection" class="space-y-4 hidden">
                     <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-sm relative">
                         <div class="flex justify-between items-center mb-3">
-                            <h3 class="text-indigo-400 font-bold text-sm">📺 จอพรีวิวแอปพลิเคชัน (WYSIWYG)</h3>
+                            <h3 class="text-indigo-400 font-bold text-sm">📺 จอพรีวิวแอปพลิเคชัน</h3>
                             <span class="text-[10px] bg-slate-700 text-slate-300 px-2 py-1 rounded">อัปเดตเรียลไทม์</span>
                         </div>
                         <p class="text-xs text-slate-400 mb-4 leading-relaxed">
@@ -222,6 +222,10 @@
     </div>
 
 <script>
+// 🌟 ใส่รหัส Cloudinary ของคุณตรงนี้เพื่อใช้งานปุ่มอัปโหลด (ถ้ายังไม่มีให้ปล่อยไว้) 🌟
+const CLOUD_NAME = "dv9ejytrx"; 
+const UPLOAD_PRESET = "t1obw6ft"; 
+
 const firebaseConfig = { apiKey: "AIzaSyB9TZN4-yUb9Kfh0gdZNp6XglsbS-xEzfk", authDomain: "biolens-ar.firebaseapp.com", projectId: "biolens-ar", storageBucket: "biolens-ar.firebasestorage.app", messagingSenderId: "1088692183155", appId: "1:1088692183155:web:d139f94812eca627e08a06" };
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
@@ -412,6 +416,13 @@ adminViewer.addEventListener('pointerup', (e) => {
 });
 
 function uploadModelToCloud(inputElement) {
+    // ป้องกันการทำงานหากผู้ใช้ยังไม่ได้กำหนดค่า CLOUD_NAME
+    if (!CLOUD_NAME || CLOUD_NAME === "your_cloud_name_here") {
+        alert("❌ โปรดตั้งค่า CLOUD_NAME ในโค้ด admin.html ก่อนใช้งานฟังก์ชันนี้ครับ");
+        inputElement.value = '';
+        return;
+    }
+
     const file = inputElement.files[0]; if(!file) return;
     if(!file.name.toLowerCase().endsWith('.glb')) { alert("❌ กรุณาอัปโหลดเฉพาะ .glb ครับ"); inputElement.value=''; return; }
     const st = document.getElementById('uploadStatus'); st.classList.remove('hidden'); st.style.color="#818cf8"; st.innerText="⏳ กำลังเตรียมอัปโหลด...";
@@ -420,7 +431,7 @@ function uploadModelToCloud(inputElement) {
     xhr.upload.onprogress = (e) => { if(e.lengthComputable) st.innerText=`⏳ กำลังอัปโหลด... ${Math.round((e.loaded/e.total)*100)}%`; };
     xhr.onload = () => {
         if(xhr.status===200){ document.getElementById('frmModelPath').value=JSON.parse(xhr.responseText).secure_url; st.innerText="✅ อัปโหลดเสร็จสมบูรณ์!"; st.style.color="#4ade80"; inputElement.value=''; updateLiveModel(); }
-        else{ st.innerText=`❌ อัปโหลดล้มเหลว`; st.style.color="#f87171"; inputElement.value=''; }
+        else{ st.innerText=`❌ อัปโหลดล้มเหลว (ตรวจสอบ Upload Preset)`; st.style.color="#f87171"; inputElement.value=''; }
     };
     xhr.onerror = () => { st.innerText="❌ เกิดข้อผิดพลาดการเชื่อมต่อ"; st.style.color="#f87171"; inputElement.value=''; };
     xhr.send(fd);
@@ -547,7 +558,6 @@ function renderSidebar() {
         } 
         else if (sidebarMode === 'quiz') {
             const qCount = sys.quiz ? sys.quiz.length : 0;
-            // 🌟 นับจำนวนข้อที่เปิดใช้งานและแสดงป้ายกำกับ
             const activeCount = sys.quiz ? sys.quiz.filter(q => q.active !== false).length : 0; 
             const badgeText = qCount > 0 ? `เปิดใช้ ${activeCount}/${qCount}` : `0 ข้อ`;
             const badgeBg = (activeCount === 0 && qCount > 0) ? 'bg-slate-700 text-slate-400' : 'bg-emerald-600 text-white';
