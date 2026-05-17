@@ -105,8 +105,16 @@
 
     <div id="dashboard" class="hidden flex-col md:flex-row h-full overflow-hidden">
         
-        <div class="w-full md:w-72 h-1/3 md:h-full bg-slate-800 border-b md:border-b-0 md:border-r border-slate-700 p-4 overflow-y-auto shrink-0">
-            <div id="sidebarMenu" class="space-y-4"></div>
+        <div class="w-full md:w-72 h-1/3 md:h-full bg-slate-800 border-b md:border-b-0 md:border-r border-slate-700 p-4 overflow-y-auto shrink-0 flex flex-col">
+            <div id="sidebarMenu" class="space-y-4 flex-grow"></div>
+            
+            <div class="mt-4 pt-4 border-t border-slate-700 shrink-0">
+                <h3 class="text-slate-500 font-bold text-[10px] uppercase mb-2">⚙️ ตั้งค่าส่วนกลาง (ระบบโหมดรวม)</h3>
+                <div class="flex items-center justify-between bg-slate-900/50 p-2.5 rounded-lg border border-slate-700">
+                    <span class="text-[11px] text-slate-300">🎯 จำนวนสุ่มข้อสอบ (ข้อ)</span>
+                    <input type="number" id="globalQuizLimitInput" class="w-12 bg-slate-800 text-emerald-400 font-bold text-xs text-center rounded border border-slate-600 outline-none focus:border-emerald-500 py-1 transition" min="1" value="15" onchange="updateGlobalLimit(this.value)" title="เมื่อแก้ตัวเลข ระบบจะอัปเดตให้แอปอัตโนมัติ">
+                </div>
+            </div>
         </div>
 
         <div class="flex-grow bg-slate-900 flex flex-col h-full overflow-hidden relative">
@@ -121,6 +129,11 @@
                     <button id="btnDeleteTarget" onclick="deleteCurrentTarget()" class="text-rose-400 hover:bg-rose-400/10 px-3 py-2 rounded-lg text-xs border border-rose-400/20 transition dev-only">🗑️ ลบหน้านี้ทิ้ง</button>
                     <button onclick="saveData()" class="bg-emerald-600 hover:bg-emerald-500 px-6 py-2 rounded-lg font-bold text-white text-sm shadow-md transition flex items-center gap-2">💾 บันทึกข้อมูล</button>
                 </div>
+            </div>
+
+            <div id="editorTabs" class="flex gap-2 px-6 bg-slate-800 border-b border-slate-700 shrink-0 hidden">
+                <button id="tabContentBtn" onclick="switchAdminTab('content')" class="px-5 py-3 text-sm font-bold text-blue-400 border-b-2 border-blue-500 transition">📚 จัดการเนื้อหา & โมเดล</button>
+                <button id="tabQuizBtn" onclick="switchAdminTab('quiz')" class="px-5 py-3 text-sm font-bold text-slate-400 border-b-2 border-transparent hover:text-slate-200 transition">📝 คลังแบบทดสอบ</button>
             </div>
             
             <div class="flex-grow px-6 py-4 overflow-y-auto">
@@ -205,7 +218,7 @@
                             <button onclick="addQuiz()" class="bg-rose-500/20 text-rose-400 hover:bg-rose-500 hover:text-white px-3 py-1 rounded-lg text-xs transition shadow-sm">+ เพิ่มข้อสอบ</button>
                         </div>
                         <p class="text-[11px] text-slate-400 mb-6 bg-slate-900/50 p-3 rounded-lg border border-slate-700/50">
-                            💡 <b>ระบบคลังสลับข้ออัจฉริยะ:</b> ข้อสอบที่เปิดใช้งาน (✅) ทั้งหมดในหมวดนี้ จะถูกรวมเข้าด้วยกันและสลับลำดับข้อ/ตัวเลือกอัตโนมัติ เพื่อป้องกันนักเรียนลอกกัน 
+                            💡 <b>ระบบสลับข้อ:</b> ข้อสอบที่เปิดใช้งาน (✅) ทั้งหมดในหมวดนี้ จะถูกสลับลำดับข้อ/ตัวเลือกอัตโนมัติ เพื่อป้องกันการลอกกัน (ทุกข้อมีค่าเท่ากับ 1 แต้มเสมอ)
                         </p>
                         
                         <div id="quizContainer" class="space-y-3"></div>
@@ -227,17 +240,35 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// 🌟 ตัวแปรสถานะ 🌟
 let globalDatabase = null;
 let currentSysIndex = null;
 let currentItemIndex = null; 
-let currentItemData = null; // ข้อมูลโมเดล
-let currentQuizDataRef = null; // อ้างอิงข้อมูลข้อสอบของหมวด
-let editingMode = ''; // 'item' หรือ 'quiz'
+let currentItemData = null; 
+let currentQuizDataRef = null; 
+let editingMode = ''; 
 
 let isDevMode = false;
 let activePreviewMaterial = null; 
 let adminOriginalColors = new Map();
+
+function switchAdminTab(tabName) {
+    const btnContent = document.getElementById('tabContentBtn');
+    const btnQuiz = document.getElementById('tabQuizBtn');
+    const secContent = document.getElementById('adminContentSection');
+    const secQuiz = document.getElementById('adminQuizSection');
+
+    if (tabName === 'content') {
+        secContent.style.display = 'block';
+        secQuiz.style.display = 'none';
+        btnContent.className = 'px-5 py-3 text-sm font-bold text-blue-400 border-b-2 border-blue-500 transition';
+        btnQuiz.className = 'px-5 py-3 text-sm font-bold text-slate-400 border-b-2 border-transparent hover:text-slate-200 transition';
+    } else {
+        secContent.style.display = 'none';
+        secQuiz.style.display = 'block';
+        btnQuiz.className = 'px-5 py-3 text-sm font-bold text-rose-400 border-b-2 border-rose-500 transition';
+        btnContent.className = 'px-5 py-3 text-sm font-bold text-slate-400 border-b-2 border-transparent hover:text-slate-200 transition';
+    }
+}
 
 const svgExpand = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>`;
 const svgCollapse = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><polyline points="4 14 10 14 10 20"></polyline><polyline points="20 10 14 10 14 4"></polyline><line x1="14" y1="10" x2="21" y2="3"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>`;
@@ -425,24 +456,28 @@ function uploadModelToCloud(inputElement) {
     xhr.send(fd);
 }
 
+// 🌟 เพิ่มระบบดึงค่า Setting
 function loadData() { 
     db.collection("database").doc("anatomy").get().then(doc => { 
         if(doc.exists){ 
             globalDatabase = doc.data(); 
 
-            // 🌟 ระบบดูดข้อสอบเก่ามารวมที่หมวดหมู่อัตโนมัติ (Data Migration) 🌟
+            // ตรวจสอบและดึงค่า Setting
+            if(!globalDatabase.settings) {
+                globalDatabase.settings = { global_quiz_limit: 15 };
+            }
+            document.getElementById('globalQuizLimitInput').value = globalDatabase.settings.global_quiz_limit || 15;
+
             let isMigrated = false;
             if (globalDatabase.systems) {
                 globalDatabase.systems.forEach(sys => {
-                    if (!sys.quiz) sys.quiz = []; // ถ้าหมวดนี้ยังไม่มีคลังข้อสอบ ให้สร้างกล่องรอไว้
+                    if (!sys.quiz) sys.quiz = []; 
                     
-                    // วนลูปเข้าไปหาข้อสอบเก่าที่เคยซ่อนอยู่ในบทเรียนย่อย (Items)
                     if (sys.items) {
                         sys.items.forEach(item => {
                             if (item.quiz && item.quiz.length > 0) {
-                                // ก๊อปปี้ข้อสอบเก่าทั้งหมด มาใส่ในคลังใหญ่ของหมวดนี้
                                 sys.quiz = sys.quiz.concat(item.quiz);
-                                item.quiz = []; // เคลียร์ข้อสอบเก่าในบทเรียนทิ้งเพื่อไม่ให้ไฟล์หนัก
+                                item.quiz = []; 
                                 isMigrated = true;
                             }
                         });
@@ -450,11 +485,8 @@ function loadData() {
                 });
             }
 
-            // ถ้ามีการดูดข้อสอบเก่ามารวม ให้แอบบันทึกขึ้น Cloud ทันที
             if (isMigrated) {
-                db.collection("database").doc("anatomy").set(globalDatabase).then(() => {
-                    console.log("✅ ย้ายข้อสอบเก่าเข้าสู่คลังแบบใหม่สำเร็จ!");
-                });
+                db.collection("database").doc("anatomy").set(globalDatabase);
             }
 
             renderSidebar(); 
@@ -464,13 +496,29 @@ function loadData() {
         } 
     }); 
 }
+
+// 🌟 ระบบบันทึกการตั้งค่าลง Cloud
+function updateGlobalLimit(val) {
+    let num = parseInt(val);
+    if(isNaN(num) || num < 1) num = 15;
+    document.getElementById('globalQuizLimitInput').value = num;
+    
+    if(!globalDatabase) return;
+    if(!globalDatabase.settings) globalDatabase.settings = {};
+    globalDatabase.settings.global_quiz_limit = num;
+    
+    db.collection("database").doc("anatomy").set(globalDatabase).then(() => {
+        const input = document.getElementById('globalQuizLimitInput');
+        input.classList.add('border-emerald-500', 'bg-emerald-900');
+        setTimeout(() => input.classList.remove('border-emerald-500', 'bg-emerald-900'), 1000);
+    });
+}
+
 function syncInitialData() { openCustomConfirm("ดึงข้อมูลเริ่มต้นจาก anatomy_data.json ขึ้น Cloud ใช่หรือไม่?", "📥 โหลดข้อมูลตั้งต้น", () => { fetch("anatomy_data.json").then(r=>r.json()).then(data=>{db.collection("database").doc("anatomy").set(data).then(()=>{alert("สำเร็จ!"); loadData();});}); }, false); }
 
-// 🌟 อัปเดต Sidebar ให้มีปุ่มจัดการข้อสอบระดับ System
 function renderSidebar() {
     const menu = document.getElementById('sidebarMenu'); menu.innerHTML = ''; if (!globalDatabase || !globalDatabase.systems) return; 
     globalDatabase.systems.forEach((sys, sIdx) => {
-        // นับจำนวนข้อสอบในระบบนี้
         const qCount = sys.quiz ? sys.quiz.length : 0;
         
         let html = `<div class="mb-5">
@@ -488,7 +536,6 @@ function renderSidebar() {
                 </button>
         `;
         
-        // ปุ่มโมเดลย่อย
         if (sys.items && sys.items.length > 0) { 
             sys.items.forEach((item, iIdx) => { 
                 const isActive = (editingMode === 'item' && currentSysIndex === sIdx && currentItemIndex === iIdx); 
@@ -501,13 +548,11 @@ function renderSidebar() {
     });
 }
 
-// 🌟 ฟังก์ชันเข้าสู่โหมดแก้ไข "เนื้อหาโมเดล"
 function editItem(sIdx, iIdx) {
     editingMode = 'item';
     currentSysIndex = sIdx; 
     currentItemIndex = iIdx;
     
-    // ตรวจสอบโครงสร้างข้อมูลเก่า เผื่อมี quiz ค้างใน item ให้ลบออกได้เลยเพราะเราย้ายไปรวมแล้ว (หรือไม่ลบก็ไม่มีผล)
     currentItemData = JSON.parse(JSON.stringify(globalDatabase.systems[sIdx].items[iIdx]));
     if (!currentItemData.click_parts) currentItemData.click_parts = [];
 
@@ -527,7 +572,6 @@ function editItem(sIdx, iIdx) {
     renderSidebar(); renderParts();
 }
 
-// 🌟 ฟังก์ชันเข้าสู่โหมดแก้ไข "คลังข้อสอบประจำหมวด"
 function editSystemQuiz(sIdx) {
     editingMode = 'quiz';
     currentSysIndex = sIdx;
@@ -548,7 +592,6 @@ function editSystemQuiz(sIdx) {
 
     renderSidebar(); renderQuiz();
 }
-
 
 function addClickPart() { currentItemData.click_parts.push({material_name:'', name:'', info:''}); renderParts(); }
 
@@ -582,8 +625,11 @@ function renderParts() {
     });
 }
 
-// 🌟 ฟังก์ชันจัดการข้อสอบ (ชี้ไปที่ currentQuizDataRef แทน)
-function addQuiz() { currentQuizDataRef.push({question:'', choices:['','','',''], answer:0, points: 1, explanation: '', active: true}); renderQuiz(); renderSidebar(); }
+function addQuiz() { 
+    currentQuizDataRef.push({question:'', choices:['','','',''], answer:0, points: 1, explanation: '', active: true}); 
+    renderQuiz(); 
+    renderSidebar(); 
+}
 
 function renderQuiz() {
     const container = document.getElementById('quizContainer'); container.innerHTML = '';
@@ -611,7 +657,6 @@ function renderQuiz() {
 
                 <div class="flex gap-2 mb-3">
                     <input type="text" class="input-box font-medium text-sm flex-grow" value="${q.question}" oninput="currentQuizDataRef[${idx}].question=this.value" placeholder="โจทย์คำถาม">
-                    <input type="number" class="input-box font-bold text-sm w-24 text-center text-amber-400" value="${q.points || 1}" oninput="currentQuizDataRef[${idx}].points=Number(this.value)" placeholder="คะแนน" min="1" title="คะแนนสำหรับข้อนี้">
                 </div>
 
                 <div class="grid grid-cols-2 gap-2 mb-3">
@@ -619,7 +664,7 @@ function renderQuiz() {
                 </div>
                 
                 <div class="bg-slate-800/50 p-2 rounded-lg border border-slate-700 mt-2">
-                    <label class="text-[10px] text-slate-400 block uppercase mb-1">💡 คำอธิบายเฉลย (แสดงให้นักเรียนเห็นตอนดูสรุปผล)</label>
+                    <label class="text-[10px] text-slate-400 block uppercase mb-1">💡 คำอธิบายเฉลย</label>
                     <input type="text" class="input-box text-xs text-indigo-300" value="${q.explanation || ''}" oninput="currentQuizDataRef[${idx}].explanation=this.value" placeholder="อธิบายเหตุผลของคำตอบที่ถูกต้อง...">
                 </div>
             </div>`;
@@ -627,7 +672,6 @@ function renderQuiz() {
     }
 }
 
-// 🌟 อัปเดตฟังก์ชัน Save ให้เซฟตามโหมด
 function saveData() { 
     if(currentSysIndex === null) return; 
     
@@ -637,7 +681,6 @@ function saveData() {
         currentItemData.description = document.getElementById('frmDesc').innerHTML; 
         globalDatabase.systems[currentSysIndex].items[currentItemIndex] = currentItemData; 
     } 
-    // ถ้าเป็นโหมด quiz ไม่ต้องอัปเดตตัวแปร เพราะเราแก้ที่ currentQuizDataRef (ชี้ไปหา globalDatabase โดยตรงแล้ว)
     
     db.collection("database").doc("anatomy").set(globalDatabase).then(() => { 
         alert("บันทึกข้อมูลเรียบร้อยแล้ว! ✅"); 
@@ -655,7 +698,6 @@ function deleteQuizPart(idx) {
     }); 
 }
 
-// ลบเป้าหมายตามโหมด
 function deleteCurrentTarget() { 
     if (editingMode === 'item') {
         openCustomConfirm(`ลบอวัยวะ <b class="text-rose-400">[${currentItemData.name}]</b> แน่ใจหรือไม่?`, "ลบหน้านี้ทิ้ง", () => { 

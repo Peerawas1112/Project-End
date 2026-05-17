@@ -302,6 +302,9 @@ let pendingQuizPool = [];
 let pendingQuizTitle = "";
 let currentActiveQuizIndex = null;
 
+// 🌟 ตัวแปรใหม่สำหรับรับค่าจากฐานข้อมูล
+let globalQuizLimit = 15; 
+
 const firebaseConfig = {
   apiKey: "AIzaSyB9TZN4-yUb9Kfh0gdZNp6XglsbS-xEzfk",
   authDomain: "biolens-ar.firebaseapp.com",
@@ -317,10 +320,18 @@ db.enablePersistence().catch(function(err) {
     console.log("Firebase Cache Error: ", err);
 });
 
+// 🌟 อัปเดตให้ไปดึงค่า Setting จาก Cloud ด้วย
 db.collection("database").doc("anatomy").get()
 .then((docSnap) => {
     if(docSnap.exists) {
-        data = docSnap.data().systems;
+        const dbData = docSnap.data();
+        data = dbData.systems || [];
+        
+        // รับค่าลิมิตข้อสอบมาใช้ (ถ้ายังไม่ตั้งค่าในหน้าแอดมิน ให้ใช้ 15 เป็นค่าเริ่มต้น)
+        if(dbData.settings && dbData.settings.global_quiz_limit) {
+            globalQuizLimit = parseInt(dbData.settings.global_quiz_limit);
+        }
+
         renderTabs();
         renderQuizMenu(); 
         if (data.length > 0) loadSystem(0);
@@ -436,16 +447,23 @@ function openPreQuizInfo(index) {
         data.forEach(sys => { 
             if (sys.quiz) pool = pool.concat(sys.quiz.filter(q => q.active !== false)); 
         });
+        
+        if (pool.length === 0) return alert(`ยังไม่มีคำถามที่ "เปิดใช้งาน" ในระบบครับ`);
+        
+        // 🌟 ดึงค่า globalQuizLimit มาแสดงผล
+        let limitCount = pool.length > globalQuizLimit ? globalQuizLimit : pool.length;
+        document.getElementById("preQuizCount").innerHTML = `${limitCount} ข้อ <span style="font-size: 0.75rem; color: #64748b; font-weight: normal;">(สุ่มจากคลังทั้งหมด ${pool.length} ข้อ)</span>`;
+        
     } else {
         title = data[index].category;
         if (data[index].quiz) pool = data[index].quiz.filter(q => q.active !== false);
+        
+        if (pool.length === 0) return alert(`ยังไม่มีคำถามที่ "เปิดใช้งาน" ในหมวด "${title}" ครับ`);
+        
+        document.getElementById("preQuizCount").textContent = `${pool.length} ข้อ`;
     }
-    
-    if (pool.length === 0) return alert(`ยังไม่มีคำถามที่ "เปิดใช้งาน" ในหมวด "${title}" ครับ`);
 
     document.getElementById("preQuizTopic").textContent = title;
-    document.getElementById("preQuizCount").textContent = `${pool.length} ข้อ`;
-    
     pendingQuizPool = pool;
     pendingQuizTitle = title;
     
@@ -455,7 +473,15 @@ function openPreQuizInfo(index) {
 function startQuizConfirm() {
     closeModals(); 
     
-    currentQuizData = shuffleArray([...pendingQuizPool]); 
+    let shuffledPool = shuffleArray([...pendingQuizPool]); 
+    
+    // 🌟 ดึงค่า globalQuizLimit มาใช้งานจริงตอนตัดข้อสอบ
+    if (currentActiveQuizIndex === 'all') {
+        currentQuizData = shuffledPool.slice(0, globalQuizLimit);
+    } else {
+        currentQuizData = shuffledPool;
+    }
+    
     qIndex = 0; score = 0; userAnswers = []; 
     
     document.getElementById("quizType").textContent = "แบบทดสอบ: " + pendingQuizTitle;
@@ -665,7 +691,6 @@ function nextQuestion() {
     qIndex++; showQuestion();
 }
 
-// 🌟 อัปเดตการแสดงผล (Formative Assessment: โชว์แค่ผ่าน/ไม่ผ่าน) 🌟
 function showResult() {
     clearInterval(timerInterval); document.getElementById("quizTimer").style.display = "none";
 
@@ -675,7 +700,7 @@ function showResult() {
     currentQuizData.forEach(q => totalMaxScore += (q.points || 1));
 
     const percent = (score / totalMaxScore) * 100;
-    const isPass = percent >= 50; // เกณฑ์ผ่าน 50%
+    const isPass = percent >= 50; 
 
     let summaryHTML = `<div style="max-height: 40vh; overflow-y: auto; padding-right: 5px; margin-bottom: 20px; text-align: left;">`;
 
