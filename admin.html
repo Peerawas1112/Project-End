@@ -631,6 +631,7 @@ function addQuiz() {
     renderSidebar(); 
 }
 
+// 🌟 นำกล่องกรอกคะแนนกลับมาให้ครูกำหนดแต้มได้
 function renderQuiz() {
     const container = document.getElementById('quizContainer'); container.innerHTML = '';
     const msg = document.getElementById('emptyQuizMsg');
@@ -657,6 +658,7 @@ function renderQuiz() {
 
                 <div class="flex gap-2 mb-3">
                     <input type="text" class="input-box font-medium text-sm flex-grow" value="${q.question}" oninput="currentQuizDataRef[${idx}].question=this.value" placeholder="โจทย์คำถาม">
+                    <input type="number" class="input-box font-bold text-sm w-24 text-center text-amber-400" value="${q.points || 1}" oninput="currentQuizDataRef[${idx}].points=Number(this.value)" placeholder="คะแนน" min="1" title="คะแนนสำหรับข้อนี้">
                 </div>
 
                 <div class="grid grid-cols-2 gap-2 mb-3">
@@ -664,7 +666,7 @@ function renderQuiz() {
                 </div>
                 
                 <div class="bg-slate-800/50 p-2 rounded-lg border border-slate-700 mt-2">
-                    <label class="text-[10px] text-slate-400 block uppercase mb-1">💡 คำอธิบายเฉลย</label>
+                    <label class="text-[10px] text-slate-400 block uppercase mb-1">💡 คำอธิบายเฉลย (แสดงให้นักเรียนเห็นตอนดูสรุปผล)</label>
                     <input type="text" class="input-box text-xs text-indigo-300" value="${q.explanation || ''}" oninput="currentQuizDataRef[${idx}].explanation=this.value" placeholder="อธิบายเหตุผลของคำตอบที่ถูกต้อง...">
                 </div>
             </div>`;
