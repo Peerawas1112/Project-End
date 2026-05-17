@@ -202,7 +202,7 @@ model-viewer { width:100%; height:calc(100vh - 60px); margin-top: 60px; --poster
     <div class="modal-box">
       <h3 id="qrModalTitle" class="modal-title" style="background:transparent; border:none; padding:0; box-shadow:none;">📱 สแกนเพื่อดูแบบ AR</h3>
       <div id="qrcode" style="display:flex; justify-content:center; margin: 20px 0; background: white; padding: 15px; border-radius: 10px;"></div>
-      <p id="qrModalDesc" style="font-size: 0.85rem; color: #cbd5e1; margin-bottom: 15px;">ใช้กล้องมือถือสแกนเพื่อโชว์โมเดล 3 มิติแบบทะลุจอบนโต๊ะเรียน</p>
+      <p id="qrModalDesc" style="font-size: 0.85rem; color: #cbd5e1; margin-bottom: 15px;">ใช้กล้องมือถือสแกนเพื่อแสดงโมเดล 3 มิติเสมือนจริงบนโต๊ะเรียน</p>
       <button class="close-modal-btn" onclick="closeModals()" style="background: #475569; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">ปิดหน้าต่าง</button>
     </div>
 </div>
@@ -455,7 +455,7 @@ function openPreQuizInfo(index) {
         // 🌟 สุ่มเลือกข้อสอบมาตามลิมิตตั้งแต่หน้านี้เลย เพื่อให้บวกคะแนนเต็มได้เป๊ะๆ
         pool = shuffleArray(pool).slice(0, globalQuizLimit);
         
-        document.getElementById("preQuizCount").innerHTML = `${pool.length} ข้อ <span style="font-size: 0.75rem; color: #64748b; font-weight: normal;">(สุ่มจากคลัง)</span>`;
+        document.getElementById("preQuizCount").innerHTML = `${limitCount} ข้อ <span style="font-size: 0.75rem; color: #64748b; font-weight: normal;">(สุ่มจากคลัง ${pool.length} ข้อ)</span>`;
         
     } else {
         title = data[index].category;
