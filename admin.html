@@ -94,7 +94,7 @@
         <div class="flex gap-2 items-center">
             <button onclick="toggleDevMode()" id="btnDevMode" class="bg-slate-600/20 hover:bg-slate-600 text-slate-400 hover:text-white px-3 py-1.5 rounded-lg text-xs transition border border-slate-600/30 flex items-center gap-1">🔒 โหมดปกติ</button>
             <button onclick="syncInitialData()" class="bg-amber-600 hover:bg-amber-500 px-3 py-1.5 rounded-lg text-xs dev-only hidden" id="btnSync">📥 โหลดข้อมูลเริ่มต้น</button>
-            <button onclick="addNewSystem()" class="bg-blue-600/20 hover:bg-blue-600 text-blue-400 hover:text-white px-3 py-1.5 rounded-lg text-xs transition border border-blue-600/30 dev-only">➕ เพิ่มระบบ (หมวดหมู่)</button>
+            <button onclick="addNewSystem()" class="bg-blue-600/20 hover:bg-blue-600 text-blue-400 hover:text-white px-3 py-1.5 rounded-lg text-xs transition border border-blue-600/30 dev-only">➕ เพิ่มหมวดหมู่</button>
             <button onclick="clearAllData()" class="bg-rose-600/20 hover:bg-rose-600 text-rose-400 hover:text-white px-3 py-1.5 rounded-lg text-xs transition border border-rose-600/30 dev-only">🧹 ล้าง Cloud</button>
             <div class="w-[1px] bg-slate-700 mx-1 h-6"></div>
             <button onclick="toggleFullScreen()" id="fsBtnHeader" class="bg-slate-700 hover:bg-slate-600 text-white w-8 h-8 rounded-lg flex items-center justify-center transition" title="ขยายเต็มจอ"></button>
@@ -107,33 +107,20 @@
         
         <div class="w-full md:w-72 h-1/3 md:h-full bg-slate-800 border-b md:border-b-0 md:border-r border-slate-700 p-4 overflow-y-auto shrink-0 flex flex-col">
             <div id="sidebarMenu" class="space-y-4 flex-grow"></div>
-            
-            <div class="mt-4 pt-4 border-t border-slate-700 shrink-0">
-                <h3 class="text-slate-500 font-bold text-[10px] uppercase mb-2">⚙️ ตั้งค่าส่วนกลาง (ระบบโหมดรวม)</h3>
-                <div class="flex items-center justify-between bg-slate-900/50 p-2.5 rounded-lg border border-slate-700">
-                    <span class="text-[11px] text-slate-300">🎯 จำนวนสุ่มข้อสอบ (ข้อ)</span>
-                    <input type="number" id="globalQuizLimitInput" class="w-12 bg-slate-800 text-emerald-400 font-bold text-xs text-center rounded border border-slate-600 outline-none focus:border-emerald-500 py-1 transition" min="1" value="15" onchange="updateGlobalLimit(this.value)" title="เมื่อแก้ตัวเลข ระบบจะอัปเดตให้แอปอัตโนมัติ">
-                </div>
-            </div>
         </div>
 
         <div class="flex-grow bg-slate-900 flex flex-col h-full overflow-hidden relative">
             <div id="welcomeScreen" class="absolute inset-0 flex flex-col items-center justify-center bg-slate-900 z-10 text-slate-500">
                 <span class="text-4xl mb-3">👈</span>
-                <p class="text-base">เลือกบทเรียนจากเมนูด้านซ้ายเพื่อเริ่มจัดการ</p>
+                <p class="text-base">เลือกเมนูด้านซ้ายเพื่อเริ่มจัดการข้อมูล</p>
             </div>
 
-            <div id="editorHeader" class="bg-slate-800 px-6 py-4 border-b border-slate-700 flex justify-between items-center shrink-0">
+            <div id="editorHeader" class="bg-slate-800 px-6 py-4 border-b border-slate-700 flex justify-between items-center shrink-0 hidden">
                 <h2 id="editingTitle" class="text-xl font-bold text-blue-400 truncate w-1/2">Editor</h2>
                 <div class="flex gap-2">
-                    <button id="btnDeleteTarget" onclick="deleteCurrentTarget()" class="text-rose-400 hover:bg-rose-400/10 px-3 py-2 rounded-lg text-xs border border-rose-400/20 transition dev-only">🗑️ ลบหน้านี้ทิ้ง</button>
+                    <button id="btnDeleteTarget" onclick="deleteCurrentTarget()" class="text-rose-400 hover:bg-rose-400/10 px-3 py-2 rounded-lg text-xs border border-rose-400/20 transition dev-only hidden">🗑️ ลบหน้านี้ทิ้ง</button>
                     <button onclick="saveData()" class="bg-emerald-600 hover:bg-emerald-500 px-6 py-2 rounded-lg font-bold text-white text-sm shadow-md transition flex items-center gap-2">💾 บันทึกข้อมูล</button>
                 </div>
-            </div>
-
-            <div id="editorTabs" class="flex gap-2 px-6 bg-slate-800 border-b border-slate-700 shrink-0 hidden">
-                <button id="tabContentBtn" onclick="switchAdminTab('content')" class="px-5 py-3 text-sm font-bold text-blue-400 border-b-2 border-blue-500 transition">📚 จัดการเนื้อหา & โมเดล</button>
-                <button id="tabQuizBtn" onclick="switchAdminTab('quiz')" class="px-5 py-3 text-sm font-bold text-slate-400 border-b-2 border-transparent hover:text-slate-200 transition">📝 คลังแบบทดสอบ</button>
             </div>
             
             <div class="flex-grow px-6 py-4 overflow-y-auto">
@@ -218,7 +205,7 @@
                             <button onclick="addQuiz()" class="bg-rose-500/20 text-rose-400 hover:bg-rose-500 hover:text-white px-3 py-1 rounded-lg text-xs transition shadow-sm">+ เพิ่มข้อสอบ</button>
                         </div>
                         <p class="text-[11px] text-slate-400 mb-6 bg-slate-900/50 p-3 rounded-lg border border-slate-700/50">
-                            💡 <b>ระบบสลับข้อ:</b> ข้อสอบที่เปิดใช้งาน (✅) ทั้งหมดในหมวดนี้ จะถูกสลับลำดับข้อ/ตัวเลือกอัตโนมัติ เพื่อป้องกันการลอกกัน (ทุกข้อมีค่าเท่ากับ 1 แต้มเสมอ)
+                            💡 <b>ระบบคลังสลับข้ออัจฉริยะ:</b> ข้อสอบที่เปิดใช้งาน (✅) ทั้งหมดในหมวดนี้ จะถูกนำไปสลับลำดับข้อ/ตัวเลือกอัตโนมัติ เพื่อป้องกันนักเรียนลอกกัน 
                         </p>
                         
                         <div id="quizContainer" class="space-y-3"></div>
@@ -240,35 +227,18 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
+// 🌟 ตัวแปรสถานะ 🌟
 let globalDatabase = null;
 let currentSysIndex = null;
 let currentItemIndex = null; 
 let currentItemData = null; 
 let currentQuizDataRef = null; 
 let editingMode = ''; 
+let sidebarMode = 'content'; 
 
 let isDevMode = false;
 let activePreviewMaterial = null; 
 let adminOriginalColors = new Map();
-
-function switchAdminTab(tabName) {
-    const btnContent = document.getElementById('tabContentBtn');
-    const btnQuiz = document.getElementById('tabQuizBtn');
-    const secContent = document.getElementById('adminContentSection');
-    const secQuiz = document.getElementById('adminQuizSection');
-
-    if (tabName === 'content') {
-        secContent.style.display = 'block';
-        secQuiz.style.display = 'none';
-        btnContent.className = 'px-5 py-3 text-sm font-bold text-blue-400 border-b-2 border-blue-500 transition';
-        btnQuiz.className = 'px-5 py-3 text-sm font-bold text-slate-400 border-b-2 border-transparent hover:text-slate-200 transition';
-    } else {
-        secContent.style.display = 'none';
-        secQuiz.style.display = 'block';
-        btnQuiz.className = 'px-5 py-3 text-sm font-bold text-rose-400 border-b-2 border-rose-500 transition';
-        btnContent.className = 'px-5 py-3 text-sm font-bold text-slate-400 border-b-2 border-transparent hover:text-slate-200 transition';
-    }
-}
 
 const svgExpand = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>`;
 const svgCollapse = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><polyline points="4 14 10 14 10 20"></polyline><polyline points="20 10 14 10 14 4"></polyline><line x1="14" y1="10" x2="21" y2="3"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>`;
@@ -456,17 +426,14 @@ function uploadModelToCloud(inputElement) {
     xhr.send(fd);
 }
 
-// 🌟 เพิ่มระบบดึงค่า Setting
 function loadData() { 
     db.collection("database").doc("anatomy").get().then(doc => { 
         if(doc.exists){ 
             globalDatabase = doc.data(); 
 
-            // ตรวจสอบและดึงค่า Setting
             if(!globalDatabase.settings) {
                 globalDatabase.settings = { global_quiz_limit: 15 };
             }
-            document.getElementById('globalQuizLimitInput').value = globalDatabase.settings.global_quiz_limit || 15;
 
             let isMigrated = false;
             if (globalDatabase.systems) {
@@ -497,11 +464,9 @@ function loadData() {
     }); 
 }
 
-// 🌟 ระบบบันทึกการตั้งค่าลง Cloud
 function updateGlobalLimit(val) {
     let num = parseInt(val);
     if(isNaN(num) || num < 1) num = 15;
-    document.getElementById('globalQuizLimitInput').value = num;
     
     if(!globalDatabase) return;
     if(!globalDatabase.settings) globalDatabase.settings = {};
@@ -509,41 +474,92 @@ function updateGlobalLimit(val) {
     
     db.collection("database").doc("anatomy").set(globalDatabase).then(() => {
         const input = document.getElementById('globalQuizLimitInput');
-        input.classList.add('border-emerald-500', 'bg-emerald-900');
-        setTimeout(() => input.classList.remove('border-emerald-500', 'bg-emerald-900'), 1000);
+        if (input) {
+            input.value = num;
+            input.classList.add('border-emerald-500', 'bg-emerald-900');
+            setTimeout(() => input.classList.remove('border-emerald-500', 'bg-emerald-900'), 1000);
+        }
     });
 }
 
 function syncInitialData() { openCustomConfirm("ดึงข้อมูลเริ่มต้นจาก anatomy_data.json ขึ้น Cloud ใช่หรือไม่?", "📥 โหลดข้อมูลตั้งต้น", () => { fetch("anatomy_data.json").then(r=>r.json()).then(data=>{db.collection("database").doc("anatomy").set(data).then(()=>{alert("สำเร็จ!"); loadData();});}); }, false); }
 
+function setSidebarMode(mode) {
+    sidebarMode = mode;
+    renderSidebar();
+    
+    document.getElementById('welcomeScreen').classList.remove('hidden');
+    document.getElementById('adminContentSection').classList.add('hidden');
+    document.getElementById('adminQuizSection').classList.add('hidden');
+    document.getElementById('editorHeader').classList.add('hidden');
+    editingMode = '';
+    currentSysIndex = null;
+    currentItemIndex = null;
+}
+
+// 🌟 แสดงปุ่มเมนูด้านซ้าย พร้อมป้ายกำกับ เปิดใช้ X/Y 🌟
 function renderSidebar() {
-    const menu = document.getElementById('sidebarMenu'); menu.innerHTML = ''; if (!globalDatabase || !globalDatabase.systems) return; 
+    const menu = document.getElementById('sidebarMenu'); 
+    menu.innerHTML = ''; 
+    if (!globalDatabase || !globalDatabase.systems) return; 
+
+    let toggleHTML = `
+        <div class="flex bg-slate-900 rounded-lg p-1 mb-6 border border-slate-700 shrink-0">
+            <button onclick="setSidebarMode('content')" class="flex-1 py-1.5 text-xs font-bold rounded-md transition ${sidebarMode === 'content' ? 'bg-blue-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-200'}">📚 เนื้อหาบทเรียน</button>
+            <button onclick="setSidebarMode('quiz')" class="flex-1 py-1.5 text-xs font-bold rounded-md transition ${sidebarMode === 'quiz' ? 'bg-rose-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-200'}">📝 คลังข้อสอบ</button>
+        </div>
+    `;
+    menu.innerHTML += toggleHTML;
+
+    if (sidebarMode === 'quiz') {
+        let limitVal = globalDatabase.settings?.global_quiz_limit || 15;
+        menu.innerHTML += `
+            <div class="mb-6 p-3 bg-slate-900/50 rounded-xl border border-slate-700 shadow-inner">
+                <h3 class="text-slate-400 font-bold text-[10px] uppercase mb-3 flex items-center gap-1">⚙️ ตั้งค่าระบบ (โหมดสอบรวม)</h3>
+                <div class="flex items-center justify-between">
+                    <span class="text-[11px] text-slate-300">🎯 จำนวนสุ่มข้อสอบ</span>
+                    <input type="number" id="globalQuizLimitInput" class="w-12 bg-slate-800 text-emerald-400 font-bold text-xs text-center rounded border border-slate-600 outline-none focus:border-emerald-500 py-1 transition" min="1" value="${limitVal}" onchange="updateGlobalLimit(this.value)" title="เมื่อแก้ตัวเลข ระบบจะบันทึกและอัปเดตแอปให้อัตโนมัติ">
+                </div>
+            </div>
+        `;
+    }
+
     globalDatabase.systems.forEach((sys, sIdx) => {
-        const qCount = sys.quiz ? sys.quiz.length : 0;
-        
         let html = `<div class="mb-5">
             <div class="flex justify-between items-center px-1 mb-2 border-b border-slate-700/50 pb-1">
-                <h3 class="text-blue-500 font-bold text-[11px] uppercase">${sys.category}</h3>
+                <h3 class="text-slate-300 font-bold text-[11px] uppercase">${sys.category}</h3>
                 <div class="flex gap-2 dev-only">
-                    <button onclick="addNewItemToSys(${sIdx})" class="text-[10px] text-emerald-500 hover:text-emerald-400">+ บทเรียน</button>
+                    ${sidebarMode === 'content' ? `<button onclick="addNewItemToSys(${sIdx})" class="text-[10px] text-emerald-500 hover:text-emerald-400">+ บทเรียน</button>` : ''}
                     <button onclick="deleteSystem(${sIdx})" class="text-[10px] text-slate-500 hover:text-rose-500">ลบหมวด</button>
                 </div>
             </div>
-            <div class="flex flex-col gap-1">
-                <button onclick="editSystemQuiz(${sIdx})" class="sidebar-quiz text-left px-3 py-2 rounded-lg text-xs transition border border-transparent flex justify-between items-center ${editingMode === 'quiz' && currentSysIndex === sIdx ? 'active' : 'bg-rose-900/30 text-rose-300 hover:bg-rose-800/50'}">
-                    <span>📝 คลังข้อสอบ</span>
-                    <span class="bg-rose-950 px-1.5 py-0.5 rounded text-[9px]">${qCount} ข้อ</span>
-                </button>
-        `;
+            <div class="flex flex-col gap-1">`;
         
-        if (sys.items && sys.items.length > 0) { 
-            sys.items.forEach((item, iIdx) => { 
-                const isActive = (editingMode === 'item' && currentSysIndex === sIdx && currentItemIndex === iIdx); 
-                html += `<button onclick="editItem(${sIdx}, ${iIdx})" class="sidebar-item text-left px-3 py-2 rounded-lg text-xs transition border border-transparent ${isActive ? 'active' : 'bg-slate-900/50 text-slate-400 hover:bg-slate-700'}">📄 ${item.name}</button>`; 
-            }); 
-        } else { 
-            html += `<p class="text-slate-600 text-[10px] italic px-2 py-1">ยังไม่มีบทเรียน</p>`; 
+        if (sidebarMode === 'content') {
+            if (sys.items && sys.items.length > 0) { 
+                sys.items.forEach((item, iIdx) => { 
+                    const isActive = (editingMode === 'item' && currentSysIndex === sIdx && currentItemIndex === iIdx); 
+                    html += `<button onclick="editItem(${sIdx}, ${iIdx})" class="sidebar-item text-left px-3 py-2 rounded-lg text-xs transition border border-transparent ${isActive ? 'active' : 'bg-slate-900/50 text-slate-400 hover:bg-slate-700'}">📄 ${item.name}</button>`; 
+                }); 
+            } else { 
+                html += `<p class="text-slate-600 text-[10px] italic px-2 py-1">ยังไม่มีบทเรียน</p>`; 
+            }
+        } 
+        else if (sidebarMode === 'quiz') {
+            const qCount = sys.quiz ? sys.quiz.length : 0;
+            // 🌟 นับจำนวนข้อที่เปิดใช้งานและแสดงป้ายกำกับ
+            const activeCount = sys.quiz ? sys.quiz.filter(q => q.active !== false).length : 0; 
+            const badgeText = qCount > 0 ? `เปิดใช้ ${activeCount}/${qCount}` : `0 ข้อ`;
+            const badgeBg = (activeCount === 0 && qCount > 0) ? 'bg-slate-700 text-slate-400' : 'bg-emerald-600 text-white';
+
+            const isActive = (editingMode === 'quiz' && currentSysIndex === sIdx);
+            
+            html += `<button onclick="editSystemQuiz(${sIdx})" class="sidebar-quiz text-left px-3 py-2 rounded-lg text-xs transition border border-transparent flex justify-between items-center ${isActive ? 'active' : 'bg-rose-900/30 text-rose-300 hover:bg-rose-800/50 border-rose-900/40'}">
+                        <span>📝 คลังข้อสอบชุดนี้</span>
+                        <span class="${badgeBg} px-1.5 py-0.5 rounded text-[9px] shadow-sm tracking-wide font-medium">${badgeText}</span>
+                    </button>`;
         }
+        
         html += `</div></div>`; menu.innerHTML += html;
     });
 }
@@ -558,6 +574,8 @@ function editItem(sIdx, iIdx) {
 
     document.getElementById('welcomeScreen').classList.add('hidden');
     document.getElementById('adminQuizSection').classList.add('hidden');
+    
+    document.getElementById('editorHeader').classList.remove('hidden');
     document.getElementById('adminContentSection').classList.remove('hidden');
 
     document.getElementById('editingTitle').textContent = `แก้ไขบทเรียน: ${currentItemData.name}`;
@@ -566,7 +584,9 @@ function editItem(sIdx, iIdx) {
     document.getElementById('frmDesc').innerHTML = currentItemData.description || '';
     document.getElementById('uploadStatus').classList.add('hidden');
     
-    document.getElementById('btnDeleteTarget').innerText = "🗑️ ลบบทเรียนนี้ทิ้ง";
+    const btnDel = document.getElementById('btnDeleteTarget');
+    btnDel.innerText = "🗑️ ลบบทเรียนนี้ทิ้ง";
+    btnDel.classList.remove('hidden');
     
     updateLiveModel(); 
     renderSidebar(); renderParts();
@@ -582,13 +602,17 @@ function editSystemQuiz(sIdx) {
 
     document.getElementById('welcomeScreen').classList.add('hidden');
     document.getElementById('adminContentSection').classList.add('hidden');
+    
+    document.getElementById('editorHeader').classList.remove('hidden');
     document.getElementById('adminQuizSection').classList.remove('hidden');
 
     const catName = globalDatabase.systems[sIdx].category;
     document.getElementById('editingTitle').textContent = `แฟ้มคลังข้อสอบ: ${catName}`;
     document.getElementById('quizSectionTitle').textContent = `📝 คลังแบบทดสอบ: ${catName}`;
     
-    document.getElementById('btnDeleteTarget').innerText = "🧹 ล้างข้อสอบทั้งหมด";
+    const btnDel = document.getElementById('btnDeleteTarget');
+    btnDel.innerText = "🧹 ล้างข้อสอบทั้งหมด";
+    btnDel.classList.remove('hidden');
 
     renderSidebar(); renderQuiz();
 }
@@ -625,49 +649,65 @@ function renderParts() {
     });
 }
 
-function addQuiz() { 
-    currentQuizDataRef.push({question:'', choices:['','','',''], answer:0, points: 1, explanation: '', active: true}); 
-    renderQuiz(); 
-    renderSidebar(); 
-}
+function addQuiz() { currentQuizDataRef.push({question:'', choices:['','','',''], answer:0, points: 1, explanation: '', active: true}); renderQuiz(); renderSidebar(); }
 
-// 🌟 นำกล่องกรอกคะแนนกลับมาให้ครูกำหนดแต้มได้
+// 🌟 ระบบเรียงลำดับและล็อกช่องพิมพ์สำหรับข้อที่ถูกปิดใช้งาน 🌟
 function renderQuiz() {
     const container = document.getElementById('quizContainer'); container.innerHTML = '';
     const msg = document.getElementById('emptyQuizMsg');
     
+    // เรียงลำดับข้อสอบ: เปิดใช้ (true) อยู่บน, เก็บในคลัง (false) อยู่ล่าง
+    currentQuizDataRef.sort((a, b) => {
+        const aActive = a.active !== false;
+        const bActive = b.active !== false;
+        if (aActive === bActive) return 0;
+        return aActive ? -1 : 1; 
+    });
+
     if(currentQuizDataRef.length === 0) {
         msg.classList.remove('hidden');
     } else {
         msg.classList.add('hidden');
         currentQuizDataRef.forEach((q, idx) => {
             const isActive = q.active !== false; 
-            container.innerHTML += `<div class="bg-slate-900/50 p-4 rounded-xl border ${isActive ? 'border-indigo-500' : 'border-slate-700 opacity-60'} relative pr-12">
+            
+            // กำหนด Style ให้กล่องข้อสอบที่ปิดใช้งานเป็นเส้นประสีเทา
+            const boxStyle = isActive ? 'bg-slate-900/50 border-indigo-500' : 'bg-slate-900/20 border-slate-600 border-dashed opacity-75';
+            
+            // แอตทริบิวต์ล็อกไม่ให้พิมพ์ (disabled) และเปลี่ยนสีกล่องเป็นเทาเพื่อกันพลาด
+            const lockAttr = isActive ? '' : 'disabled';
+            const inputClass = isActive ? 'input-box' : 'input-box bg-slate-800/50 text-slate-500 cursor-not-allowed border-transparent';
+            const textClass = isActive ? 'text-white' : 'text-slate-500 cursor-not-allowed';
+
+            container.innerHTML += `<div class="${boxStyle} p-4 rounded-xl border relative pr-12 transition-all duration-300">
                 <button onclick="deleteQuizPart(${idx})" class="delete-btn-sm">✕</button>
                 
                 <div class="flex items-center gap-3 mb-4 border-b border-slate-700/50 pb-3">
                     <label class="flex items-center gap-2 cursor-pointer group">
                         <input type="checkbox" ${isActive ? 'checked' : ''} 
-                               onchange="currentQuizDataRef[${idx}].active=this.checked; renderQuiz();"
-                               class="w-4 h-4 rounded border-slate-700 text-indigo-600 focus:ring-indigo-500">
+                               onchange="currentQuizDataRef[${idx}].active=this.checked; renderQuiz(); renderSidebar();"
+                               class="w-4 h-4 rounded border-slate-700 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
                         <span class="text-xs ${isActive ? 'text-indigo-400 font-bold' : 'text-slate-500'} uppercase">
-                            ${isActive ? '✅ ใช้งานข้อนี้' : '📦 เก็บในคลัง (ไม่ใช้)'}
+                            ${isActive ? '✅ ใช้งานข้อนี้' : '🔒 เก็บในคลัง (ติ๊กเปิดใช้เพื่อแก้ไข)'}
                         </span>
                     </label>
                 </div>
 
                 <div class="flex gap-2 mb-3">
-                    <input type="text" class="input-box font-medium text-sm flex-grow" value="${q.question}" oninput="currentQuizDataRef[${idx}].question=this.value" placeholder="โจทย์คำถาม">
-                    <input type="number" class="input-box font-bold text-sm w-24 text-center text-amber-400" value="${q.points || 1}" oninput="currentQuizDataRef[${idx}].points=Number(this.value)" placeholder="คะแนน" min="1" title="คะแนนสำหรับข้อนี้">
+                    <input type="text" class="${inputClass} font-medium text-sm flex-grow" value="${q.question}" oninput="currentQuizDataRef[${idx}].question=this.value" placeholder="โจทย์คำถาม" ${lockAttr}>
+                    <input type="number" class="${inputClass} font-bold text-sm w-24 text-center ${isActive ? 'text-amber-400' : ''}" value="${q.points || 1}" oninput="currentQuizDataRef[${idx}].points=Number(this.value)" placeholder="คะแนน" min="1" title="คะแนนสำหรับข้อนี้" ${lockAttr}>
                 </div>
 
                 <div class="grid grid-cols-2 gap-2 mb-3">
-                    ${q.choices.map((c, cIdx) => `<div class="flex gap-2 items-center bg-slate-800 p-1.5 rounded-lg border ${q.answer===cIdx ? 'border-emerald-500' : 'border-transparent'}"><input type="radio" name="ans-${idx}" ${q.answer===cIdx?'checked':''} onchange="currentQuizDataRef[${idx}].answer=${cIdx}" class="ml-1 cursor-pointer"><input type="text" class="bg-transparent text-xs text-white w-full outline-none" value="${c}" oninput="currentQuizDataRef[${idx}].choices[${cIdx}]=this.value" placeholder="ตัวเลือก"></div>`).join('')}
+                    ${q.choices.map((c, cIdx) => `<div class="flex gap-2 items-center bg-slate-800 p-1.5 rounded-lg border ${q.answer===cIdx && isActive ? 'border-emerald-500' : 'border-transparent'} ${!isActive ? 'opacity-60' : ''}">
+                        <input type="radio" name="ans-${idx}" ${q.answer===cIdx?'checked':''} onchange="currentQuizDataRef[${idx}].answer=${cIdx}" class="ml-1 ${isActive?'cursor-pointer':'cursor-not-allowed'}" ${lockAttr}>
+                        <input type="text" class="bg-transparent text-xs ${textClass} w-full outline-none" value="${c}" oninput="currentQuizDataRef[${idx}].choices[${cIdx}]=this.value" placeholder="ตัวเลือก" ${lockAttr}>
+                    </div>`).join('')}
                 </div>
                 
-                <div class="bg-slate-800/50 p-2 rounded-lg border border-slate-700 mt-2">
+                <div class="bg-slate-800/50 p-2 rounded-lg border border-slate-700 mt-2 ${!isActive ? 'opacity-60' : ''}">
                     <label class="text-[10px] text-slate-400 block uppercase mb-1">💡 คำอธิบายเฉลย (แสดงให้นักเรียนเห็นตอนดูสรุปผล)</label>
-                    <input type="text" class="input-box text-xs text-indigo-300" value="${q.explanation || ''}" oninput="currentQuizDataRef[${idx}].explanation=this.value" placeholder="อธิบายเหตุผลของคำตอบที่ถูกต้อง...">
+                    <input type="text" class="${inputClass} text-xs ${isActive ? 'text-indigo-300' : ''}" value="${q.explanation || ''}" oninput="currentQuizDataRef[${idx}].explanation=this.value" placeholder="อธิบายเหตุผลของคำตอบที่ถูกต้อง..." ${lockAttr}>
                 </div>
             </div>`;
         });
@@ -705,8 +745,8 @@ function deleteCurrentTarget() {
         openCustomConfirm(`ลบอวัยวะ <b class="text-rose-400">[${currentItemData.name}]</b> แน่ใจหรือไม่?`, "ลบหน้านี้ทิ้ง", () => { 
             globalDatabase.systems[currentSysIndex].items.splice(currentItemIndex, 1); 
             db.collection("database").doc("anatomy").set(globalDatabase).then(() => { 
-                currentItemData=null; currentSysIndex=null; currentItemIndex=null; editingMode=''; 
-                renderSidebar(); document.getElementById('welcomeScreen').classList.remove('hidden'); document.getElementById('adminContentSection').classList.add('hidden'); 
+                currentItemData=null; currentSysIndex=null; currentItemIndex=null;
+                setSidebarMode('content'); 
             }); 
         });
     } else if (editingMode === 'quiz') {
@@ -723,7 +763,7 @@ function deleteCurrentTarget() {
 function deleteSystem(idx) { const sysName=globalDatabase.systems[idx].category; openCustomPrompt("⚠️ ลบหมวดหมู่", `พิมพ์: ${sysName}`, `<span class="text-rose-400">ระวัง! บทเรียนและข้อสอบในหมวดนี้หายหมด</span><br>พิมพ์ <b>${sysName}</b> เพื่อยืนยัน:`, (conf) => { if(conf===sysName) { globalDatabase.systems.splice(idx, 1); db.collection("database").doc("anatomy").set(globalDatabase).then(() => renderSidebar()); } else if(conf!==null&&conf.trim()!==""){alert("พิมพ์ชื่อไม่ถูกต้อง");} }); }
 function clearAllData() { openCustomPrompt("🔥 ล้าง Cloud", "พิมพ์ CONFIRM DELETE", `พิมพ์ <b>CONFIRM DELETE</b>`, (conf) => { if(conf==="CONFIRM DELETE"){ db.collection("database").doc("anatomy").delete().then(()=>location.reload()); } }); }
 function addNewSystem() { openCustomPrompt("✨ เพิ่มหมวดหมู่", "ชื่อหมวดหมู่...", null, (n) => { if(n&&n.trim()!==""){ if(!globalDatabase) globalDatabase={systems:[]}; globalDatabase.systems.push({category: n.trim(), items: [], quiz: []}); db.collection("database").doc("anatomy").set(globalDatabase).then(()=>renderSidebar()); } }); }
-function addNewItemToSys(sysIdx) { if(!globalDatabase.systems[sysIdx].items) globalDatabase.systems[sysIdx].items=[]; globalDatabase.systems[sysIdx].items.push({name: "บทเรียนใหม่", model_file: "", description: "รายละเอียดบทเรียน...", click_parts: []}); db.collection("database").doc("anatomy").set(globalDatabase).then(()=>{ renderSidebar(); editItem(sysIdx, globalDatabase.systems[sysIdx].items.length-1); }); }
+function addNewItemToSys(sysIdx) { if(!globalDatabase.systems[sysIdx].items) globalDatabase.systems[sysIdx].items=[]; globalDatabase.systems[sysIdx].items.push({name: "บทเรียนใหม่", model_file: "", description: "รายละเอียดบทเรียน...", click_parts: []}); db.collection("database").doc("anatomy").set(globalDatabase).then(()=>{ setSidebarMode('content'); editItem(sysIdx, globalDatabase.systems[sysIdx].items.length-1); }); }
 
 document.addEventListener('paste', function(e) { if(e.target.isContentEditable) { e.preventDefault(); let text=(e.originalEvent||e).clipboardData.getData('text/plain'); document.execCommand('insertText', false, text); } });
 </script>
