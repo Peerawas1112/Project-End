@@ -173,7 +173,8 @@ model-viewer { width:100%; height:calc(100vh - 60px); margin-top: 60px; --poster
         
         <div style="background: rgba(15,23,42,0.6); padding: 15px; border-radius: 16px; margin-bottom: 20px; text-align: left; border: 1px solid var(--border);">
             <p style="margin: 0 0 10px 0; color: #cbd5e1; font-size: 0.95rem;">📖 หัวข้อ: <b id="preQuizTopic" style="color: white; font-size: 1rem;">...</b></p>
-            <p style="margin: 0; color: #cbd5e1; font-size: 0.95rem;">📌 จำนวนข้อทั้งหมด: <b id="preQuizCount" style="color: #4ade80;">... ข้อ</b></p>
+            <p style="margin: 0 0 10px 0; color: #cbd5e1; font-size: 0.95rem;">📌 จำนวนข้อทั้งหมด: <b id="preQuizCount" style="color: #4ade80;">... ข้อ</b></p>
+            <p style="margin: 0; color: #cbd5e1; font-size: 0.95rem;">🏆 คะแนนเต็ม: <b id="preQuizTotalScore" style="color: #fbbf24;">... คะแนน</b></p>
         </div>
 
         <div style="text-align: left; margin-bottom: 20px;">
@@ -438,6 +439,7 @@ function renderQuizMenu() {
     container.innerHTML = html;
 }
 
+// 🌟 อัปเดตให้คำนวณและแสดงคะแนนเต็มล่วงหน้า
 function openPreQuizInfo(index) {
     let pool = []; let title = "";
     currentActiveQuizIndex = index;
@@ -450,9 +452,10 @@ function openPreQuizInfo(index) {
         
         if (pool.length === 0) return alert(`ยังไม่มีคำถามที่ "เปิดใช้งาน" ในระบบครับ`);
         
-        // 🌟 ดึงค่า globalQuizLimit มาแสดงผล
-        let limitCount = pool.length > globalQuizLimit ? globalQuizLimit : pool.length;
-        document.getElementById("preQuizCount").innerHTML = `${limitCount} ข้อ <span style="font-size: 0.75rem; color: #64748b; font-weight: normal;">(สุ่มจากคลังทั้งหมด ${pool.length} ข้อ)</span>`;
+        // 🌟 สุ่มเลือกข้อสอบมาตามลิมิตตั้งแต่หน้านี้เลย เพื่อให้บวกคะแนนเต็มได้เป๊ะๆ
+        pool = shuffleArray(pool).slice(0, globalQuizLimit);
+        
+        document.getElementById("preQuizCount").innerHTML = `${pool.length} ข้อ <span style="font-size: 0.75rem; color: #64748b; font-weight: normal;">(สุ่มจากคลัง)</span>`;
         
     } else {
         title = data[index].category;
@@ -463,7 +466,13 @@ function openPreQuizInfo(index) {
         document.getElementById("preQuizCount").textContent = `${pool.length} ข้อ`;
     }
 
+    // 🌟 คำนวณคะแนนรวมทั้งหมด จากข้อสอบในชุดที่จะใช้สอบจริง
+    let totalScore = 0;
+    pool.forEach(q => totalScore += (q.points || 1));
+
     document.getElementById("preQuizTopic").textContent = title;
+    document.getElementById("preQuizTotalScore").textContent = `${totalScore} คะแนน`; // โชว์คะแนน
+    
     pendingQuizPool = pool;
     pendingQuizTitle = title;
     
@@ -473,14 +482,8 @@ function openPreQuizInfo(index) {
 function startQuizConfirm() {
     closeModals(); 
     
-    let shuffledPool = shuffleArray([...pendingQuizPool]); 
-    
-    // 🌟 ดึงค่า globalQuizLimit มาใช้งานจริงตอนตัดข้อสอบ
-    if (currentActiveQuizIndex === 'all') {
-        currentQuizData = shuffledPool.slice(0, globalQuizLimit);
-    } else {
-        currentQuizData = shuffledPool;
-    }
+    // สลับข้อสอบอีกรอบก่อนให้เด็กทำ เพื่อความชัวร์ว่าลำดับไม่ซ้ำ
+    currentQuizData = shuffleArray([...pendingQuizPool]); 
     
     qIndex = 0; score = 0; userAnswers = []; 
     
