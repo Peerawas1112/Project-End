@@ -197,7 +197,30 @@
                         <div id="clickPartsContainer" class="space-y-4"></div>
                     </div>
                 </div>
+            <div id="adminSettingsSection" class="space-y-4 hidden mb-10">
+                    <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-sm">
+                        <div class="flex justify-between items-center mb-6 border-b border-slate-700/50 pb-4">
+                            <h3 class="text-amber-400 font-bold text-lg">⚙️ ตั้งค่าระบบประเมินผล</h3>
+                        </div>
+                        <p class="text-xs text-slate-400 mb-6 bg-slate-900/50 p-4 rounded-xl border border-slate-700/50 leading-relaxed">
+                            💡 <b>คำแนะนำ:</b> ตั้งค่าจำนวนข้อสอบที่จะสุ่มมาแสดงในโหมด "แบบทดสอบรวมทุกระบบ" และกำหนดเกณฑ์เปอร์เซ็นต์ขั้นต่ำที่นักเรียนต้องทำได้เพื่อให้สอบผ่าน (ต้องกดปุ่มบันทึกข้อมูลด้านบนขวาหลังแก้ไขเสร็จ)
+                        </p>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="bg-slate-900/40 p-5 rounded-xl border border-slate-700">
+                                <label class="text-xs text-slate-300 mb-3 block uppercase font-bold">🎯 จำนวนสุ่มข้อสอบ (ข้อ)</label>
+                                <input type="number" id="frmGlobalQuizLimit" class="input-box text-emerald-400 font-bold text-2xl text-center py-4" min="1">
+                                <p class="text-[10px] text-slate-500 mt-3 text-center">จำนวนข้อสอบที่จะสุ่มดึงมา (เฉพาะข้อที่เปิดใช้งาน)</p>
+                            </div>
 
+                            <div class="bg-slate-900/40 p-5 rounded-xl border border-slate-700">
+                                <label class="text-xs text-slate-300 mb-3 block uppercase font-bold">🏆 เกณฑ์สอบผ่าน (%)</label>
+                                <input type="number" id="frmGlobalPassing" class="input-box text-amber-400 font-bold text-2xl text-center py-4" min="1" max="100">
+                                <p class="text-[10px] text-slate-500 mt-3 text-center">เปอร์เซ็นต์คะแนนรวมที่ต้องทำได้เพื่อผ่านเกณฑ์</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div id="adminQuizSection" class="space-y-4 hidden mb-10">
                     <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-sm">
                         <div class="flex justify-between items-center mb-4">
@@ -220,7 +243,7 @@
             </div>
         </div>
     </div>
-
+<div id="toastContainer" class="fixed bottom-6 right-6 z-[9999] flex flex-col gap-3 pointer-events-none"></div>
 <script>
 // 🌟 ใส่รหัส Cloudinary ของคุณตรงนี้เพื่อใช้งานปุ่มอัปโหลด (ถ้ายังไม่มีให้ปล่อยไว้) 🌟
 const CLOUD_NAME = "dv9ejytrx"; 
@@ -519,6 +542,7 @@ function setSidebarMode(mode) {
     document.getElementById('welcomeScreen').classList.remove('hidden');
     document.getElementById('adminContentSection').classList.add('hidden');
     document.getElementById('adminQuizSection').classList.add('hidden');
+    document.getElementById('adminSettingsSection').classList.add('hidden'); // ซ่อนหน้าตั้งค่า
     document.getElementById('editorHeader').classList.add('hidden');
     editingMode = '';
     currentSysIndex = null;
@@ -539,22 +563,15 @@ function renderSidebar() {
     `;
     menu.innerHTML += toggleHTML;
 
+    // 🌟 เปลี่ยนจากช่องกรอก เป็นปุ่มกดเปิดหน้าจอขวา
     if (sidebarMode === 'quiz') {
-        let limitVal = globalDatabase.settings?.global_quiz_limit || 15;
-        let passVal = globalDatabase.settings?.passing_percentage || 50; // 🌟 เพิ่มดึงค่าเกณฑ์
+        const isSettingsActive = (editingMode === 'settings');
         menu.innerHTML += `
-            <div class="mb-6 p-3 bg-slate-900/50 rounded-xl border border-slate-700 shadow-inner">
-                <h3 class="text-slate-400 font-bold text-[10px] uppercase mb-3 flex items-center gap-1">⚙️ ตั้งค่าระบบประเมินผล</h3>
-                <div class="flex flex-col gap-2">
-                    <div class="flex items-center justify-between">
-                        <span class="text-[11px] text-slate-300">🎯 จำนวนสุ่มสอบ (ข้อ)</span>
-                        <input type="number" id="globalQuizLimitInput" class="w-14 bg-slate-800 text-emerald-400 font-bold text-xs text-center rounded border border-slate-600 outline-none focus:border-emerald-500 py-1 transition" min="1" value="${limitVal}" onchange="updateGlobalLimit(this.value)">
-                    </div>
-                    <div class="flex items-center justify-between">
-                        <span class="text-[11px] text-slate-300">🏆 เกณฑ์สอบผ่าน (%)</span>
-                        <input type="number" id="globalPassingInput" class="w-14 bg-slate-800 text-amber-400 font-bold text-xs text-center rounded border border-slate-600 outline-none focus:border-amber-500 py-1 transition" min="1" max="100" value="${passVal}" onchange="updatePassingPercentage(this.value)">
-                    </div>
-                </div>
+            <div class="mb-6">
+                <button onclick="editGlobalSettings()" class="w-full text-left px-3 py-3 rounded-xl text-sm transition border flex items-center justify-between ${isSettingsActive ? 'bg-amber-600 border-amber-500 text-white shadow-lg' : 'bg-slate-900/80 border-slate-700 text-slate-300 hover:bg-slate-800 hover:border-slate-600'}">
+                    <span class="font-bold flex items-center gap-2">⚙️ ตั้งค่าประเมินผล</span>
+                    <span class="text-[10px] bg-black/20 px-2 py-1 rounded-md">ทั่วไป</span>
+                </button>
             </div>
         `;
     }
@@ -598,6 +615,64 @@ function renderSidebar() {
     });
 }
 
+    globalDatabase.systems.forEach((sys, sIdx) => {
+        let html = `<div class="mb-5">
+            <div class="flex justify-between items-center px-1 mb-2 border-b border-slate-700/50 pb-1">
+                <h3 class="text-slate-300 font-bold text-[11px] uppercase">${sys.category}</h3>
+                <div class="flex gap-2 dev-only">
+                    ${sidebarMode === 'content' ? `<button onclick="addNewItemToSys(${sIdx})" class="text-[10px] text-emerald-500 hover:text-emerald-400">+ บทเรียน</button>` : ''}
+                    <button onclick="deleteSystem(${sIdx})" class="text-[10px] text-slate-500 hover:text-rose-500">ลบหมวด</button>
+                </div>
+            </div>
+            <div class="flex flex-col gap-1">`;
+        
+        if (sidebarMode === 'content') {
+            if (sys.items && sys.items.length > 0) { 
+                sys.items.forEach((item, iIdx) => { 
+                    const isActive = (editingMode === 'item' && currentSysIndex === sIdx && currentItemIndex === iIdx); 
+                    html += `<button onclick="editItem(${sIdx}, ${iIdx})" class="sidebar-item text-left px-3 py-2 rounded-lg text-xs transition border border-transparent ${isActive ? 'active' : 'bg-slate-900/50 text-slate-400 hover:bg-slate-700'}">📄 ${item.name}</button>`; 
+                }); 
+            } else { 
+                html += `<p class="text-slate-600 text-[10px] italic px-2 py-1">ยังไม่มีบทเรียน</p>`; 
+            }
+        } 
+        else if (sidebarMode === 'quiz') {
+            const qCount = sys.quiz ? sys.quiz.length : 0;
+            const activeCount = sys.quiz ? sys.quiz.filter(q => q.active !== false).length : 0; 
+            const badgeText = qCount > 0 ? `เปิดใช้ ${activeCount}/${qCount}` : `0 ข้อ`;
+            const badgeBg = (activeCount === 0 && qCount > 0) ? 'bg-slate-700 text-slate-400' : 'bg-emerald-600 text-white';
+
+            const isActive = (editingMode === 'quiz' && currentSysIndex === sIdx);
+            
+            html += `<button onclick="editSystemQuiz(${sIdx})" class="sidebar-quiz text-left px-3 py-2 rounded-lg text-xs transition border border-transparent flex justify-between items-center ${isActive ? 'active' : 'bg-rose-900/30 text-rose-300 hover:bg-rose-800/50 border-rose-900/40'}">
+                        <span>📝 คลังข้อสอบชุดนี้</span>
+                        <span class="${badgeBg} px-1.5 py-0.5 rounded text-[9px] shadow-sm tracking-wide font-medium">${badgeText}</span>
+                    </button>`;
+        }
+        
+        html += `</div></div>`; menu.innerHTML += html;
+    });
+// 🌟 เพิ่มฟังก์ชันสำหรับเปิดหน้าจอการตั้งค่า 🌟
+function editGlobalSettings() {
+    editingMode = 'settings';
+    currentSysIndex = null;
+    currentItemIndex = null;
+
+    document.getElementById('welcomeScreen').classList.add('hidden');
+    document.getElementById('adminContentSection').classList.add('hidden');
+    document.getElementById('adminQuizSection').classList.add('hidden');
+    
+    document.getElementById('editorHeader').classList.remove('hidden');
+    document.getElementById('adminSettingsSection').classList.remove('hidden');
+
+    document.getElementById('editingTitle').textContent = `⚙️ การตั้งค่าระบบประเมินผล`;
+    document.getElementById('btnDeleteTarget').classList.add('hidden'); 
+    
+    document.getElementById('frmGlobalQuizLimit').value = globalDatabase.settings?.global_quiz_limit || 15;
+    document.getElementById('frmGlobalPassing').value = globalDatabase.settings?.passing_percentage || 50;
+
+    renderSidebar();
+}
 function editItem(sIdx, iIdx) {
     editingMode = 'item';
     currentSysIndex = sIdx; 
@@ -608,6 +683,7 @@ function editItem(sIdx, iIdx) {
 
     document.getElementById('welcomeScreen').classList.add('hidden');
     document.getElementById('adminQuizSection').classList.add('hidden');
+    document.getElementById('adminSettingsSection').classList.add('hidden'); // ซ่อนส่วนตั้งค่า
     
     document.getElementById('editorHeader').classList.remove('hidden');
     document.getElementById('adminContentSection').classList.remove('hidden');
@@ -636,6 +712,7 @@ function editSystemQuiz(sIdx) {
 
     document.getElementById('welcomeScreen').classList.add('hidden');
     document.getElementById('adminContentSection').classList.add('hidden');
+    document.getElementById('adminSettingsSection').classList.add('hidden'); // ซ่อนส่วนตั้งค่า
     
     document.getElementById('editorHeader').classList.remove('hidden');
     document.getElementById('adminQuizSection').classList.remove('hidden');
@@ -749,6 +826,26 @@ function renderQuiz() {
 }
 
 function saveData() { 
+    // ถ้ายืนยันการเซฟจากหน้า "ตั้งค่าประเมินผล"
+    if (editingMode === 'settings') {
+        if(!globalDatabase.settings) globalDatabase.settings = {};
+        
+        let limit = parseInt(document.getElementById('frmGlobalQuizLimit').value);
+        let pass = parseInt(document.getElementById('frmGlobalPassing').value);
+        
+        if(isNaN(limit) || limit < 1) limit = 15;
+        if(isNaN(pass) || pass < 1 || pass > 100) pass = 50;
+        
+        globalDatabase.settings.global_quiz_limit = limit;
+        globalDatabase.settings.passing_percentage = pass;
+        
+        db.collection("database").doc("anatomy").set(globalDatabase).then(() => { 
+            showToast("บันทึกการตั้งค่าระบบเรียบร้อยแล้ว!", "success"); // 🌟 ใช้ Toast แทน Alert
+            renderSidebar(); 
+        });
+        return;
+    }
+
     if(currentSysIndex === null) return; 
     
     if (editingMode === 'item') {
@@ -759,9 +856,39 @@ function saveData() {
     } 
     
     db.collection("database").doc("anatomy").set(globalDatabase).then(() => { 
-        alert("บันทึกข้อมูลเรียบร้อยแล้ว! ✅"); 
+        showToast("บันทึกข้อมูลเรียบร้อยแล้ว!", "success");  // 🌟 ใช้ Toast แทน Alert
         renderSidebar(); 
     }); 
+}
+// 🌟 ฟังก์ชันแจ้งเตือนแบบ Toast (ป๊อปอัปมุมจอ) 🌟
+function showToast(message, type = 'success') {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    
+    // ตั้งค่าพื้นฐานให้กล่องข้อความ
+    toast.className = `px-5 py-3 rounded-xl shadow-2xl text-sm font-bold flex items-center gap-3 transform transition-all duration-300 translate-y-10 opacity-0 pointer-events-auto`;
+    
+    // เลือกสีและไอคอนตามประเภท (success หรือ error)
+    if (type === 'success') {
+        toast.classList.add('bg-emerald-600', 'text-white', 'border', 'border-emerald-500');
+        toast.innerHTML = `<span class="text-xl">✅</span> <span>${message}</span>`;
+    } else if (type === 'error') {
+        toast.classList.add('bg-rose-600', 'text-white', 'border', 'border-rose-500');
+        toast.innerHTML = `<span class="text-xl">❌</span> <span>${message}</span>`;
+    }
+    
+    container.appendChild(toast);
+    
+    // สั่งให้แสดงเด้งขึ้นมา
+    requestAnimationFrame(() => {
+        toast.classList.remove('translate-y-10', 'opacity-0');
+    });
+    
+    // สั่งให้ค่อยๆ จางหายไปเองเมื่อผ่านไป 3 วินาที
+    setTimeout(() => {
+        toast.classList.add('translate-y-10', 'opacity-0');
+        setTimeout(() => toast.remove(), 300); // ลบออกจากระบบหลังภาพหายไป
+    }, 3000);
 }
 
 function deleteClickPart(idx) { openCustomConfirm("ลบ <b>'จุดคลิก'</b> ใช่หรือไม่?", "ลบจุดคลิก", () => { currentItemData.click_parts.splice(idx, 1); renderParts(); }); }
