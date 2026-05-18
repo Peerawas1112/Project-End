@@ -243,7 +243,7 @@
             </div>
         </div>
     </div>
-<div id="toastContainer" class="fixed bottom-6 right-6 z-[9999] flex flex-col gap-3 pointer-events-none"></div>
+<div id="toastContainer" class="fixed top-10 left-1/2 transform -translate-x-1/2 z-[9999] flex flex-col gap-3 pointer-events-none items-center"></div>
 <script>
 // 🌟 ใส่รหัส Cloudinary ของคุณตรงนี้เพื่อใช้งานปุ่มอัปโหลด (ถ้ายังไม่มีให้ปล่อยไว้) 🌟
 const CLOUD_NAME = "dv9ejytrx"; 
@@ -860,13 +860,13 @@ function saveData() {
         renderSidebar(); 
     }); 
 }
-// 🌟 ฟังก์ชันแจ้งเตือนแบบ Toast (ป๊อปอัปมุมจอ) 🌟
+// 🌟 ฟังก์ชันแจ้งเตือนแบบ Toast (เด้งจากตรงกลางด้านบน) 🌟
 function showToast(message, type = 'success') {
     const container = document.getElementById('toastContainer');
     const toast = document.createElement('div');
     
-    // ตั้งค่าพื้นฐานให้กล่องข้อความ
-    toast.className = `px-5 py-3 rounded-xl shadow-2xl text-sm font-bold flex items-center gap-3 transform transition-all duration-300 translate-y-10 opacity-0 pointer-events-auto`;
+    // เปลี่ยนแอนิเมชันเป็น -translate-y-10 (ซ่อนอยู่ด้านบน แล้วค่อยๆ เด้งลงมา)
+    toast.className = `px-6 py-3 rounded-xl shadow-2xl text-sm font-bold flex items-center gap-3 transform transition-all duration-300 -translate-y-10 opacity-0 pointer-events-auto`;
     
     // เลือกสีและไอคอนตามประเภท (success หรือ error)
     if (type === 'success') {
@@ -879,14 +879,14 @@ function showToast(message, type = 'success') {
     
     container.appendChild(toast);
     
-    // สั่งให้แสดงเด้งขึ้นมา
+    // สั่งให้แสดงเด้งลงมา
     requestAnimationFrame(() => {
-        toast.classList.remove('translate-y-10', 'opacity-0');
+        toast.classList.remove('-translate-y-10', 'opacity-0');
     });
     
-    // สั่งให้ค่อยๆ จางหายไปเองเมื่อผ่านไป 3 วินาที
+    // สั่งให้ค่อยๆ จางและเด้งกลับขึ้นไปเมื่อผ่านไป 3 วินาที
     setTimeout(() => {
-        toast.classList.add('translate-y-10', 'opacity-0');
+        toast.classList.add('-translate-y-10', 'opacity-0');
         setTimeout(() => toast.remove(), 300); // ลบออกจากระบบหลังภาพหายไป
     }, 3000);
 }
