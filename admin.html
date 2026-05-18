@@ -492,7 +492,24 @@ function updateGlobalLimit(val) {
         }
     });
 }
-
+// 🌟 เพิ่มฟังก์ชันเซฟค่าเกณฑ์สอบผ่าน
+function updatePassingPercentage(val) {
+    let num = parseInt(val);
+    if(isNaN(num) || num < 1 || num > 100) num = 50; // บังคับไม่ให้เกิน 100%
+    
+    if(!globalDatabase) return;
+    if(!globalDatabase.settings) globalDatabase.settings = {};
+    globalDatabase.settings.passing_percentage = num;
+    
+    db.collection("database").doc("anatomy").set(globalDatabase).then(() => {
+        const input = document.getElementById('globalPassingInput');
+        if (input) {
+            input.value = num;
+            input.classList.add('border-amber-500', 'bg-amber-900');
+            setTimeout(() => input.classList.remove('border-amber-500', 'bg-amber-900'), 1000);
+        }
+    });
+}
 function syncInitialData() { openCustomConfirm("ดึงข้อมูลเริ่มต้นจาก anatomy_data.json ขึ้น Cloud ใช่หรือไม่?", "📥 โหลดข้อมูลตั้งต้น", () => { fetch("anatomy_data.json").then(r=>r.json()).then(data=>{db.collection("database").doc("anatomy").set(data).then(()=>{alert("สำเร็จ!"); loadData();});}); }, false); }
 
 function setSidebarMode(mode) {
@@ -524,12 +541,19 @@ function renderSidebar() {
 
     if (sidebarMode === 'quiz') {
         let limitVal = globalDatabase.settings?.global_quiz_limit || 15;
+        let passVal = globalDatabase.settings?.passing_percentage || 50; // 🌟 เพิ่มดึงค่าเกณฑ์
         menu.innerHTML += `
             <div class="mb-6 p-3 bg-slate-900/50 rounded-xl border border-slate-700 shadow-inner">
-                <h3 class="text-slate-400 font-bold text-[10px] uppercase mb-3 flex items-center gap-1">⚙️ ตั้งค่าระบบ (โหมดสอบรวม)</h3>
-                <div class="flex items-center justify-between">
-                    <span class="text-[11px] text-slate-300">🎯 จำนวนสุ่มข้อสอบ</span>
-                    <input type="number" id="globalQuizLimitInput" class="w-12 bg-slate-800 text-emerald-400 font-bold text-xs text-center rounded border border-slate-600 outline-none focus:border-emerald-500 py-1 transition" min="1" value="${limitVal}" onchange="updateGlobalLimit(this.value)" title="เมื่อแก้ตัวเลข ระบบจะบันทึกและอัปเดตแอปให้อัตโนมัติ">
+                <h3 class="text-slate-400 font-bold text-[10px] uppercase mb-3 flex items-center gap-1">⚙️ ตั้งค่าระบบประเมินผล</h3>
+                <div class="flex flex-col gap-2">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[11px] text-slate-300">🎯 จำนวนสุ่มสอบ (ข้อ)</span>
+                        <input type="number" id="globalQuizLimitInput" class="w-14 bg-slate-800 text-emerald-400 font-bold text-xs text-center rounded border border-slate-600 outline-none focus:border-emerald-500 py-1 transition" min="1" value="${limitVal}" onchange="updateGlobalLimit(this.value)">
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-[11px] text-slate-300">🏆 เกณฑ์สอบผ่าน (%)</span>
+                        <input type="number" id="globalPassingInput" class="w-14 bg-slate-800 text-amber-400 font-bold text-xs text-center rounded border border-slate-600 outline-none focus:border-amber-500 py-1 transition" min="1" max="100" value="${passVal}" onchange="updatePassingPercentage(this.value)">
+                    </div>
                 </div>
             </div>
         `;
