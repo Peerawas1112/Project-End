@@ -453,9 +453,10 @@ function openPreQuizInfo(index) {
         if (pool.length === 0) return alert(`ยังไม่มีคำถามที่ "เปิดใช้งาน" ในระบบครับ`);
         
         // 🌟 สุ่มเลือกข้อสอบมาตามลิมิตตั้งแต่หน้านี้เลย เพื่อให้บวกคะแนนเต็มได้เป๊ะๆ
-        pool = shuffleArray(pool).slice(0, globalQuizLimit);
+let totalQuestionsInPool = pool.length; // เก็บจำนวนข้อสอบทั้งหมดในคลังไว้ก่อน
+pool = shuffleArray(pool).slice(0, globalQuizLimit);
         
-        document.getElementById("preQuizCount").innerHTML = `${limitCount} ข้อ <span style="font-size: 0.75rem; color: #64748b; font-weight: normal;">(สุ่มจากคลัง ${pool.length} ข้อ)</span>`;
+document.getElementById("preQuizCount").innerHTML = `${pool.length} ข้อ <span style="font-size: 0.75rem; color: #64748b; font-weight: normal;">(สุ่มจากคลัง ${totalQuestionsInPool} ข้อ)</span>`;
         
     } else {
         title = data[index].category;
