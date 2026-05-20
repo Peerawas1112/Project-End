@@ -451,25 +451,36 @@ function openPreQuizInfo(index) {
     
     if (index === 'all') {
         title = "รวมทุกระบบ";
+        let guaranteedPool = [];
+        let remainingPool = [];
+        
+        // 1. ดึงข้อสอบมาอย่างน้อยระบบละ 1 ข้อ
         data.forEach(sys => { 
-            if (sys.quiz) pool = pool.concat(sys.quiz.filter(q => q.active !== false)); 
+            if (sys.quiz) {
+                let activeQs = sys.quiz.filter(q => q.active !== false);
+                if (activeQs.length > 0) {
+                    activeQs = shuffleArray([...activeQs]);
+                    guaranteedPool.push(activeQs[0]); // เก็บข้อแรกไว้การันตี
+                    remainingPool = remainingPool.concat(activeQs.slice(1)); // ที่เหลือโยนลงกองกลาง
+                }
+            }
         });
         
-        if (pool.length === 0) return alert(`ยังไม่มีคำถามที่ "เปิดใช้งาน" ในระบบครับ`);
+        if (guaranteedPool.length === 0) return alert(`ยังไม่มีคำถามที่ "เปิดใช้งาน" ในระบบครับ`);
         
-        // 🌟 สุ่มเลือกข้อสอบมาตามลิมิตตั้งแต่หน้านี้เลย เพื่อให้บวกคะแนนเต็มได้เป๊ะๆ
-let totalQuestionsInPool = pool.length; // เก็บจำนวนข้อสอบทั้งหมดในคลังไว้ก่อน
-pool = shuffleArray(pool).slice(0, globalQuizLimit);
+        // 2. นำข้อที่เหลือมาเติมให้เต็มโควตา
+        remainingPool = shuffleArray(remainingPool);
+        let needed = globalQuizLimit - guaranteedPool.length;
+        if (needed > 0) {
+            pool = guaranteedPool.concat(remainingPool.slice(0, needed));
+        } else {
+            pool = guaranteedPool.slice(0, globalQuizLimit);
+        }
         
-document.getElementById("preQuizCount").innerHTML = `${pool.length} ข้อ <span style="font-size: 0.75rem; color: #64748b; font-weight: normal;">(สุ่มจากคลัง ${totalQuestionsInPool} ข้อ)</span>`;
+        let totalQuestionsInPool = guaranteedPool.length + remainingPool.length;
+        pool = shuffleArray(pool); // คละลำดับสลับกันอีกรอบ
         
-    } else {
-        title = data[index].category;
-        if (data[index].quiz) pool = data[index].quiz.filter(q => q.active !== false);
-        
-        if (pool.length === 0) return alert(`ยังไม่มีคำถามที่ "เปิดใช้งาน" ในหมวด "${title}" ครับ`);
-        
-        document.getElementById("preQuizCount").textContent = `${pool.length} ข้อ`;
+        document.getElementById("preQuizCount").innerHTML = `${pool.length} ข้อ <span style="font-size: 0.75rem; color: #64748b; font-weight: normal;">(สุ่มจากคลัง ${totalQuestionsInPool} ข้อ มีครบทุกระบบ)</span>`;
     }
 
     // 🌟 คำนวณคะแนนรวมทั้งหมด จากข้อสอบในชุดที่จะใช้สอบจริง
