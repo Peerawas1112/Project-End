@@ -891,11 +891,26 @@ function speakText(elementId, btnElement) {
     }
     const textRaw = document.getElementById(elementId).innerText; 
     const utterance = new SpeechSynthesisUtterance(textRaw);
-    utterance.lang = 'th-TH'; utterance.rate = 1.1;
+    utterance.lang = 'th-TH'; 
+    utterance.rate = 1.0; // ปรับความเร็วให้ช้าลงนิดนึงจะดูเป็นธรรมชาติขึ้น
+
+    // 🌟 เพิ่มโค้ดส่วนนี้เพื่อค้นหาเสียงที่นุ่มนวลที่สุดในเครื่อง
+    const voices = speechSynthesis.getVoices();
+    // พยายามหาเสียงของ Google ก่อน ถ้าไม่มีค่อยเอาเสียงไทยปกติ
+    const bestVoice = voices.find(v => v.lang === 'th-TH' && v.name.includes('Google')) 
+                   || voices.find(v => v.lang === 'th-TH');
+    
+    if (bestVoice) {
+        utterance.voice = bestVoice;
+    }
+
     utterance.onend = () => { isSpeaking = false; btnElement.innerHTML = "🔊 ฟังเสียงบรรยาย"; };
     speechSynthesis.speak(utterance);
     isSpeaking = true; btnElement.innerHTML = "🔇 หยุดฟังเสียง";
 }
+
+// โหลดเสียงล่วงหน้า (แก้บั๊ก Chrome หาเสียงไม่เจอในครั้งแรก)
+speechSynthesis.onvoiceschanged = () => { speechSynthesis.getVoices(); };
 </script>
 </body>
 </html>
