@@ -884,33 +884,64 @@ function toggleUI() {
     }
 }
 let isSpeaking = false;
+
 function speakText(elementId, btnElement) {
     if (isSpeaking) {
-        speechSynthesis.cancel(); isSpeaking = false;
-        btnElement.innerHTML = "🔊 ฟังเสียงบรรยาย"; return;
+        speechSynthesis.cancel(); 
+        isSpeaking = false;
+        btnElement.innerHTML = "🔊 ฟังเสียงบรรยาย"; 
+        return;
     }
-    const textRaw = document.getElementById(elementId).innerText; 
+    
+    // 1. ดึงข้อความดิบมาจากหน้าจอ
+    let textRaw = document.getElementById(elementId).innerText; 
+    
+    // 2. ลบอิโมจิทิ้ง (ทำทุกอุปกรณ์ เพราะ AI อ่านอิโมจิแล้วตลก)
+    textRaw = textRaw.replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, '');
+    
+    // 🌟 3. ตรวจสอบว่าผู้ใช้เปิดบนคอมพิวเตอร์ "Windows" หรือไม่
+    const isWindows = navigator.userAgent.indexOf('Windows') !== -1;
+    
+    if (isWindows) {
+        // ---- โหมดสำหรับคอมพิวเตอร์ Windows (ตัดภาษาอังกฤษทิ้ง) ----
+        textRaw = textRaw.replace(/\(.*?\)/g, ''); // ลบวงเล็บ
+        textRaw = textRaw.replace(/C-shaped/gi, "รูปตัวซี"); 
+        textRaw = textRaw.replace(/RBC/gi, "อาร์ บี ซี");
+        textRaw = textRaw.replace(/WBC/gi, "ดับเบิลยู บี ซี");
+        textRaw = textRaw.replace(/[a-zA-Z]/g, ''); // ลบ A-Z ทิ้งทั้งหมด
+    } else {
+        // ---- โหมดสำหรับมือถือ iOS/Android และ Mac (เก็บภาษาอังกฤษไว้) ----
+        // ดักแปลแค่บางคำที่ AI มักจะอ่านรวน
+        textRaw = textRaw.replace(/RBC/gi, "อาร์ บี ซี");
+        textRaw = textRaw.replace(/WBC/gi, "ดับเบิลยู บี ซี");
+    }
+
+    // ส่งข้อความไปให้ AI อ่าน
     const utterance = new SpeechSynthesisUtterance(textRaw);
     utterance.lang = 'th-TH'; 
-    utterance.rate = 1.0; // ปรับความเร็วให้ช้าลงนิดนึงจะดูเป็นธรรมชาติขึ้น
+    utterance.rate = 1.0; 
 
-    // 🌟 เพิ่มโค้ดส่วนนี้เพื่อค้นหาเสียงที่นุ่มนวลที่สุดในเครื่อง
+    // พยายามดึงเสียงของ Google เพื่อความสมจริง (ถ้ารองรับ)
     const voices = speechSynthesis.getVoices();
-    // พยายามหาเสียงของ Google ก่อน ถ้าไม่มีค่อยเอาเสียงไทยปกติ
-    const bestVoice = voices.find(v => v.lang === 'th-TH' && v.name.includes('Google')) 
-                   || voices.find(v => v.lang === 'th-TH');
-    
+    const bestVoice = voices.find(v => v.lang === 'th-TH' && v.name.includes('Google')) || voices.find(v => v.lang === 'th-TH');
     if (bestVoice) {
         utterance.voice = bestVoice;
     }
 
-    utterance.onend = () => { isSpeaking = false; btnElement.innerHTML = "🔊 ฟังเสียงบรรยาย"; };
+    utterance.onend = () => { 
+        isSpeaking = false; 
+        btnElement.innerHTML = "🔊 ฟังเสียงบรรยาย"; 
+    };
+    
     speechSynthesis.speak(utterance);
-    isSpeaking = true; btnElement.innerHTML = "🔇 หยุดฟังเสียง";
+    isSpeaking = true; 
+    btnElement.innerHTML = "🔇 หยุดฟังเสียง";
 }
 
-// โหลดเสียงล่วงหน้า (แก้บั๊ก Chrome หาเสียงไม่เจอในครั้งแรก)
-speechSynthesis.onvoiceschanged = () => { speechSynthesis.getVoices(); };
+// โหลดเสียงเตรียมไว้ล่วงหน้า
+if ('speechSynthesis' in window) {
+    speechSynthesis.onvoiceschanged = () => { speechSynthesis.getVoices(); };
+}
 </script>
 </body>
 </html>
