@@ -195,6 +195,7 @@ model-viewer { width:100%; height:calc(100vh - 60px); margin-top: 60px; --poster
 <div id="infoModal" class="part-info-card">
   <h3 id="modalTitle" class="modal-title">ชื่อส่วนประกอบ</h3>
   <div id="modalDesc" class="modal-desc">รายละเอียด...</div>
+  <button onclick="speakText('modalDesc', this)" style="background: #10b981; color: white; border: none; padding: 8px 20px; border-radius: 10px; cursor: pointer; font-family: 'Kanit'; width: 100%; margin-top: 10px;">🔊 ฟังเสียงอธิบาย</button>
   <button class="close-modal-btn" onclick="closeInfoAndUnfocus()">ปิดหน้าต่าง</button>
 </div>
 
@@ -287,6 +288,7 @@ model-viewer { width:100%; height:calc(100vh - 60px); margin-top: 60px; --poster
     <h3 id="title" style="margin-right: 30px;"></h3> 
     <p id="desc"></p>
     <button onclick="showQRCode()" style="width: 100%; background: #3b82f6; padding: 10px; font-size: 0.9rem; margin-top: 5px;">📱 สแกน QR ดู AR บนมือถือ</button>
+    <button onclick="speakText('desc', this)" style="width: 100%; background: #10b981; padding: 10px; font-size: 0.9rem; margin-top: 5px;">🔊 ฟังเสียงบรรยาย</button>
   </div>
   
   <footer class="menu" id="menu"></footer>
@@ -415,6 +417,18 @@ function closeModals() {
     preQuizModal.style.display = 'none';
     resetHighlight(); 
     if (viewer) viewer.autoRotate = true;
+
+    // 🌟 1. เพิ่มคำสั่งสั่งให้ระบบหยุดพูดทันทีเมื่อปิดหน้าต่างป๊อปอัป
+    if ('speechSynthesis' in window) {
+        speechSynthesis.cancel();
+    }
+    isSpeaking = false; // รีเซ็ตตัวแปรสถานะเสียง
+
+    // 🌟 2. รีเซ็ตข้อความบนปุ่มฟังเสียงทั้งหมดให้กลับเป็นเริ่มต้น (ป้องกันบั๊กตัวหนังสือ "หยุดฟังเสียง" ค้าง)
+    const voiceBtns = document.querySelectorAll('[onclick^="speakText"]');
+    voiceBtns.forEach(btn => {
+        btn.innerHTML = "🔊 ฟังเสียงบรรยาย";
+    });
 }
 
 function toggleInfoBox() {
@@ -868,6 +882,19 @@ function toggleUI() {
         btn.innerHTML = "👁️<span class='btn-text' style='margin-left:4px;'>ซ่อน UI</span>"; 
         btn.style.borderColor = "var(--border)"; btn.style.color = "white"; 
     }
+}
+let isSpeaking = false;
+function speakText(elementId, btnElement) {
+    if (isSpeaking) {
+        speechSynthesis.cancel(); isSpeaking = false;
+        btnElement.innerHTML = "🔊 ฟังเสียงบรรยาย"; return;
+    }
+    const textRaw = document.getElementById(elementId).innerText; 
+    const utterance = new SpeechSynthesisUtterance(textRaw);
+    utterance.lang = 'th-TH'; utterance.rate = 1.1;
+    utterance.onend = () => { isSpeaking = false; btnElement.innerHTML = "🔊 ฟังเสียงบรรยาย"; };
+    speechSynthesis.speak(utterance);
+    isSpeaking = true; btnElement.innerHTML = "🔇 หยุดฟังเสียง";
 }
 </script>
 </body>
