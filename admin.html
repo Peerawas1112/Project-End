@@ -427,11 +427,18 @@ function forcePreviewMaterial(matName) {
 }
 
 adminViewer.addEventListener('pointerdown', (e) => { ptDownX = e.clientX; ptDownY = e.clientY; });
+window.lastHitPosition = ""; // 🌟 เพิ่มตัวแปรเก็บพิกัดระดับโกลบอล
+
 adminViewer.addEventListener('pointerup', (e) => {
     if (Math.abs(e.clientX - ptDownX) > 15 || Math.abs(e.clientY - ptDownY) > 15) return; 
+    
     const material = adminViewer.materialFromPoint(e.clientX, e.clientY);
+    const hit = adminViewer.positionAndNormalFromPoint(e.clientX, e.clientY); // 🌟 อ่านพิกัด 3D จากจุดที่คลิก
     
     if (material != null) {
+        if (hit != null) {
+            window.lastHitPosition = `${hit.position.x}m ${hit.position.y}m ${hit.position.z}m`; // 🌟 จำพิกัดเก็บไว้
+        }
         forcePreviewMaterial(material.name);
     } else {
         resetLivePreview(); 
@@ -739,6 +746,14 @@ function renderParts() {
             <div class="w-full md:w-1/3">
                 <label class="text-[10px] text-slate-400 mb-1 block uppercase">ID ในโมเดล</label>
                 <input type="text" class="input-box text-xs font-mono dev-lock-input" value="${p.material_name}" oninput="currentItemData.click_parts[${idx}].material_name=this.value" placeholder="ID โมเดล">
+                
+                <div class="mt-3 p-2 bg-slate-800/80 rounded-lg border border-slate-700">
+                    <label class="text-[9px] text-emerald-400 mb-1 block uppercase">📍 พิกัดโฟกัส (X Y Z)</label>
+                    <div class="flex flex-col gap-2">
+                        <input type="text" class="input-box text-[10px] font-mono px-2 py-1.5 bg-slate-900 text-emerald-300" value="${p.position || ''}" oninput="currentItemData.click_parts[${idx}].position=this.value" placeholder="เว้นว่างได้" disabled>
+                        <button onclick="if(window.lastHitPosition){ currentItemData.click_parts[${idx}].position = window.lastHitPosition; renderParts(); showToast('ดูดพิกัดสำเร็จ!', 'success'); } else { alert('กรุณาไปคลิกอวัยวะบนโมเดล 3D ด้านซ้ายก่อน 1 ครั้ง เพื่อคัดลอกพิกัดครับ!'); }" class="bg-emerald-600 hover:bg-emerald-500 text-white px-2 py-1.5 rounded text-[10px] font-bold w-full transition shadow-sm flex justify-center items-center gap-1">ดูดพิกัดล่าสุดจาก 3D</button>
+                    </div>
+                </div>
             </div>
             <div class="w-full md:w-2/3 space-y-4">
                 <div>
