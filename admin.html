@@ -40,10 +40,10 @@
     <div id="devPassModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] flex justify-center items-center p-4 transition-opacity">
         <div class="bg-slate-900 border border-slate-700 p-6 rounded-2xl shadow-2xl w-full max-w-xs transform scale-100">
             <h3 class="text-white text-lg font-bold mb-2 flex items-center gap-2">🔑 ปลดล็อกสิทธิ์</h3>
-            <p class="text-slate-400 text-xs mb-4">กรุณาใส่รหัสผ่านนักพัฒนาเพื่อดำเนินการต่อ</p>
+            <p class="text-slate-300 text-xs mb-4">กรุณาใส่รหัสผ่านนักพัฒนาเพื่อดำเนินการต่อ</p>
             <input type="password" id="devPassInput" class="input-box mb-4 text-center text-lg tracking-[0.3em]" placeholder="••••">
             <div class="flex justify-end gap-2">
-                <button onclick="closeDevPassModal()" class="px-4 py-2 rounded-lg text-xs text-slate-400 hover:text-white hover:bg-slate-800 transition">ยกเลิก</button>
+                <button onclick="closeDevPassModal()" class="px-4 py-2 rounded-lg text-xs text-slate-300 hover:text-white hover:bg-slate-800 transition">ยกเลิก</button>
                 <button onclick="confirmDevPass()" class="bg-blue-600 hover:bg-blue-500 px-6 py-2 rounded-lg text-xs text-white font-bold transition shadow-lg">ยืนยัน</button>
             </div>
         </div>
@@ -52,10 +52,10 @@
     <div id="customPromptModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] flex justify-center items-center p-4 transition-opacity">
         <div class="bg-slate-900 border border-slate-700 p-6 rounded-2xl shadow-2xl w-full max-w-sm transform scale-100">
             <h3 id="promptTitle" class="text-white text-lg font-bold mb-2">Title</h3>
-            <p id="promptDesc" class="text-slate-400 text-xs mb-4 hidden">Description</p>
+            <p id="promptDesc" class="text-slate-300 text-xs mb-4 hidden">Description</p>
             <input type="text" id="promptInput" class="input-box mb-4 text-sm font-medium" placeholder="...">
             <div class="flex justify-end gap-2">
-                <button onclick="closeCustomPrompt()" class="px-4 py-2 rounded-lg text-xs text-slate-400 hover:text-white hover:bg-slate-800 transition">ยกเลิก</button>
+                <button onclick="closeCustomPrompt()" class="px-4 py-2 rounded-lg text-xs text-slate-300 hover:text-white hover:bg-slate-800 transition">ยกเลิก</button>
                 <button id="promptConfirmBtn" class="bg-blue-600 hover:bg-blue-500 px-6 py-2 rounded-lg text-xs text-white font-bold transition shadow-lg">ตกลง</button>
             </div>
         </div>
@@ -67,23 +67,23 @@
             <h3 id="confirmTitle" class="text-white text-lg font-bold mb-2">ยืนยันการดำเนินการ</h3>
             <p id="confirmDesc" class="text-slate-300 text-sm mb-6">คุณแน่ใจหรือไม่?</p>
             <div class="flex justify-center gap-3">
-                <button onclick="closeCustomConfirm()" class="px-6 py-2 rounded-lg text-sm text-slate-400 hover:text-white hover:bg-slate-800 transition">ยกเลิก</button>
+                <button onclick="closeCustomConfirm()" class="px-6 py-2 rounded-lg text-sm text-slate-300 hover:text-white hover:bg-slate-800 transition">ยกเลิก</button>
                 <button id="confirmBtn" class="bg-rose-600 hover:bg-rose-500 px-6 py-2 rounded-lg text-sm text-white font-bold transition shadow-lg">ยืนยัน</button>
             </div>
         </div>
     </div>
 
     <div id="loginPage" class="flex flex-col items-center justify-center h-full w-full p-6 bg-slate-950 absolute inset-0 z-50">
-        <button onclick="toggleFullScreen()" id="fsBtnLogin" class="absolute top-6 right-6 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white border border-slate-700 p-2 rounded-full transition shadow-lg w-10 h-10 flex justify-center items-center"></button>
+        <button onclick="toggleFullScreen()" id="fsBtnLogin" class="absolute top-6 right-6 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 p-2 rounded-full transition shadow-lg w-10 h-10 flex justify-center items-center"></button>
         <div class="bg-slate-900 p-8 rounded-3xl shadow-2xl w-full max-w-md text-center border border-slate-800">
             <div class="text-5xl mb-4">⚙️</div>
             <h1 class="text-2xl font-bold text-white mb-2">BioLens Admin</h1>
-            <p class="text-slate-400 mb-6 text-sm">เข้าสู่ระบบจัดการเนื้อหาและโครงสร้าง</p>
+            <p class="text-slate-300 mb-6 text-sm">เข้าสู่ระบบจัดการเนื้อหาและโครงสร้าง</p>
             <input type="email" id="email" class="input-box mb-3" placeholder="อีเมล">
             <input type="password" id="pass" class="input-box mb-5" placeholder="รหัสผ่าน">
             <button onclick="login()" class="w-full bg-blue-600 hover:bg-blue-500 py-3 rounded-xl text-white font-bold transition">เข้าสู่ระบบ</button>
             <p id="errorMsg" class="text-red-400 mt-4 text-xs hidden">❌ เข้าสู่ระบบไม่สำเร็จ ตรวจสอบอีเมลหรือรหัสผ่าน</p>
-            <button onclick="window.location.href='index.html'" class="mt-5 text-slate-500 hover:text-white text-xs transition">🔙 กลับหน้าแอป</button>
+            <button onclick="window.location.href='index.html'" class="mt-5 text-slate-400 hover:text-white text-xs transition">🔙 กลับหน้าแอป</button>
         </div>
     </div>
 
@@ -92,7 +92,7 @@
             <h1 class="text-lg font-bold text-white ml-2">Admin Dashboard</h1>
         </div>
         <div class="flex gap-2 items-center">
-            <button onclick="toggleDevMode()" id="btnDevMode" class="bg-slate-600/20 hover:bg-slate-600 text-slate-400 hover:text-white px-3 py-1.5 rounded-lg text-xs transition border border-slate-600/30 flex items-center gap-1">🔒 โหมดปกติ</button>
+            <button onclick="toggleDevMode()" id="btnDevMode" class="bg-slate-600/20 hover:bg-slate-600 text-slate-300 hover:text-white px-3 py-1.5 rounded-lg text-xs transition border border-slate-600/30 flex items-center gap-1">🔒 โหมดปกติ</button>
             <button onclick="syncInitialData()" class="bg-amber-600 hover:bg-amber-500 px-3 py-1.5 rounded-lg text-xs dev-only hidden" id="btnSync">📥 โหลดข้อมูลเริ่มต้น</button>
             <button onclick="addNewSystem()" class="bg-blue-600/20 hover:bg-blue-600 text-blue-400 hover:text-white px-3 py-1.5 rounded-lg text-xs transition border border-blue-600/30 dev-only">➕ เพิ่มหมวดหมู่</button>
             <button onclick="clearAllData()" class="bg-rose-600/20 hover:bg-rose-600 text-rose-400 hover:text-white px-3 py-1.5 rounded-lg text-xs transition border border-rose-600/30 dev-only">🧹 ล้าง Cloud</button>
@@ -110,7 +110,7 @@
         </div>
 
         <div class="flex-grow bg-slate-900 flex flex-col h-full overflow-hidden relative">
-            <div id="welcomeScreen" class="absolute inset-0 flex flex-col items-center justify-center bg-slate-900 z-10 text-slate-500">
+            <div id="welcomeScreen" class="absolute inset-0 flex flex-col items-center justify-center bg-slate-900 z-10 text-slate-400">
                 <span class="text-4xl mb-3">👈</span>
                 <p class="text-base">เลือกเมนูด้านซ้ายเพื่อเริ่มจัดการข้อมูล</p>
             </div>
@@ -131,12 +131,12 @@
                             <h3 class="text-indigo-400 font-bold text-sm">📺 จอพรีวิวแอปพลิเคชัน</h3>
                             <span class="text-[10px] bg-slate-700 text-slate-300 px-2 py-1 rounded">อัปเดตเรียลไทม์</span>
                         </div>
-                        <p class="text-xs text-slate-400 mb-4 leading-relaxed">
+                        <p class="text-xs text-slate-300 mb-4 leading-relaxed">
                             💡 <b>ทริค:</b> ลอง <b>"คลิก"</b> ชิ้นส่วนบนโมเดล 3D ด้านซ้าย เพื่อดูผลลัพธ์ในการ์ดจำลองด้านขวา และดึง ID มาใช้งานครับ
                         </p>
                         
                         <div id="allMaterialsContainer" class="hidden mb-4 p-3 bg-slate-900/50 rounded-xl border border-slate-700">
-                            <div class="text-[10px] text-slate-400 mb-2 uppercase flex justify-between items-center">
+                            <div class="text-[10px] text-slate-300 mb-2 uppercase flex justify-between items-center">
                                 <span>🏷️ รายชื่อ ID ทั้งหมดที่พบในโมเดล (คลิกปุ่มแทนการเลือกบนโมเดลได้เลย)</span>
                             </div>
                             <div id="materialChips" class="flex flex-wrap gap-1.5"></div>
@@ -163,11 +163,11 @@
                     <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-sm">
                         <div class="grid grid-cols-2 gap-4 mb-4">
                             <div>
-                                <label class="text-[10px] text-slate-400 mb-1 block uppercase">ชื่อหัวข้อ (Name)</label>
+                                <label class="text-[10px] text-slate-300 mb-1 block uppercase">ชื่อหัวข้อ (Name)</label>
                                 <input type="text" id="frmName" class="input-box font-bold">
                             </div>
                             <div>
-                                <label class="text-[10px] text-slate-400 mb-1 block uppercase">ลิงก์โมเดล (GLB Path) <span class="dev-only text-emerald-400">🔓 ปลดล็อกแล้ว</span></label>
+                                <label class="text-[10px] text-slate-300 mb-1 block uppercase">ลิงก์โมเดล (GLB Path) <span class="dev-only text-emerald-400">🔓 ปลดล็อกแล้ว</span></label>
                                 <div class="flex gap-2 items-center">
                                     <input type="text" id="frmModelPath" class="input-box font-mono text-emerald-400 dev-lock-input" placeholder="อัปโหลดเพื่อสร้างลิงก์อัตโนมัติ" onchange="updateLiveModel()">
                                     <div class="dev-only shrink-0 flex items-center gap-2">
@@ -179,7 +179,7 @@
                             </div>
                         </div>
                         <div>
-                            <label class="text-[10px] text-slate-400 mb-1 block uppercase">คำอธิบายประกอบภาพรวม</label>
+                            <label class="text-[10px] text-slate-300 mb-1 block uppercase">คำอธิบายประกอบภาพรวม</label>
                             <div class="border border-slate-700 rounded-lg overflow-hidden focus-within:border-blue-500 transition">
                                 <div class="bg-slate-900 p-1.5 border-b border-slate-700 flex gap-2 items-center">
                                     <button type="button" onmousedown="event.preventDefault(); document.execCommand('bold', false, null);" class="bg-slate-700 hover:bg-slate-600 text-white text-[10px] px-2 py-1 rounded transition"><b>B</b> ตัวหนา</button>
@@ -202,7 +202,7 @@
                         <div class="flex justify-between items-center mb-6 border-b border-slate-700/50 pb-4">
                             <h3 class="text-amber-400 font-bold text-lg">⚙️ ตั้งค่าระบบประเมินผล</h3>
                         </div>
-                        <p class="text-xs text-slate-400 mb-6 bg-slate-900/50 p-4 rounded-xl border border-slate-700/50 leading-relaxed">
+                        <p class="text-xs text-slate-300 mb-6 bg-slate-900/50 p-4 rounded-xl border border-slate-700/50 leading-relaxed">
                             💡 <b>คำแนะนำ:</b> ตั้งค่าจำนวนข้อสอบที่จะสุ่มมาแสดงในโหมด "แบบทดสอบรวมทุกระบบ" และกำหนดเกณฑ์เปอร์เซ็นต์ขั้นต่ำที่นักเรียนต้องทำได้เพื่อให้สอบผ่าน (ต้องกดปุ่มบันทึกข้อมูลด้านบนขวาหลังแก้ไขเสร็จ)
                         </p>
                         
@@ -210,13 +210,13 @@
                             <div class="bg-slate-900/40 p-5 rounded-xl border border-slate-700">
                                 <label class="text-xs text-slate-300 mb-3 block uppercase font-bold">🎯 จำนวนสุ่มข้อสอบ (ข้อ)</label>
                                 <input type="number" id="frmGlobalQuizLimit" class="input-box text-emerald-400 font-bold text-2xl text-center py-4" min="1">
-                                <p class="text-[10px] text-slate-500 mt-3 text-center">จำนวนข้อสอบที่จะสุ่มดึงมา (เฉพาะข้อที่เปิดใช้งาน)</p>
+                                <p class="text-[10px] text-slate-400 mt-3 text-center">จำนวนข้อสอบที่จะสุ่มดึงมา (เฉพาะข้อที่เปิดใช้งาน)</p>
                             </div>
 
                             <div class="bg-slate-900/40 p-5 rounded-xl border border-slate-700">
                                 <label class="text-xs text-slate-300 mb-3 block uppercase font-bold">🏆 เกณฑ์สอบผ่าน (%)</label>
                                 <input type="number" id="frmGlobalPassing" class="input-box text-amber-400 font-bold text-2xl text-center py-4" min="1" max="100">
-                                <p class="text-[10px] text-slate-500 mt-3 text-center">เปอร์เซ็นต์คะแนนรวมที่ต้องทำได้เพื่อผ่านเกณฑ์</p>
+                                <p class="text-[10px] text-slate-400 mt-3 text-center">เปอร์เซ็นต์คะแนนรวมที่ต้องทำได้เพื่อผ่านเกณฑ์</p>
                             </div>
                         </div>
                     </div>
@@ -227,7 +227,7 @@
                             <h3 id="quizSectionTitle" class="text-rose-400 font-bold text-sm">📝 คลังแบบทดสอบประจำหมวด</h3>
                             <button onclick="addQuiz()" class="bg-rose-500/20 text-rose-400 hover:bg-rose-500 hover:text-white px-3 py-1 rounded-lg text-xs transition shadow-sm">+ เพิ่มข้อสอบ</button>
                         </div>
-                        <p class="text-[11px] text-slate-400 mb-6 bg-slate-900/50 p-3 rounded-lg border border-slate-700/50">
+                        <p class="text-[11px] text-slate-300 mb-6 bg-slate-900/50 p-3 rounded-lg border border-slate-700/50">
                             💡 <b>ระบบคลังสลับข้ออัจฉริยะ:</b> ข้อสอบที่เปิดใช้งาน (✅) ทั้งหมดในหมวดนี้ จะถูกนำไปสลับลำดับข้อ/ตัวเลือกอัตโนมัติ เพื่อป้องกันนักเรียนลอกกัน 
                         </p>
                         
@@ -235,7 +235,7 @@
                         
                         <div id="emptyQuizMsg" class="hidden text-center py-10 bg-slate-900/50 rounded-xl border border-dashed border-slate-700 mt-4">
                             <span class="text-4xl block mb-2">📋</span>
-                            <p class="text-slate-400 text-sm">คลังข้อสอบหมวดนี้ยังว่างเปล่า<br>กดปุ่ม "+ เพิ่มข้อสอบ" ด้านบนเพื่อเริ่มสร้างแบบทดสอบ</p>
+                            <p class="text-slate-300 text-sm">คลังข้อสอบหมวดนี้ยังว่างเปล่า<br>กดปุ่ม "+ เพิ่มข้อสอบ" ด้านบนเพื่อเริ่มสร้างแบบทดสอบ</p>
                         </div>
                     </div>
                 </div>
@@ -307,7 +307,7 @@ function openCustomConfirm(d, t="ยืนยันการดำเนิน�
 function closeCustomConfirm() { document.getElementById('customConfirmModal').classList.add('hidden'); confirmCallback = null; }
 document.getElementById('confirmBtn').addEventListener('click', () => { if(confirmCallback) confirmCallback(); closeCustomConfirm(); });
 
-function toggleDevMode() { if(isDevMode){isDevMode=false; document.body.classList.remove('dev-mode'); const btn=document.getElementById('btnDevMode'); btn.innerHTML="🔒 โหมดปกติ"; btn.className="bg-slate-600/20 hover:bg-slate-600 text-slate-400 hover:text-white px-3 py-1.5 rounded-lg text-xs border border-slate-600/30 flex items-center gap-1";}else{document.getElementById('devPassModal').classList.remove('hidden'); document.getElementById('devPassInput').value=''; setTimeout(()=>document.getElementById('devPassInput').focus(),100);} }
+function toggleDevMode() { if(isDevMode){isDevMode=false; document.body.classList.remove('dev-mode'); const btn=document.getElementById('btnDevMode'); btn.innerHTML="🔒 โหมดปกติ"; btn.className="bg-slate-600/20 hover:bg-slate-600 text-slate-300 hover:text-white px-3 py-1.5 rounded-lg text-xs border border-slate-600/30 flex items-center gap-1";}else{document.getElementById('devPassModal').classList.remove('hidden'); document.getElementById('devPassInput').value=''; setTimeout(()=>document.getElementById('devPassInput').focus(),100);} }
 function closeDevPassModal() { document.getElementById('devPassModal').classList.add('hidden'); }
 function confirmDevPass() { if(document.getElementById('devPassInput').value==="122026"){isDevMode=true; document.body.classList.add('dev-mode'); const btn=document.getElementById('btnDevMode'); btn.innerHTML="🔓 โหมดนักพัฒนา"; btn.className="bg-emerald-600/20 hover:bg-emerald-600 text-emerald-400 hover:text-white px-3 py-1.5 rounded-lg text-xs border border-emerald-600/30 flex items-center gap-1 shadow-md"; closeDevPassModal();}else{alert("❌ รหัสผ่านไม่ถูกต้อง!"); document.getElementById('devPassInput').value=''; document.getElementById('devPassInput').focus();} }
 document.getElementById('devPassInput').addEventListener('keypress', (e) => { if(e.key==='Enter') confirmDevPass(); });
@@ -419,7 +419,7 @@ function forcePreviewMaterial(matName) {
         if(foundPart) {
             updatePartPreview(foundPart.name, foundPart.info);
         } else {
-            updatePartPreview('<span class="text-rose-400">ยังไม่ได้ตั้งชื่อ</span>', '<span class="text-slate-400">พบ ID นี้บนโมเดล แต่คุณยังไม่ได้กด +เพิ่มจุดคลิก ด้านล่างครับ</span>');
+            updatePartPreview('<span class="text-rose-400">ยังไม่ได้ตั้งชื่อ</span>', '<span class="text-slate-300">พบ ID นี้บนโมเดล แต่คุณยังไม่ได้กด +เพิ่มจุดคลิก ด้านล่างครับ</span>');
         }
     }
     disp.style.transform = 'translate(-50%, -10px)'; 
@@ -564,8 +564,8 @@ function renderSidebar() {
 
     let toggleHTML = `
         <div class="flex bg-slate-900 rounded-lg p-1 mb-6 border border-slate-700 shrink-0">
-            <button onclick="setSidebarMode('content')" class="flex-1 py-1.5 text-xs font-bold rounded-md transition ${sidebarMode === 'content' ? 'bg-blue-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-200'}">📚 เนื้อหาบทเรียน</button>
-            <button onclick="setSidebarMode('quiz')" class="flex-1 py-1.5 text-xs font-bold rounded-md transition ${sidebarMode === 'quiz' ? 'bg-rose-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-200'}">📝 คลังข้อสอบ</button>
+            <button onclick="setSidebarMode('content')" class="flex-1 py-1.5 text-xs font-bold rounded-md transition ${sidebarMode === 'content' ? 'bg-blue-600 text-white shadow-md' : 'text-slate-300 hover:text-slate-200'}">📚 เนื้อหาบทเรียน</button>
+            <button onclick="setSidebarMode('quiz')" class="flex-1 py-1.5 text-xs font-bold rounded-md transition ${sidebarMode === 'quiz' ? 'bg-rose-600 text-white shadow-md' : 'text-slate-300 hover:text-slate-200'}">📝 คลังข้อสอบ</button>
         </div>
     `;
     menu.innerHTML += toggleHTML;
@@ -589,7 +589,7 @@ function renderSidebar() {
                 <h3 class="text-slate-300 font-bold text-[11px] uppercase">${sys.category}</h3>
                 <div class="flex gap-2 dev-only">
                     ${sidebarMode === 'content' ? `<button onclick="addNewItemToSys(${sIdx})" class="text-[10px] text-emerald-500 hover:text-emerald-400">+ บทเรียน</button>` : ''}
-                    <button onclick="deleteSystem(${sIdx})" class="text-[10px] text-slate-500 hover:text-rose-500">ลบหมวด</button>
+                    <button onclick="deleteSystem(${sIdx})" class="text-[10px] text-slate-400 hover:text-rose-500">ลบหมวด</button>
                 </div>
             </div>
             <div class="flex flex-col gap-1">`;
@@ -598,7 +598,7 @@ function renderSidebar() {
             if (sys.items && sys.items.length > 0) { 
                 sys.items.forEach((item, iIdx) => { 
                     const isActive = (editingMode === 'item' && currentSysIndex === sIdx && currentItemIndex === iIdx); 
-                    html += `<button onclick="editItem(${sIdx}, ${iIdx})" class="sidebar-item text-left px-3 py-2 rounded-lg text-xs transition border border-transparent ${isActive ? 'active' : 'bg-slate-900/50 text-slate-400 hover:bg-slate-700'}">📄 ${item.name}</button>`; 
+                    html += `<button onclick="editItem(${sIdx}, ${iIdx})" class="sidebar-item text-left px-3 py-2 rounded-lg text-xs transition border border-transparent ${isActive ? 'active' : 'bg-slate-900/50 text-slate-300 hover:bg-slate-700'}">📄 ${item.name}</button>`; 
                 }); 
             } else { 
                 html += `<p class="text-slate-600 text-[10px] italic px-2 py-1">ยังไม่มีบทเรียน</p>`; 
@@ -608,7 +608,7 @@ function renderSidebar() {
             const qCount = sys.quiz ? sys.quiz.length : 0;
             const activeCount = sys.quiz ? sys.quiz.filter(q => q.active !== false).length : 0; 
             const badgeText = qCount > 0 ? `เปิดใช้ ${activeCount}/${qCount}` : `0 ข้อ`;
-            const badgeBg = (activeCount === 0 && qCount > 0) ? 'bg-slate-700 text-slate-400' : 'bg-emerald-600 text-white';
+            const badgeBg = (activeCount === 0 && qCount > 0) ? 'bg-slate-700 text-slate-300' : 'bg-emerald-600 text-white';
 
             const isActive = (editingMode === 'quiz' && currentSysIndex === sIdx);
             
@@ -628,7 +628,7 @@ function renderSidebar() {
                 <h3 class="text-slate-300 font-bold text-[11px] uppercase">${sys.category}</h3>
                 <div class="flex gap-2 dev-only">
                     ${sidebarMode === 'content' ? `<button onclick="addNewItemToSys(${sIdx})" class="text-[10px] text-emerald-500 hover:text-emerald-400">+ บทเรียน</button>` : ''}
-                    <button onclick="deleteSystem(${sIdx})" class="text-[10px] text-slate-500 hover:text-rose-500">ลบหมวด</button>
+                    <button onclick="deleteSystem(${sIdx})" class="text-[10px] text-slate-400 hover:text-rose-500">ลบหมวด</button>
                 </div>
             </div>
             <div class="flex flex-col gap-1">`;
@@ -637,7 +637,7 @@ function renderSidebar() {
             if (sys.items && sys.items.length > 0) { 
                 sys.items.forEach((item, iIdx) => { 
                     const isActive = (editingMode === 'item' && currentSysIndex === sIdx && currentItemIndex === iIdx); 
-                    html += `<button onclick="editItem(${sIdx}, ${iIdx})" class="sidebar-item text-left px-3 py-2 rounded-lg text-xs transition border border-transparent ${isActive ? 'active' : 'bg-slate-900/50 text-slate-400 hover:bg-slate-700'}">📄 ${item.name}</button>`; 
+                    html += `<button onclick="editItem(${sIdx}, ${iIdx})" class="sidebar-item text-left px-3 py-2 rounded-lg text-xs transition border border-transparent ${isActive ? 'active' : 'bg-slate-900/50 text-slate-300 hover:bg-slate-700'}">📄 ${item.name}</button>`; 
                 }); 
             } else { 
                 html += `<p class="text-slate-600 text-[10px] italic px-2 py-1">ยังไม่มีบทเรียน</p>`; 
@@ -647,7 +647,7 @@ function renderSidebar() {
             const qCount = sys.quiz ? sys.quiz.length : 0;
             const activeCount = sys.quiz ? sys.quiz.filter(q => q.active !== false).length : 0; 
             const badgeText = qCount > 0 ? `เปิดใช้ ${activeCount}/${qCount}` : `0 ข้อ`;
-            const badgeBg = (activeCount === 0 && qCount > 0) ? 'bg-slate-700 text-slate-400' : 'bg-emerald-600 text-white';
+            const badgeBg = (activeCount === 0 && qCount > 0) ? 'bg-slate-700 text-slate-300' : 'bg-emerald-600 text-white';
 
             const isActive = (editingMode === 'quiz' && currentSysIndex === sIdx);
             
@@ -744,7 +744,7 @@ function renderParts() {
         container.innerHTML += `<div class="bg-slate-900/50 p-4 rounded-xl border border-slate-700 relative pr-12 flex flex-col md:flex-row gap-4 items-start">
             <button onclick="deleteClickPart(${idx})" class="delete-btn-sm dev-only">✕</button>
             <div class="w-full md:w-1/3">
-                <label class="text-[10px] text-slate-400 mb-1 block uppercase">ID ในโมเดล</label>
+                <label class="text-[10px] text-slate-300 mb-1 block uppercase">ID ในโมเดล</label>
                 <input type="text" class="input-box text-xs font-mono dev-lock-input" value="${p.material_name}" oninput="currentItemData.click_parts[${idx}].material_name=this.value" placeholder="ID โมเดล">
                 
                 <div class="mt-3 p-2 bg-slate-800/80 rounded-lg border border-slate-700">
@@ -757,14 +757,14 @@ function renderParts() {
             </div>
             <div class="w-full md:w-2/3 space-y-4">
                 <div>
-                    <label class="text-[10px] text-slate-400 block uppercase mb-1">ชื่อที่แสดง</label>
+                    <label class="text-[10px] text-slate-300 block uppercase mb-1">ชื่อที่แสดง</label>
                     <div class="border border-slate-700 rounded-lg overflow-hidden">
                         <div class="bg-slate-900 p-1.5 border-b border-slate-700 flex gap-2"><button type="button" onmousedown="event.preventDefault(); document.execCommand('bold', false, null);" class="bg-slate-700 text-white text-[10px] px-2 py-1 rounded"><b>B</b> ตัวหนา</button></div>
                         <div class="rich-editor-content border-none text-xs min-h-[40px] p-2" contenteditable="true" placeholder="ระบุชื่อ..." oninput="currentItemData.click_parts[${idx}].name=this.innerHTML; if(activePreviewMaterial === currentItemData.click_parts[${idx}].material_name) updatePartPreview(this.innerHTML, currentItemData.click_parts[${idx}].info);">${p.name || ''}</div>
                     </div>
                 </div>
                 <div>
-                    <label class="text-[10px] text-slate-400 block uppercase mb-1">รายละเอียดเพิ่มเติม</label>
+                    <label class="text-[10px] text-slate-300 block uppercase mb-1">รายละเอียดเพิ่มเติม</label>
                     <div class="border border-slate-700 rounded-lg overflow-hidden">
                         <div class="bg-slate-900 p-1.5 border-b border-slate-700 flex gap-2"><button type="button" onmousedown="event.preventDefault(); document.execCommand('bold', false, null);" class="bg-slate-700 text-white text-[10px] px-2 py-1 rounded"><b>B</b> ตัวหนา</button></div>
                         <div class="rich-editor-content border-none text-xs min-h-[60px] p-2" contenteditable="true" placeholder="ระบุรายละเอียด..." oninput="currentItemData.click_parts[${idx}].info=this.innerHTML; if(activePreviewMaterial === currentItemData.click_parts[${idx}].material_name) updatePartPreview(currentItemData.click_parts[${idx}].name, this.innerHTML);">${p.info || ''}</div>
@@ -802,8 +802,8 @@ function renderQuiz() {
             
             // แอตทริบิวต์ล็อกไม่ให้พิมพ์ (disabled) และเปลี่ยนสีกล่องเป็นเทาเพื่อกันพลาด
             const lockAttr = isActive ? '' : 'disabled';
-            const inputClass = isActive ? 'input-box' : 'input-box bg-slate-800/50 text-slate-500 cursor-not-allowed border-transparent';
-            const textClass = isActive ? 'text-white' : 'text-slate-500 cursor-not-allowed';
+            const inputClass = isActive ? 'input-box' : 'input-box bg-slate-800/50 text-slate-400 cursor-not-allowed border-transparent';
+            const textClass = isActive ? 'text-white' : 'text-slate-400 cursor-not-allowed';
 
             container.innerHTML += `<div class="${boxStyle} p-4 rounded-xl border relative pr-12 transition-all duration-300">
                 <button onclick="deleteQuizPart(${idx})" class="delete-btn-sm">✕</button>
@@ -813,7 +813,7 @@ function renderQuiz() {
                         <input type="checkbox" ${isActive ? 'checked' : ''} 
                                onchange="currentQuizDataRef[${idx}].active=this.checked; renderQuiz(); renderSidebar();"
                                class="w-4 h-4 rounded border-slate-700 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
-                        <span class="text-xs ${isActive ? 'text-indigo-400 font-bold' : 'text-slate-500'} uppercase">
+                        <span class="text-xs ${isActive ? 'text-indigo-400 font-bold' : 'text-slate-400'} uppercase">
                             ${isActive ? '✅ ใช้งานข้อนี้' : '🔒 เก็บในคลัง (ติ๊กเปิดใช้เพื่อแก้ไข)'}
                         </span>
                     </label>
@@ -832,7 +832,7 @@ function renderQuiz() {
                 </div>
                 
                 <div class="bg-slate-800/50 p-2 rounded-lg border border-slate-700 mt-2 ${!isActive ? 'opacity-60' : ''}">
-                    <label class="text-[10px] text-slate-400 block uppercase mb-1">💡 คำอธิบายเฉลย (แสดงให้นักเรียนเห็นตอนดูสรุปผล)</label>
+                    <label class="text-[10px] text-slate-300 block uppercase mb-1">💡 คำอธิบายเฉลย (แสดงให้นักเรียนเห็นตอนดูสรุปผล)</label>
                     <input type="text" class="${inputClass} text-xs ${isActive ? 'text-indigo-300' : ''}" value="${q.explanation || ''}" oninput="currentQuizDataRef[${idx}].explanation=this.value" placeholder="อธิบายเหตุผลของคำตอบที่ถูกต้อง..." ${lockAttr}>
                 </div>
             </div>`;
