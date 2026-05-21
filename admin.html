@@ -218,6 +218,22 @@
                                 <input type="number" id="frmGlobalPassing" class="input-box text-amber-400 font-bold text-2xl text-center py-4" min="1" max="100">
                                 <p class="text-[10px] text-slate-400 mt-3 text-center">เปอร์เซ็นต์คะแนนรวมที่ต้องทำได้เพื่อผ่านเกณฑ์</p>
                             </div>
+                            <div class="bg-slate-900/40 p-5 rounded-xl border border-slate-700">
+                                <label class="text-xs text-slate-300 mb-3 block uppercase font-bold">⏱️ เปิด/ปิด การจับเวลา</label>
+                                <div class="flex justify-center items-center py-3">
+                                    <label class="inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" id="frmTimerEnabled" class="w-5 h-5 rounded border-slate-700 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
+                                        <span class="ml-2 text-sm text-slate-300 font-bold">เปิดใช้งานตัวจับเวลา</span>
+                                    </label>
+                                </div>
+                                <p class="text-[10px] text-slate-500 mt-3 text-center">ติ๊กถูกเพื่อเปิดระบบเลื่อนเวลาถอยหลังในหน้าทำข้อสอบ</p>
+                            </div>
+
+                            <div class="bg-slate-900/40 p-5 rounded-xl border border-slate-700">
+                                <label class="text-xs text-slate-300 mb-3 block uppercase font-bold">⏳ เวลาต่อข้อ (วินาที)</label>
+                                <input type="number" id="frmGlobalTimeLimit" class="input-box text-rose-400 font-bold text-2xl text-center py-4" min="5" placeholder="30">
+                                <p class="text-[10px] text-slate-500 mt-3 text-center">กำหนดเวลาถอยหลังในแต่ละข้อ (วินาที)</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -677,6 +693,8 @@ function editGlobalSettings() {
     
     document.getElementById('frmGlobalQuizLimit').value = globalDatabase.settings?.global_quiz_limit || 15;
     document.getElementById('frmGlobalPassing').value = globalDatabase.settings?.passing_percentage || 50;
+    document.getElementById('frmTimerEnabled').checked = globalDatabase.settings?.timer_enabled !== false;
+    document.getElementById('frmGlobalTimeLimit').value = globalDatabase.settings?.time_limit || 30;
 
     renderSidebar();
 }
@@ -859,15 +877,20 @@ function saveData() {
         
         let limit = parseInt(document.getElementById('frmGlobalQuizLimit').value);
         let pass = parseInt(document.getElementById('frmGlobalPassing').value);
+        let timerEnabled = document.getElementById('frmTimerEnabled').checked;
+        let timeLimit = parseInt(document.getElementById('frmGlobalTimeLimit').value);
         
         if(isNaN(limit) || limit < 1) limit = 15;
         if(isNaN(pass) || pass < 1 || pass > 100) pass = 50;
+        if(isNaN(timeLimit) || timeLimit < 5) timeLimit = 30; // ขั้นต่ำ 5 วินาที
         
         globalDatabase.settings.global_quiz_limit = limit;
         globalDatabase.settings.passing_percentage = pass;
+        globalDatabase.settings.timer_enabled = timerEnabled;
+        globalDatabase.settings.time_limit = timeLimit;
         
         db.collection("database").doc("anatomy").set(globalDatabase).then(() => { 
-            showToast("บันทึกการตั้งค่าระบบเรียบร้อยแล้ว!", "success"); // 🌟 ใช้ Toast แทน Alert
+            showToast("บันทึกการตั้งค่าระบบเรียบร้อยแล้ว!", "success");
             renderSidebar(); 
         });
         return;

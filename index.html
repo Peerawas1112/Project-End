@@ -313,6 +313,8 @@ let currentActiveQuizIndex = null;
 
 // 🌟 ตัวแปรใหม่สำหรับรับค่าจากฐานข้อมูล
 let globalQuizLimit = 15; 
+let timerEnabled = true; // เปิด-ปิดจับเวลา
+let globalTimeLimit = 30; // จำนวนวินาทีต่อข้อ
 let globalPassingPercentage = 50; // เพิ่มตัวแปรเกณฑ์ผ่าน (ค่าเริ่มต้น 50%)
 
 const firebaseConfig = {
@@ -346,6 +348,11 @@ db.collection("database").doc("anatomy").get()
             globalPassingPercentage = parseInt(dbData.settings.passing_percentage);
         }
 
+        // รับค่าเปิด/ปิดเวลา และจำนวนเวลาต่อข้อจากแอดมิน
+        if(dbData.settings) {
+            timerEnabled = dbData.settings.timer_enabled !== false;
+            globalTimeLimit = parseInt(dbData.settings.time_limit) || 30;
+        }
         renderTabs();
         renderQuizMenu(); 
         if (data.length > 0) loadSystem(0);
@@ -749,8 +756,16 @@ function showQuizMenu() { home.style.display = "none"; quizMenuPage.style.displa
 function closeQuizMenu() { quizMenuPage.style.display = "none"; home.style.display = "flex"; }
 
 function startTimer() {
-    clearInterval(timerInterval); timeLeft = 30;
+    clearInterval(timerInterval); 
     const timerDisplay = document.getElementById("quizTimer");
+    
+    // 🌟 เช็กว่าคุณครูเปิดใช้งานการจับเวลาหรือไม่? ถ้าปิดอยู่ให้ซ่อนแถบเวลาและหยุดทำงาน
+    if (!timerEnabled) {
+        timerDisplay.style.display = "none";
+        return; 
+    }
+    
+    timeLeft = globalTimeLimit; // 🌟 ดึงพารามิเตอร์เวลาที่ตั้งไว้จากแอดมินมาใช้รันถอยหลัง
     timerDisplay.style.display = "block"; timerDisplay.textContent = `⏱️ ${timeLeft}s`; timerDisplay.style.background = "#ef4444";
     
     timerInterval = setInterval(() => {
