@@ -195,7 +195,9 @@ model-viewer { width:100%; height:calc(100vh - 60px); margin-top: 60px; --poster
 <div id="infoModal" class="part-info-card">
   <h3 id="modalTitle" class="modal-title">ชื่อส่วนประกอบ</h3>
   <div id="modalDesc" class="modal-desc">รายละเอียด...</div>
-  <button onclick="speakText('modalDesc', this)" style="background: #10b981; color: white; border: none; padding: 8px 20px; border-radius: 10px; cursor: pointer; font-family: 'Kanit'; width: 100%; margin-top: 10px;">🔊 ฟังเสียงอธิบาย</button>
+  
+  <button onclick="speakText('modalDesc', this)" style="background: #10b981; color: white; border: none; padding: 10px 20px; border-radius: 12px; cursor: pointer; font-family: 'Kanit'; width: 100%; margin-top: 5px; margin-bottom: 10px;">🔊 ฟังเสียงอธิบาย</button>
+  
   <button class="close-modal-btn" onclick="closeInfoAndUnfocus()">ปิดหน้าต่าง</button>
 </div>
 
@@ -287,8 +289,12 @@ model-viewer { width:100%; height:calc(100vh - 60px); margin-top: 60px; --poster
     <button class="close-info-btn" onclick="toggleInfoBox()">✖</button>
     <h3 id="title" style="margin-right: 30px;"></h3> 
     <p id="desc"></p>
-    <button onclick="showQRCode()" style="width: 100%; background: #3b82f6; padding: 10px; font-size: 0.9rem; margin-top: 5px;">📱 สแกน QR ดู AR บนมือถือ</button>
-    <button onclick="speakText('desc', this)" style="width: 100%; background: #10b981; padding: 10px; font-size: 0.9rem; margin-top: 5px;">🔊 ฟังเสียงบรรยาย</button>
+    
+    <button onclick="showQRCode()" style="width: 100%; background: #3b82f6; padding: 10px; font-size: 0.9rem; margin-top: 5px; border-radius: 12px; border: none; color: white; cursor: pointer; font-family: 'Kanit';">📱 สแกน QR ดู AR บนมือถือ</button>
+    
+    <button onclick="speakText('desc', this)" style="width: 100%; background: #10b981; padding: 10px; font-size: 0.9rem; margin-top: 8px; border-radius: 12px; border: none; color: white; cursor: pointer; font-family: 'Kanit';">🔊 ฟังเสียงบรรยาย</button>
+    
+    <div id="partsListContainer" style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px;"></div>
   </div>
   
   <footer class="menu" id="menu"></footer>
@@ -569,6 +575,61 @@ function loadModelData(dataObj) {
     document.getElementById("desc").innerHTML = dataObj.description; 
     currentActiveModelUrl = dataObj.model_file; 
     setTimeout(() => { viewer.src = dataObj.model_file; }, 50); 
+
+    // 🌟 ส่วนที่เพิ่มใหม่: สร้างปุ่มทางลัด (Hotspot Buttons) อัตโนมัติ 🌟
+    const partsListDiv = document.getElementById("partsListContainer");
+    if(dataObj.click_parts && dataObj.click_parts.length > 0) {
+        
+        // แอบฝัง CSS เพื่อเปลี่ยนแถบ Scrollbar สีขาวกวนใจ ให้เป็นแถบสีเทาบางๆ สไตล์แอปพลิเคชัน
+        let html = `
+        <style>
+            .premium-scroll::-webkit-scrollbar { width: 5px; }
+            .premium-scroll::-webkit-scrollbar-track { background: transparent; }
+            .premium-scroll::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 10px; }
+            .premium-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255, 71, 87, 0.6); }
+        </style>
+        <div style="color:#cbd5e1; font-size:0.85rem; margin-bottom:10px;">📌 <b>โครงสร้างที่ศึกษาได้ (${dataObj.click_parts.length} จุด):</b></div>`;
+        
+        html += `<div class="premium-scroll" style="display:flex; flex-wrap:wrap; gap:8px; max-height:130px; overflow-y:auto; padding-right: 5px;">`;
+        
+        dataObj.click_parts.forEach(p => {
+            // ตัดโค้ด HTML และคำภาษาอังกฤษออก เพื่อให้ชื่อปุ่มสั้นและดูสะอาดตา
+            let cleanName = p.name.replace(/<[^>]*>?/gm, '').split('(')[0].trim(); 
+            
+            // 🌟 ปุ่มแบบ Premium Outline: พื้นหลังดำ ขอบเทา และเรืองแสงสีแดงตอนเอาเมาส์ไปชี้ 🌟
+            html += `<button onclick="forceClickPart('${p.material_name}')" style="background: #0f172a; border: 1px solid #334155; color: #cbd5e1; padding: 8px 14px; font-size: 0.85rem; font-family: 'Kanit'; border-radius: 10px; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.2);" onmouseover="this.style.borderColor='#ff4757'; this.style.color='#ffffff'; this.style.background='rgba(255, 71, 87, 0.1)';" onmouseout="this.style.borderColor='#334155'; this.style.color='#cbd5e1'; this.style.background='#0f172a';"><span style="color:#ff4757; font-size:1.1rem;">📍</span> ${cleanName}</button>`;
+        });
+        
+        html += `</div>`;
+        partsListDiv.innerHTML = html;
+    } else {
+        partsListDiv.innerHTML = '';
+    }
+}
+// 🌟 ฟังก์ชันใหม่: จำลองการคลิกโมเดลเมื่อกดปุ่มทางลัด 🌟
+function forceClickPart(matName) {
+    const partsData = isAltMode ? currentOrganData.alt_mode.click_parts : currentOrganData.click_parts;
+    const clickedPart = partsData.find(p => p.material_name === matName);
+
+    if(clickedPart) {
+        // ทำการไฮไลต์สีโมเดลชิ้นที่ถูกเลือก และดรอปสีชิ้นอื่นๆ ให้มืดลง (เหมือนตอนเอานิ้วจิ้ม)
+        for (const mat of viewer.model.materials) {
+            const origColor = originalColors.get(mat.name) || [1, 1, 1, 1];
+            if (mat.name !== matName) {
+                mat.pbrMetallicRoughness.setBaseColorFactor([origColor[0]*0.15, origColor[1]*0.15, origColor[2]*0.15, origColor[3]]); 
+                mat.setEmissiveFactor([0, 0, 0]);
+            } else {
+                mat.pbrMetallicRoughness.setBaseColorFactor(origColor);
+                mat.setEmissiveFactor([0, 0, 0]);
+            }
+        }
+        
+        // เด้งหน้าต่างข้อมูลขึ้นมา
+        document.getElementById('modalTitle').innerHTML = clickedPart.name;
+        document.getElementById('modalDesc').innerHTML = clickedPart.info || "ไม่มีข้อมูลรายละเอียดเพิ่มเติม"; 
+        infoModal.style.display = 'flex';
+        viewer.autoRotate = false; // หยุดหมุนโมเดล
+    }
 }
 
 function toggleModelMode() {
@@ -893,13 +954,22 @@ function speakText(elementId, btnElement) {
         return;
     }
     
-    // 1. ดึงข้อความดิบมาจากหน้าจอ
-    let textRaw = document.getElementById(elementId).innerText; 
+    // 🌟 1. ดึงข้อความมาประกอบร่างกัน (ให้เอา "หัวข้อ" มาอ่านก่อน "เนื้อหา")
+    let textRaw = "";
+    if (elementId === 'desc') {
+        // ถ้ากดฟังที่หน้าต่างหลัก: ให้เอา id="title" มาต่อกับ id="desc"
+        textRaw = document.getElementById('title').innerText + " " + document.getElementById('desc').innerText;
+    } else if (elementId === 'modalDesc') {
+        // ถ้ากดฟังที่หน้าต่างจุดคลิกย่อย: ให้เอา id="modalTitle" มาต่อกับ id="modalDesc"
+        textRaw = document.getElementById('modalTitle').innerText + " " + document.getElementById('modalDesc').innerText;
+    } else {
+        textRaw = document.getElementById(elementId).innerText;
+    }
     
     // 2. ลบอิโมจิทิ้ง (ทำทุกอุปกรณ์ เพราะ AI อ่านอิโมจิแล้วตลก)
     textRaw = textRaw.replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, '');
     
-    // 🌟 3. ตรวจสอบว่าผู้ใช้เปิดบนคอมพิวเตอร์ "Windows" หรือไม่
+    // 3. ตรวจสอบว่าผู้ใช้เปิดบนคอมพิวเตอร์ "Windows" หรือไม่
     const isWindows = navigator.userAgent.indexOf('Windows') !== -1;
     
     if (isWindows) {
