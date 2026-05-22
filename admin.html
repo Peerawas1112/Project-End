@@ -96,6 +96,7 @@
             <button onclick="syncInitialData()" class="bg-amber-600 hover:bg-amber-500 px-3 py-1.5 rounded-lg text-xs dev-only hidden" id="btnSync">📥 โหลดข้อมูลเริ่มต้น</button>
             <button onclick="addNewSystem()" class="bg-blue-600/20 hover:bg-blue-600 text-blue-400 hover:text-white px-3 py-1.5 rounded-lg text-xs transition border border-blue-600/30 dev-only">➕ เพิ่มหมวดหมู่</button>
             <button onclick="clearAllData()" class="bg-rose-600/20 hover:bg-rose-600 text-rose-400 hover:text-white px-3 py-1.5 rounded-lg text-xs transition border border-rose-600/30 dev-only">🧹 ล้าง Cloud</button>
+            <button onclick="exportBackup()" class="bg-indigo-600/20 hover:bg-indigo-600 text-indigo-400 hover:text-white px-3 py-1.5 rounded-lg text-xs transition border border-indigo-600/30">💾 สำรองข้อมูล</button>
             <div class="w-[1px] bg-slate-700 mx-1 h-6"></div>
             <button onclick="toggleFullScreen()" id="fsBtnHeader" class="bg-slate-700 hover:bg-slate-600 text-white w-8 h-8 rounded-lg flex items-center justify-center transition" title="ขยายเต็มจอ"></button>
             <button onclick="returnToHomeSecurely()" class="bg-slate-700 hover:bg-slate-600 px-3 py-1.5 rounded-lg text-xs">🏠 หน้าหลัก</button>
@@ -946,6 +947,16 @@ function addNewSystem() { openCustomPrompt("✨ เพิ่มหมวดห�
 function addNewItemToSys(sysIdx) { if(!globalDatabase.systems[sysIdx].items) globalDatabase.systems[sysIdx].items=[]; globalDatabase.systems[sysIdx].items.push({name: "บทเรียนใหม่", model_file: "", description: "รายละเอียดบทเรียน...", click_parts: []}); db.collection("database").doc("anatomy").set(globalDatabase).then(()=>{ setSidebarMode('content'); editItem(sysIdx, globalDatabase.systems[sysIdx].items.length-1); }); }
 
 document.addEventListener('paste', function(e) { if(e.target.isContentEditable) { e.preventDefault(); let text=(e.originalEvent||e).clipboardData.getData('text/plain'); document.execCommand('insertText', false, text); } });
+function exportBackup() {
+    if (!globalDatabase) { showToast("ไม่มีข้อมูลให้สำรองครับ", "error"); return; }
+    // แปลงข้อมูลเป็นไฟล์ JSON
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(globalDatabase, null, 2));
+    const dl = document.createElement('a');
+    dl.setAttribute("href", dataStr);
+    dl.setAttribute("download", "biolens_backup_" + new Date().toISOString().split('T')[0] + ".json");
+    dl.click();
+    showToast("ดาวน์โหลดไฟล์สำรองข้อมูลสำเร็จ!", "success");
+}
 </script>
 </body>
 </html>
