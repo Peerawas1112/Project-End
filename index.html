@@ -471,12 +471,12 @@ function renderQuizMenu() {
     container.innerHTML = html;
 }
 
-// 🌟 อัปเดตให้คำนวณและแสดงคะแนนเต็มล่วงหน้า
 function openPreQuizInfo(index) {
     let pool = []; let title = "";
     currentActiveQuizIndex = index;
     
     if (index === 'all') {
+        // --- โหมด: ทดสอบรวมทุกระบบ ---
         title = "รวมทุกระบบ";
         let guaranteedPool = [];
         let remainingPool = [];
@@ -508,20 +508,36 @@ function openPreQuizInfo(index) {
         pool = shuffleArray(pool); // คละลำดับสลับกันอีกรอบ
         
         document.getElementById("preQuizCount").innerHTML = `${pool.length} ข้อ <span style="font-size: 0.75rem; color: #64748b; font-weight: normal;">(สุ่มจากคลัง ${totalQuestionsInPool} ข้อ มีครบทุกระบบ)</span>`;
+        
+    } else {
+        // 🌟🌟🌟 ส่วนที่หายไป: โหมดทดสอบแยกตามระบบ (เช่น ระบบหมุนเวียนเลือด) 🌟🌟🌟
+        title = data[index].category;
+        
+        if (data[index].quiz) {
+            // ดึงมาเฉพาะข้อสอบที่แอดมิน "เปิดใช้งาน (active: true)"
+            pool = data[index].quiz.filter(q => q.active !== false);
+        }
+        
+        if (pool.length === 0) {
+            return alert(`หมวดหมู่ "${title}" ยังไม่มีข้อสอบที่เปิดใช้งานครับ แอดมินต้องไปเพิ่มข้อสอบก่อน`);
+        }
+        
+        pool = shuffleArray([...pool]); // สลับข้อสอบ
+        document.getElementById("preQuizCount").innerHTML = `${pool.length} ข้อ`;
     }
 
     // 🌟 คำนวณคะแนนรวมทั้งหมด จากข้อสอบในชุดที่จะใช้สอบจริง
     let totalScore = 0;
     pool.forEach(q => totalScore += (q.points || 1));
 
+    // อัปเดตข้อมูลลงบนป๊อปอัปให้ผู้ใช้เห็น
     document.getElementById("preQuizTopic").textContent = title;
-    document.getElementById("preQuizTotalScore").textContent = `${totalScore} คะแนน`; // โชว์คะแนน
+    document.getElementById("preQuizTotalScore").textContent = `${totalScore} คะแนน`; 
+    document.getElementById("preQuizPassingCriteria").textContent = `${globalPassingPercentage}%`;
     
+    // บันทึกตัวแปรเก็บไว้รอตอนผู้ใช้กด "เริ่มทำข้อสอบ"
     pendingQuizPool = pool;
     pendingQuizTitle = title;
-    
-    // 🌟 อัปเดตตัวเลขเกณฑ์ผ่านในป๊อปอัป
-document.getElementById("preQuizPassingCriteria").textContent = `${globalPassingPercentage}%`;
     
     preQuizModal.style.display = "flex";
 }
