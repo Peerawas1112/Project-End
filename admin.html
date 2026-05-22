@@ -638,43 +638,6 @@ function renderSidebar() {
     });
 }
 
-    globalDatabase.systems.forEach((sys, sIdx) => {
-        let html = `<div class="mb-5">
-            <div class="flex justify-between items-center px-1 mb-2 border-b border-slate-700/50 pb-1">
-                <h3 class="text-slate-300 font-bold text-[11px] uppercase">${sys.category}</h3>
-                <div class="flex gap-2 dev-only">
-                    ${sidebarMode === 'content' ? `<button onclick="addNewItemToSys(${sIdx})" class="text-[10px] text-emerald-500 hover:text-emerald-400">+ บทเรียน</button>` : ''}
-                    <button onclick="deleteSystem(${sIdx})" class="text-[10px] text-slate-400 hover:text-rose-500">ลบหมวด</button>
-                </div>
-            </div>
-            <div class="flex flex-col gap-1">`;
-        
-        if (sidebarMode === 'content') {
-            if (sys.items && sys.items.length > 0) { 
-                sys.items.forEach((item, iIdx) => { 
-                    const isActive = (editingMode === 'item' && currentSysIndex === sIdx && currentItemIndex === iIdx); 
-                    html += `<button onclick="editItem(${sIdx}, ${iIdx})" class="sidebar-item text-left px-3 py-2 rounded-lg text-xs transition border border-transparent ${isActive ? 'active' : 'bg-slate-900/50 text-slate-300 hover:bg-slate-700'}">📄 ${item.name}</button>`; 
-                }); 
-            } else { 
-                html += `<p class="text-slate-600 text-[10px] italic px-2 py-1">ยังไม่มีบทเรียน</p>`; 
-            }
-        } 
-        else if (sidebarMode === 'quiz') {
-            const qCount = sys.quiz ? sys.quiz.length : 0;
-            const activeCount = sys.quiz ? sys.quiz.filter(q => q.active !== false).length : 0; 
-            const badgeText = qCount > 0 ? `เปิดใช้ ${activeCount}/${qCount}` : `0 ข้อ`;
-            const badgeBg = (activeCount === 0 && qCount > 0) ? 'bg-slate-700 text-slate-300' : 'bg-emerald-600 text-white';
-
-            const isActive = (editingMode === 'quiz' && currentSysIndex === sIdx);
-            
-            html += `<button onclick="editSystemQuiz(${sIdx})" class="sidebar-quiz text-left px-3 py-2 rounded-lg text-xs transition border border-transparent flex justify-between items-center ${isActive ? 'active' : 'bg-rose-900/30 text-rose-300 hover:bg-rose-800/50 border-rose-900/40'}">
-                        <span>📝 คลังข้อสอบชุดนี้</span>
-                        <span class="${badgeBg} px-1.5 py-0.5 rounded text-[9px] shadow-sm tracking-wide font-medium">${badgeText}</span>
-                    </button>`;
-        }
-        
-        html += `</div></div>`; menu.innerHTML += html;
-    });
 // 🌟 เพิ่มฟังก์ชันสำหรับเปิดหน้าจอการตั้งค่า 🌟
 function editGlobalSettings() {
     editingMode = 'settings';
@@ -883,6 +846,7 @@ function saveData() {
         if(isNaN(limit) || limit < 1) limit = 15;
         if(isNaN(pass) || pass < 1 || pass > 100) pass = 50;
         if(isNaN(timeLimit) || timeLimit < 5) timeLimit = 30; // ขั้นต่ำ 5 วินาที
+        if(timeLimit > 300) timeLimit = 300; // 🌟 เพิ่มล็อกเวลาสูงสุด 300 วินาที (5 นาที)
         
         globalDatabase.settings.global_quiz_limit = limit;
         globalDatabase.settings.passing_percentage = pass;
@@ -905,8 +869,13 @@ function saveData() {
         globalDatabase.systems[currentSysIndex].items[currentItemIndex] = currentItemData; 
     } 
     
+    // 🌟 ส่วนที่หายไป: คำสั่งเซฟข้อสอบเมื่อแก้ไขหน้าคลังข้อสอบ
+    if (editingMode === 'quiz') {
+        globalDatabase.systems[currentSysIndex].quiz = currentQuizDataRef;
+    }
+    
     db.collection("database").doc("anatomy").set(globalDatabase).then(() => { 
-        showToast("บันทึกข้อมูลเรียบร้อยแล้ว!", "success");  // 🌟 ใช้ Toast แทน Alert
+        showToast("บันทึกข้อมูลเรียบร้อยแล้ว!", "success"); 
         renderSidebar(); 
     }); 
 }

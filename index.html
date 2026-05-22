@@ -970,53 +970,49 @@ function toggleUI() {
     }
 }
 let isSpeaking = false;
+let originalBtnText = ""; // 🌟 เพิ่มตัวแปรสำหรับจำข้อความตั้งต้นของปุ่ม
 
 function speakText(elementId, btnElement) {
     if (isSpeaking) {
         speechSynthesis.cancel(); 
         isSpeaking = false;
-        btnElement.innerHTML = "🔊 ฟังเสียงบรรยาย"; 
+        btnElement.innerHTML = originalBtnText || "🔊 ฟังเสียงบรรยาย"; // 🌟 คืนค่าข้อความเดิม
         return;
     }
     
-    // 🌟 1. ดึงข้อความมาประกอบร่างกัน (ให้เอา "หัวข้อ" มาอ่านก่อน "เนื้อหา")
+    originalBtnText = btnElement.innerHTML; // 🌟 จำข้อความบนปุ่มไว้ก่อนเปลี่ยนเป็นคำว่าหยุด
+    
+    // 1. ดึงข้อความมาประกอบร่างกัน (ให้เอา "หัวข้อ" มาอ่านก่อน "เนื้อหา")
     let textRaw = "";
     if (elementId === 'desc') {
-        // ถ้ากดฟังที่หน้าต่างหลัก: ให้เอา id="title" มาต่อกับ id="desc"
         textRaw = document.getElementById('title').innerText + " " + document.getElementById('desc').innerText;
     } else if (elementId === 'modalDesc') {
-        // ถ้ากดฟังที่หน้าต่างจุดคลิกย่อย: ให้เอา id="modalTitle" มาต่อกับ id="modalDesc"
         textRaw = document.getElementById('modalTitle').innerText + " " + document.getElementById('modalDesc').innerText;
     } else {
         textRaw = document.getElementById(elementId).innerText;
     }
     
-    // 2. ลบอิโมจิทิ้ง (ทำทุกอุปกรณ์ เพราะ AI อ่านอิโมจิแล้วตลก)
+    // 2. ลบอิโมจิทิ้ง
     textRaw = textRaw.replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, '');
     
-    // 3. ตรวจสอบว่าผู้ใช้เปิดบนคอมพิวเตอร์ "Windows" หรือไม่
+    // 3. ตรวจสอบระบบปฏิบัติการ
     const isWindows = navigator.userAgent.indexOf('Windows') !== -1;
     
     if (isWindows) {
-        // ---- โหมดสำหรับคอมพิวเตอร์ Windows (ตัดภาษาอังกฤษทิ้ง) ----
-        textRaw = textRaw.replace(/\(.*?\)/g, ''); // ลบวงเล็บ
+        textRaw = textRaw.replace(/\(.*?\)/g, ''); 
         textRaw = textRaw.replace(/C-shaped/gi, "รูปตัวซี"); 
         textRaw = textRaw.replace(/RBC/gi, "อาร์ บี ซี");
         textRaw = textRaw.replace(/WBC/gi, "ดับเบิลยู บี ซี");
-        textRaw = textRaw.replace(/[a-zA-Z]/g, ''); // ลบ A-Z ทิ้งทั้งหมด
+        textRaw = textRaw.replace(/[a-zA-Z]/g, ''); 
     } else {
-        // ---- โหมดสำหรับมือถือ iOS/Android และ Mac (เก็บภาษาอังกฤษไว้) ----
-        // ดักแปลแค่บางคำที่ AI มักจะอ่านรวน
         textRaw = textRaw.replace(/RBC/gi, "อาร์ บี ซี");
         textRaw = textRaw.replace(/WBC/gi, "ดับเบิลยู บี ซี");
     }
 
-    // ส่งข้อความไปให้ AI อ่าน
     const utterance = new SpeechSynthesisUtterance(textRaw);
     utterance.lang = 'th-TH'; 
     utterance.rate = 1.0; 
 
-    // พยายามดึงเสียงของ Google เพื่อความสมจริง (ถ้ารองรับ)
     const voices = speechSynthesis.getVoices();
     const bestVoice = voices.find(v => v.lang === 'th-TH' && v.name.includes('Google')) || voices.find(v => v.lang === 'th-TH');
     if (bestVoice) {
@@ -1025,7 +1021,7 @@ function speakText(elementId, btnElement) {
 
     utterance.onend = () => { 
         isSpeaking = false; 
-        btnElement.innerHTML = "🔊 ฟังเสียงบรรยาย"; 
+        btnElement.innerHTML = originalBtnText || "🔊 ฟังเสียงบรรยาย"; // 🌟 คืนค่าข้อความเดิมตอนอ่านจบ
     };
     
     speechSynthesis.speak(utterance);
