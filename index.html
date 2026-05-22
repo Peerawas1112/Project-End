@@ -599,34 +599,81 @@ function loadModelData(dataObj) {
     currentActiveModelUrl = dataObj.model_file; 
     setTimeout(() => { viewer.src = dataObj.model_file; }, 50); 
 
-    // 🌟 ส่วนที่เพิ่มใหม่: สร้างปุ่มทางลัด (Hotspot Buttons) อัตโนมัติ 🌟
+    // 🌟 ส่วนที่เพิ่มใหม่: สร้างปุ่มทางลัด (Hotspot Buttons) อัตโนมัติแบบพับเก็บได้ 🌟
     const partsListDiv = document.getElementById("partsListContainer");
     if(dataObj.click_parts && dataObj.click_parts.length > 0) {
         
-        // แอบฝัง CSS สำหรับ Scrollbar บางๆ
+        // แอบฝัง CSS สำหรับ Scrollbar บางๆ และระบบพับเก็บ (Accordion)
         let html = `
         <style>
             .premium-scroll::-webkit-scrollbar { width: 5px; }
             .premium-scroll::-webkit-scrollbar-track { background: transparent; }
             .premium-scroll::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 10px; }
             .premium-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255, 71, 87, 0.6); }
+
+            /* สไตล์กล่องพับเก็บได้ (Details/Summary) */
+            details.hotspot-accordion {
+                background: rgba(15, 23, 42, 0.4);
+                border: 1px solid rgba(255, 255, 255, 0.08);
+                border-radius: 14px;
+                transition: all 0.3s ease;
+                margin-top: 5px;
+            }
+            details.hotspot-accordion[open] {
+                background: rgba(15, 23, 42, 0.65);
+                border-color: rgba(255, 255, 255, 0.15);
+                padding-bottom: 14px;
+            }
+            details.hotspot-accordion summary {
+                list-style: none;
+                padding: 12px 15px;
+                cursor: pointer;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                font-size: 0.9rem;
+                color: #cbd5e1;
+                border-radius: 14px;
+                user-select: none;
+                transition: 0.2s;
+            }
+            details.hotspot-accordion summary::-webkit-details-marker {
+                display: none;
+            }
+            details.hotspot-accordion summary:hover {
+                background: rgba(255, 255, 255, 0.05);
+                color: #ffffff;
+            }
+            .accordion-arrow {
+                transition: transform 0.3s ease;
+                font-size: 0.8rem;
+                opacity: 0.7;
+            }
+            details.hotspot-accordion[open] .accordion-arrow {
+                transform: rotate(180deg);
+            }
         </style>
-        <div style="color:#cbd5e1; font-size:0.85rem; margin-bottom:10px;">📌 <b>โครงสร้างที่ศึกษาได้ (${dataObj.click_parts.length} จุด):</b></div>`;
         
-        // 🌟 เปลี่ยนจาก repeat(2, 1fr) เป็น repeat(auto-fit, minmax(140px, 1fr))
-html += `<div class="premium-scroll" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap:8px; max-height:130px; overflow-y:auto; padding-right: 5px;">`;
+        <details class="hotspot-accordion">
+            <summary>
+                <span>📌 <b>โครงสร้างที่ศึกษาได้ (${dataObj.click_parts.length} จุด)</b></span>
+                <span class="accordion-arrow">🔽</span>
+            </summary>
+            
+            <div class="premium-scroll" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap:8px; max-height:130px; overflow-y:auto; padding: 0 15px; margin-top: 5px;">
+        `;
+        
         dataObj.click_parts.forEach(p => {
             // ตัดโค้ด HTML และคำภาษาอังกฤษออก เพื่อให้ชื่อปุ่มสั้นและดูสะอาดตา
             let cleanName = p.name.replace(/<[^>]*>?/gm, '').split('(')[0].trim(); 
             
-            // 🌟 จุดที่แก้ 2: เพิ่ม justify-content: flex-start ให้ตัวหนังสือชิดซ้ายตรงกัน และใส่ text-overflow ป้องกันชื่อยาวทะลุกรอบ 🌟
             html += `<button onclick="forceClickPart('${p.material_name}')" style="background: #0f172a; border: 1px solid #334155; color: #cbd5e1; padding: 8px 12px; font-size: 0.85rem; font-family: 'Kanit'; border-radius: 10px; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: flex-start; gap: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.2); width: 100%; text-align: left;" onmouseover="this.style.borderColor='#ff4757'; this.style.color='#ffffff'; this.style.background='rgba(255, 71, 87, 0.1)';" onmouseout="this.style.borderColor='#334155'; this.style.color='#cbd5e1'; this.style.background='#0f172a';">
                         <span style="color:#ff4757; font-size:1.1rem; flex-shrink:0;">📍</span> 
                         <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; width: 100%;">${cleanName}</span>
                      </button>`;
         });
         
-        html += `</div>`;
+        html += `</div></details>`;
         partsListDiv.innerHTML = html;
     } else {
         partsListDiv.innerHTML = '';
