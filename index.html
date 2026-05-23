@@ -102,9 +102,19 @@ model-viewer { width:100%; height:calc(100vh - 60px); margin-top: 60px; --poster
 .ui-hidden .app-header .title-text { opacity: 0; }
 
 /* =========================================
-   📱 6. โหมดมือถือ (Mobile Responsive)
+   6. Custom Scrollbar (Premium)
+   ========================================= */
+.premium-scroll::-webkit-scrollbar { width: 6px; }
+.premium-scroll::-webkit-scrollbar-track { background: transparent; }
+.premium-scroll::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 10px; }
+.premium-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.4); }
+
+/* =========================================
+   📱 7. โหมดมือถือ (Mobile Responsive)
    ========================================= */
 @media (max-width: 768px) {
+    model-viewer { height: calc(100vh - 120px) !important; }
+
     .app-header { padding: 0 10px; height: 60px; justify-content: center; }
     .title-text { display: none; } 
     .header-buttons { gap: 12px; justify-content: center; width: 100%; }
@@ -131,7 +141,7 @@ model-viewer { width:100%; height:calc(100vh - 60px); margin-top: 60px; --poster
 }
 
 /* =========================================
-   🔄 7. บังคับหมุนจอ (Orientation Warning)
+   🔄 8. บังคับหมุนจอ (Orientation Warning)
    ========================================= */
 #orientation-warning {
     display: none;
@@ -196,7 +206,7 @@ model-viewer { width:100%; height:calc(100vh - 60px); margin-top: 60px; --poster
   <h3 id="modalTitle" class="modal-title">ชื่อส่วนประกอบ</h3>
   <div id="modalDesc" class="modal-desc">รายละเอียด...</div>
   
-  <button onclick="speakText('modalDesc', this)" style="background: #10b981; color: white; border: none; padding: 10px 20px; border-radius: 12px; cursor: pointer; font-family: 'Kanit'; width: 100%; margin-top: 5px; margin-bottom: 10px;">🔊 ฟังเสียงอธิบาย</button>
+  <button onclick="speakText('modalDesc', this)" style="background: #10b981; color: white; border: none; padding: 10px 20px; border-radius: 12px; cursor: pointer; font-family: 'Kanit'; width: 100%; margin-top: 5px; margin-bottom: 10px;">🔊 ฟังเสียงบรรยาย</button>
   
   <button class="close-modal-btn" onclick="closeInfoAndUnfocus()">ปิดหน้าต่าง</button>
 </div>
@@ -290,9 +300,14 @@ model-viewer { width:100%; height:calc(100vh - 60px); margin-top: 60px; --poster
     <h3 id="title" style="margin-right: 30px;"></h3> 
     <p id="desc"></p>
     
-    <button onclick="showQRCode()" style="width: 100%; background: #3b82f6; padding: 10px; font-size: 0.9rem; margin-top: 5px; border-radius: 12px; border: none; color: white; cursor: pointer; font-family: 'Kanit';">📱 สแกน QR ดู AR บนมือถือ</button>
-    
-    <button onclick="speakText('desc', this)" style="width: 100%; background: #10b981; padding: 10px; font-size: 0.9rem; margin-top: 8px; border-radius: 12px; border: none; color: white; cursor: pointer; font-family: 'Kanit';">🔊 ฟังเสียงบรรยาย</button>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
+        <button onclick="speakText('desc', this)" style="background: #0f172a; border: 1px solid #10b981; color: #10b981; padding: 10px; border-radius: 12px; font-family: 'Kanit'; font-size: 0.85rem; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: inset 0 0 10px rgba(16,185,129,0.1);" onmouseover="this.style.background='rgba(16,185,129,0.1)';" onmouseout="this.style.background='#0f172a';">
+            🔊 เสียงบรรยาย
+        </button>
+        <button onclick="showQRCode()" style="background: #0f172a; border: 1px solid #3b82f6; color: #3b82f6; padding: 10px; border-radius: 12px; font-family: 'Kanit'; font-size: 0.85rem; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: inset 0 0 10px rgba(59,130,246,0.1);" onmouseover="this.style.background='rgba(59,130,246,0.1)';" onmouseout="this.style.background='#0f172a';">
+            📱 โหมด AR
+        </button>
+    </div>
     
     <div id="partsListContainer" style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px;"></div>
   </div>
@@ -311,11 +326,10 @@ let pendingQuizPool = [];
 let pendingQuizTitle = "";
 let currentActiveQuizIndex = null;
 
-// 🌟 ตัวแปรใหม่สำหรับรับค่าจากฐานข้อมูล
 let globalQuizLimit = 15; 
-let timerEnabled = true; // เปิด-ปิดจับเวลา
-let globalTimeLimit = 30; // จำนวนวินาทีต่อข้อ
-let globalPassingPercentage = 50; // เพิ่มตัวแปรเกณฑ์ผ่าน (ค่าเริ่มต้น 50%)
+let timerEnabled = true; 
+let globalTimeLimit = 30; 
+let globalPassingPercentage = 50; 
 
 const firebaseConfig = {
   apiKey: "AIzaSyB9TZN4-yUb9Kfh0gdZNp6XglsbS-xEzfk",
@@ -338,17 +352,14 @@ db.collection("database").doc("anatomy").get()
         const dbData = docSnap.data();
         data = dbData.systems || [];
         
-        // รับค่าลิมิตข้อสอบมาใช้ 
         if(dbData.settings && dbData.settings.global_quiz_limit) {
             globalQuizLimit = parseInt(dbData.settings.global_quiz_limit);
         }
         
-        // 🌟 รับค่าเกณฑ์การผ่าน (Passing Percentage) มาใช้
         if(dbData.settings && dbData.settings.passing_percentage) {
             globalPassingPercentage = parseInt(dbData.settings.passing_percentage);
         }
 
-        // รับค่าเปิด/ปิดเวลา และจำนวนเวลาต่อข้อจากแอดมิน
         if(dbData.settings) {
             timerEnabled = dbData.settings.timer_enabled !== false;
             globalTimeLimit = parseInt(dbData.settings.time_limit) || 30;
@@ -431,16 +442,18 @@ function closeModals() {
     resetHighlight(); 
     if (viewer) viewer.autoRotate = true;
 
-    // 🌟 1. เพิ่มคำสั่งสั่งให้ระบบหยุดพูดทันทีเมื่อปิดหน้าต่างป๊อปอัป
     if ('speechSynthesis' in window) {
         speechSynthesis.cancel();
     }
-    isSpeaking = false; // รีเซ็ตตัวแปรสถานะเสียง
+    isSpeaking = false; 
 
-    // 🌟 2. รีเซ็ตข้อความบนปุ่มฟังเสียงทั้งหมดให้กลับเป็นเริ่มต้น (ป้องกันบั๊กตัวหนังสือ "หยุดฟังเสียง" ค้าง)
     const voiceBtns = document.querySelectorAll('[onclick^="speakText"]');
     voiceBtns.forEach(btn => {
-        btn.innerHTML = "🔊 ฟังเสียงบรรยาย";
+        if (btn.dataset.originalText) {
+            btn.innerHTML = btn.dataset.originalText;
+        } else {
+            btn.innerHTML = "🔊 ฟังเสียงบรรยาย";
+        }
     });
 }
 
@@ -464,10 +477,10 @@ function renderQuizMenu() {
     let html = "";
     
     data.forEach((sys, idx) => {
-        html += `<button onclick="openPreQuizInfo('${idx}')" style="background: #1e293b; border: 1px solid var(--border); text-align: left; padding-left: 20px;">📝 ${sys.category}</button>`;
+        html += `<button onclick="openPreQuizInfo('${idx}')" style="background: #1e293b; border: 1px solid var(--border); text-align: left; padding-left: 20px; display:flex; justify-content:space-between; align-items:center;"><span>📝 ${sys.category}</span></button>`;
     });
 
-    html += `<button onclick="openPreQuizInfo('all')" style="background: var(--primary); text-align: left; padding-left: 20px; box-shadow: 0 5px 15px rgba(255, 71, 87, 0.4);">🏆 แบบทดสอบรวมทุกระบบ</button>`;
+    html += `<button onclick="openPreQuizInfo('all')" style="background: var(--primary); text-align: left; padding-left: 20px; box-shadow: 0 5px 15px rgba(255, 71, 87, 0.4); display:flex; justify-content:space-between; align-items:center;"><span>🏆 แบบทดสอบรวมทุกระบบ</span></button>`;
     container.innerHTML = html;
 }
 
@@ -476,26 +489,23 @@ function openPreQuizInfo(index) {
     currentActiveQuizIndex = index;
     
     if (index === 'all') {
-        // --- โหมด: ทดสอบรวมทุกระบบ ---
         title = "รวมทุกระบบ";
         let guaranteedPool = [];
         let remainingPool = [];
         
-        // 1. ดึงข้อสอบมาอย่างน้อยระบบละ 1 ข้อ
         data.forEach(sys => { 
             if (sys.quiz) {
                 let activeQs = sys.quiz.filter(q => q.active !== false);
                 if (activeQs.length > 0) {
                     activeQs = shuffleArray([...activeQs]);
-                    guaranteedPool.push(activeQs[0]); // เก็บข้อแรกไว้การันตี
-                    remainingPool = remainingPool.concat(activeQs.slice(1)); // ที่เหลือโยนลงกองกลาง
+                    guaranteedPool.push(activeQs[0]); 
+                    remainingPool = remainingPool.concat(activeQs.slice(1)); 
                 }
             }
         });
         
         if (guaranteedPool.length === 0) return alert(`ยังไม่มีคำถามที่ "เปิดใช้งาน" ในระบบครับ`);
         
-        // 2. นำข้อที่เหลือมาเติมให้เต็มโควตา
         remainingPool = shuffleArray(remainingPool);
         let needed = globalQuizLimit - guaranteedPool.length;
         if (needed > 0) {
@@ -505,16 +515,14 @@ function openPreQuizInfo(index) {
         }
         
         let totalQuestionsInPool = guaranteedPool.length + remainingPool.length;
-        pool = shuffleArray(pool); // คละลำดับสลับกันอีกรอบ
+        pool = shuffleArray(pool); 
         
         document.getElementById("preQuizCount").innerHTML = `${pool.length} ข้อ <span style="font-size: 0.75rem; color: #64748b; font-weight: normal;">(สุ่มจากคลัง ${totalQuestionsInPool} ข้อ มีครบทุกระบบ)</span>`;
         
     } else {
-        // 🌟🌟🌟 ส่วนที่หายไป: โหมดทดสอบแยกตามระบบ (เช่น ระบบหมุนเวียนเลือด) 🌟🌟🌟
         title = data[index].category;
         
         if (data[index].quiz) {
-            // ดึงมาเฉพาะข้อสอบที่แอดมิน "เปิดใช้งาน (active: true)"
             pool = data[index].quiz.filter(q => q.active !== false);
         }
         
@@ -522,20 +530,17 @@ function openPreQuizInfo(index) {
             return alert(`หมวดหมู่ "${title}" ยังไม่มีข้อสอบที่เปิดใช้งานครับ แอดมินต้องไปเพิ่มข้อสอบก่อน`);
         }
         
-        pool = shuffleArray([...pool]); // สลับข้อสอบ
+        pool = shuffleArray([...pool]); 
         document.getElementById("preQuizCount").innerHTML = `${pool.length} ข้อ`;
     }
 
-    // 🌟 คำนวณคะแนนรวมทั้งหมด จากข้อสอบในชุดที่จะใช้สอบจริง
     let totalScore = 0;
     pool.forEach(q => totalScore += (q.points || 1));
 
-    // อัปเดตข้อมูลลงบนป๊อปอัปให้ผู้ใช้เห็น
     document.getElementById("preQuizTopic").textContent = title;
     document.getElementById("preQuizTotalScore").textContent = `${totalScore} คะแนน`; 
     document.getElementById("preQuizPassingCriteria").textContent = `${globalPassingPercentage}%`;
     
-    // บันทึกตัวแปรเก็บไว้รอตอนผู้ใช้กด "เริ่มทำข้อสอบ"
     pendingQuizPool = pool;
     pendingQuizTitle = title;
     
@@ -544,10 +549,7 @@ function openPreQuizInfo(index) {
 
 function startQuizConfirm() {
     closeModals(); 
-    
-    // สลับข้อสอบอีกรอบก่อนให้เด็กทำ เพื่อความชัวร์ว่าลำดับไม่ซ้ำ
     currentQuizData = shuffleArray([...pendingQuizPool]); 
-    
     qIndex = 0; score = 0; userAnswers = []; 
     
     document.getElementById("quizType").textContent = "แบบทดสอบ: " + pendingQuizTitle;
@@ -563,7 +565,9 @@ function loadSystem(i) {
     if(activeTab) activeTab.classList.add("active");
     
     if (data[i].items && data[i].items.length > 0) {
-        menu.innerHTML = data[i].items.map((o, j) => `<div class="menu-item" id="m${i}${j}" onclick="selectOrgan(${i},${j})">${o.name}</div>`).join("");
+        menu.innerHTML = data[i].items.map((o, j) => {
+            return `<div class="menu-item" id="m${i}${j}" onclick="selectOrgan(${i},${j})">${o.name}</div>`;
+        }).join("");
         selectOrgan(i, 0);
     } else {
         menu.innerHTML = "";
@@ -573,7 +577,9 @@ function loadSystem(i) {
 function selectOrgan(i, j) {
     document.querySelectorAll(".menu-item").forEach(m => m.classList.remove("active"));
     const activeMenu = document.getElementById(`m${i}${j}`);
-    if(activeMenu) activeMenu.classList.add("active");
+    if(activeMenu) {
+        activeMenu.classList.add("active");
+    }
 
     const o = data[i].items[j];
     currentOrganData = o;
@@ -599,59 +605,17 @@ function loadModelData(dataObj) {
     currentActiveModelUrl = dataObj.model_file; 
     setTimeout(() => { viewer.src = dataObj.model_file; }, 50); 
 
-    // 🌟 ส่วนที่เพิ่มใหม่: สร้างปุ่มทางลัด (Hotspot Buttons) อัตโนมัติแบบพับเก็บได้ 🌟
     const partsListDiv = document.getElementById("partsListContainer");
     if(dataObj.click_parts && dataObj.click_parts.length > 0) {
-        
-        // แอบฝัง CSS สำหรับ Scrollbar บางๆ และระบบพับเก็บ (Accordion)
         let html = `
         <style>
-            .premium-scroll::-webkit-scrollbar { width: 5px; }
-            .premium-scroll::-webkit-scrollbar-track { background: transparent; }
-            .premium-scroll::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 10px; }
-            .premium-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255, 71, 87, 0.6); }
-
-            /* สไตล์กล่องพับเก็บได้ (Details/Summary) */
-            details.hotspot-accordion {
-                background: rgba(15, 23, 42, 0.4);
-                border: 1px solid rgba(255, 255, 255, 0.08);
-                border-radius: 14px;
-                transition: all 0.3s ease;
-                margin-top: 5px;
-            }
-            details.hotspot-accordion[open] {
-                background: rgba(15, 23, 42, 0.65);
-                border-color: rgba(255, 255, 255, 0.15);
-                padding-bottom: 14px;
-            }
-            details.hotspot-accordion summary {
-                list-style: none;
-                padding: 12px 15px;
-                cursor: pointer;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                font-size: 0.9rem;
-                color: #cbd5e1;
-                border-radius: 14px;
-                user-select: none;
-                transition: 0.2s;
-            }
-            details.hotspot-accordion summary::-webkit-details-marker {
-                display: none;
-            }
-            details.hotspot-accordion summary:hover {
-                background: rgba(255, 255, 255, 0.05);
-                color: #ffffff;
-            }
-            .accordion-arrow {
-                transition: transform 0.3s ease;
-                font-size: 0.8rem;
-                opacity: 0.7;
-            }
-            details.hotspot-accordion[open] .accordion-arrow {
-                transform: rotate(180deg);
-            }
+            details.hotspot-accordion { background: rgba(15, 23, 42, 0.4); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 14px; transition: all 0.3s ease; margin-top: 5px; }
+            details.hotspot-accordion[open] { background: rgba(15, 23, 42, 0.65); border-color: rgba(255, 255, 255, 0.15); padding-bottom: 14px; }
+            details.hotspot-accordion summary { list-style: none; padding: 12px 15px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; color: #cbd5e1; border-radius: 14px; user-select: none; transition: 0.2s; }
+            details.hotspot-accordion summary::-webkit-details-marker { display: none; }
+            details.hotspot-accordion summary:hover { background: rgba(255, 255, 255, 0.05); color: #ffffff; }
+            .accordion-arrow { transition: transform 0.3s ease; font-size: 0.8rem; opacity: 0.7; }
+            details.hotspot-accordion[open] .accordion-arrow { transform: rotate(180deg); }
         </style>
         
         <details class="hotspot-accordion">
@@ -664,9 +628,7 @@ function loadModelData(dataObj) {
         `;
         
         dataObj.click_parts.forEach(p => {
-            // ตัดโค้ด HTML และคำภาษาอังกฤษออก เพื่อให้ชื่อปุ่มสั้นและดูสะอาดตา
             let cleanName = p.name.replace(/<[^>]*>?/gm, '').split('(')[0].trim(); 
-            
             html += `<button onclick="forceClickPart('${p.material_name}')" style="background: #0f172a; border: 1px solid #334155; color: #cbd5e1; padding: 8px 12px; font-size: 0.85rem; font-family: 'Kanit'; border-radius: 10px; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: flex-start; gap: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.2); width: 100%; text-align: left;" onmouseover="this.style.borderColor='#ff4757'; this.style.color='#ffffff'; this.style.background='rgba(255, 71, 87, 0.1)';" onmouseout="this.style.borderColor='#334155'; this.style.color='#cbd5e1'; this.style.background='#0f172a';">
                         <span style="color:#ff4757; font-size:1.1rem; flex-shrink:0;">📍</span> 
                         <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; width: 100%;">${cleanName}</span>
@@ -679,13 +641,12 @@ function loadModelData(dataObj) {
         partsListDiv.innerHTML = '';
     }
 }
-// 🌟 ฟังก์ชันใหม่: จำลองการคลิกโมเดลเมื่อกดปุ่มทางลัด 🌟
+
 function forceClickPart(matName) {
     const partsData = isAltMode ? currentOrganData.alt_mode.click_parts : currentOrganData.click_parts;
     const clickedPart = partsData.find(p => p.material_name === matName);
 
     if(clickedPart) {
-        // ไฮไลต์สี
         for (const mat of viewer.model.materials) {
             const origColor = originalColors.get(mat.name) || [1, 1, 1, 1];
             if (mat.name !== matName) {
@@ -697,14 +658,12 @@ function forceClickPart(matName) {
             }
         }
         
-        // 🌟 สั่งให้กล้องซูมไปที่พิกัดที่แอดมินบันทึกไว้ 🌟
         if (clickedPart.position) {
             viewer.cameraTarget = clickedPart.position;
         } else {
-            viewer.cameraTarget = 'auto auto auto'; // ท่ามาตรฐานถ้าไม่มีพิกัด
+            viewer.cameraTarget = 'auto auto auto'; 
         }
         
-        // เด้งหน้าต่างข้อมูล
         document.getElementById('modalTitle').innerHTML = clickedPart.name;
         document.getElementById('modalDesc').innerHTML = clickedPart.info || "ไม่มีข้อมูลรายละเอียดเพิ่มเติม"; 
         infoModal.style.display = 'flex';
@@ -822,13 +781,12 @@ function startTimer() {
     clearInterval(timerInterval); 
     const timerDisplay = document.getElementById("quizTimer");
     
-    // 🌟 เช็กว่าคุณครูเปิดใช้งานการจับเวลาหรือไม่? ถ้าปิดอยู่ให้ซ่อนแถบเวลาและหยุดทำงาน
     if (!timerEnabled) {
         timerDisplay.style.display = "none";
         return; 
     }
     
-    timeLeft = globalTimeLimit; // 🌟 ดึงพารามิเตอร์เวลาที่ตั้งไว้จากแอดมินมาใช้รันถอยหลัง
+    timeLeft = globalTimeLimit; 
     timerDisplay.style.display = "block"; timerDisplay.textContent = `⏱️ ${timeLeft}s`; timerDisplay.style.background = "#ef4444";
     
     timerInterval = setInterval(() => {
@@ -838,7 +796,6 @@ function startTimer() {
     }, 1000);
 }
 
-// 🌟 1. อัปเดตให้โชว์ (x คะแนน) ต่อท้ายคำถาม
 function showQuestion() {
     selectedAnswerText = ""; document.getElementById("nextQuestionBtn").style.display = "none"; 
     if (qIndex >= currentQuizData.length) return showResult();
@@ -846,7 +803,6 @@ function showQuestion() {
     const q = currentQuizData[qIndex]; currentCorrectText = q.choices[q.answer];
     const shuffledChoices = shuffleArray([...q.choices]);
     
-    // 🌟 โชว์คะแนนให้เด็กเห็น จะได้รู้ว่าข้อนี้กี่แต้ม
     const pt = q.points || 1;
     document.getElementById("qTitle").innerHTML = `${q.question} <span style="color:#fbbf24; font-size:0.85rem; font-weight:normal; margin-left:8px;">(${pt} คะแนน)</span>`;
     
@@ -867,7 +823,9 @@ function nextQuestion() {
     const q = currentQuizData[qIndex];
     const isCorrect = (selectedAnswerText === currentCorrectText);
     
-    if (isCorrect) score += (q.points || 1); 
+    if (isCorrect) {
+        score += (q.points || 1); 
+    }
     
     userAnswers.push({ 
         question: q.question, 
@@ -880,40 +838,55 @@ function nextQuestion() {
     qIndex++; showQuestion();
 }
 
-// 🌟 2. อัปเดตหน้าสรุปผล ให้แยกชัดเจนระหว่าง "จำนวนข้อที่ตอบถูก" กับ "คะแนนรวมที่ทำได้"
+// 🌟 อัปเกรดหน้าตาเฉลยแบบพรีเมียมการ์ด (Premium Card Layout) 🌟
 function showResult() {
     clearInterval(timerInterval); document.getElementById("quizTimer").style.display = "none";
 
     let totalMaxScore = 0;
-    let correctCount = 0; // นับว่าถูกกี่ "ข้อ"
+    let correctCount = 0; 
 
     currentQuizData.forEach(q => totalMaxScore += (q.points || 1));
 
     const percent = (score / totalMaxScore) * 100;
-    const isPass = percent >= globalPassingPercentage; // 🌟 ใช้เกณฑ์ผ่านแบบ Dynamic
+    const isPass = percent >= globalPassingPercentage; 
 
-    let summaryHTML = `<div style="max-height: 40vh; overflow-y: auto; padding-right: 5px; margin-bottom: 20px; text-align: left;">`;
+    let summaryHTML = `<div class="premium-scroll" style="max-height: 40vh; overflow-y: auto; padding-right: 10px; margin-bottom: 20px; text-align: left;">`;
 
     userAnswers.forEach((ans, idx) => {
         const isCorrect = ans.isCorrect;
-        if (isCorrect) correctCount++; // บวกจำนวนข้อ
+        if (isCorrect) correctCount++; 
 
-        const bgColor = isCorrect ? 'rgba(74, 222, 128, 0.1)' : 'rgba(248, 113, 113, 0.1)';
-        const borderColor = isCorrect ? '#4ade80' : '#f87171';
-        const icon = isCorrect ? '✅' : '❌';
-
-        const ptsText = isCorrect ? `+${ans.points}` : `0`;
+        const cardBorder = isCorrect ? 'rgba(74, 222, 128, 0.6)' : 'rgba(248, 113, 113, 0.6)';
+        const badgeBg = isCorrect ? 'rgba(74, 222, 128, 0.2)' : 'rgba(248, 113, 113, 0.2)';
+        const badgeColor = isCorrect ? '#4ade80' : '#f87171';
+        const ptsColor = isCorrect ? '#4ade80' : '#f87171';
+        const ptsText = isCorrect ? `${ans.points}` : `0`;
+        const iconAns = isCorrect ? '✅' : '❌';
 
         summaryHTML += `
-            <div style="background: ${bgColor}; border: 1px solid ${borderColor}; padding: 15px; border-radius: 16px; margin-bottom: 15px;">
-                <div style="color: white; font-size: 1rem; margin-bottom: 12px; line-height: 1.4;">
-                    <span style="background: ${borderColor}; color: #020617; padding: 3px 10px; border-radius: 8px; font-size: 0.85rem; font-weight: bold; margin-right: 8px;">ข้อ ${idx+1}</span>
-                    ${ans.question} <span style="color:${borderColor}; font-size:0.85rem; margin-left:5px;">(${ptsText}/${ans.points} pt)</span>
+            <div style="background: rgba(15,23,42,0.6); border: 1px solid ${cardBorder}; padding: 16px; border-radius: 16px; margin-bottom: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.2);">
+                <div style="display: flex; align-items: flex-start; gap: 10px; margin-bottom: 15px;">
+                    <span style="background: ${badgeBg}; color: ${badgeColor}; padding: 4px 10px; border-radius: 8px; font-size: 0.85rem; font-weight: bold; flex-shrink: 0;">ข้อ ${idx+1}</span>
+                    <div style="color: white; font-size: 0.95rem; line-height: 1.4; flex-grow: 1;">
+                        ${ans.question} <span style="color: ${ptsColor}; font-size: 0.85rem; margin-left: 5px;">(${ptsText}/${ans.points} pt)</span>
+                    </div>
                 </div>
-                <div style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: 12px;">
-                    <div style="color: ${isCorrect ? '#4ade80' : '#f87171'}; font-size: 0.95rem; margin-bottom: ${isCorrect && !ans.explanation ? '0' : '8px'};">${icon} <b>นักเรียนตอบ:</b> ${ans.selected}</div>
-                    ${!isCorrect ? `<div style="color: #4ade80; font-size: 0.95rem; border-top: 1px dashed rgba(255,255,255,0.2); padding-top: 8px;">💡 <b>เฉลยที่ถูกต้อง:</b> ${ans.correct}</div>` : ''}
-                    ${ans.explanation ? `<div style="color: #cbd5e1; font-size: 0.85rem; border-top: 1px dashed rgba(255,255,255,0.2); padding-top: 8px; margin-top: 8px;">📝 <b>คำอธิบาย:</b> ${ans.explanation}</div>` : ''}
+                <div style="background: rgba(0,0,0,0.4); padding: 15px; border-radius: 12px;">
+                    <div style="color: ${ptsColor}; font-size: 0.9rem; font-weight: bold; margin-bottom: ${isCorrect && !ans.explanation ? '0' : '10px'};">
+                        ${iconAns} นักเรียนตอบ: <span style="font-weight: normal;">${ans.selected}</span>
+                    </div>
+                    ${!isCorrect ? `
+                    <div style="border-top: 1px dashed rgba(255,255,255,0.15); padding-top: 10px;">
+                        <div style="color: #4ade80; font-size: 0.9rem; font-weight: bold;">
+                            💡 เฉลยที่ถูกต้อง: <span style="font-weight: normal;">${ans.correct}</span>
+                        </div>
+                    </div>` : ''}
+                    ${ans.explanation ? `
+                    <div style="border-top: 1px dashed rgba(255,255,255,0.15); padding-top: 10px; margin-top: 10px;">
+                        <div style="color: #cbd5e1; font-size: 0.85rem; line-height: 1.4;">
+                            📝 <b>คำอธิบาย:</b> ${ans.explanation}
+                        </div>
+                    </div>` : ''}
                 </div>
             </div>`;
     });
@@ -1032,20 +1005,19 @@ function toggleUI() {
         btn.style.borderColor = "var(--border)"; btn.style.color = "white"; 
     }
 }
-let isSpeaking = false;
-let originalBtnText = ""; // 🌟 เพิ่มตัวแปรสำหรับจำข้อความตั้งต้นของปุ่ม
 
 function speakText(elementId, btnElement) {
+    if (!btnElement.dataset.originalText) {
+        btnElement.dataset.originalText = btnElement.innerHTML;
+    }
+
     if (isSpeaking) {
         speechSynthesis.cancel(); 
         isSpeaking = false;
-        btnElement.innerHTML = originalBtnText || "🔊 ฟังเสียงบรรยาย"; // 🌟 คืนค่าข้อความเดิม
+        btnElement.innerHTML = btnElement.dataset.originalText;
         return;
     }
     
-    originalBtnText = btnElement.innerHTML; // 🌟 จำข้อความบนปุ่มไว้ก่อนเปลี่ยนเป็นคำว่าหยุด
-    
-    // 1. ดึงข้อความมาประกอบร่างกัน (ให้เอา "หัวข้อ" มาอ่านก่อน "เนื้อหา")
     let textRaw = "";
     if (elementId === 'desc') {
         textRaw = document.getElementById('title').innerText + " " + document.getElementById('desc').innerText;
@@ -1055,12 +1027,9 @@ function speakText(elementId, btnElement) {
         textRaw = document.getElementById(elementId).innerText;
     }
     
-    // 2. ลบอิโมจิทิ้ง
     textRaw = textRaw.replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, '');
     
-    // 3. ตรวจสอบระบบปฏิบัติการ
     const isWindows = navigator.userAgent.indexOf('Windows') !== -1;
-    
     if (isWindows) {
         textRaw = textRaw.replace(/\(.*?\)/g, ''); 
         textRaw = textRaw.replace(/C-shaped/gi, "รูปตัวซี"); 
@@ -1084,7 +1053,7 @@ function speakText(elementId, btnElement) {
 
     utterance.onend = () => { 
         isSpeaking = false; 
-        btnElement.innerHTML = originalBtnText || "🔊 ฟังเสียงบรรยาย"; // 🌟 คืนค่าข้อความเดิมตอนอ่านจบ
+        btnElement.innerHTML = btnElement.dataset.originalText;
     };
     
     speechSynthesis.speak(utterance);
@@ -1092,7 +1061,6 @@ function speakText(elementId, btnElement) {
     btnElement.innerHTML = "🔇 หยุดฟังเสียง";
 }
 
-// โหลดเสียงเตรียมไว้ล่วงหน้า
 if ('speechSynthesis' in window) {
     speechSynthesis.onvoiceschanged = () => { speechSynthesis.getVoices(); };
 }
