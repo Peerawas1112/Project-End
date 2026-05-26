@@ -96,6 +96,9 @@
             <button onclick="syncInitialData()" class="bg-amber-600 hover:bg-amber-500 px-3 py-1.5 rounded-lg text-xs dev-only hidden" id="btnSync">📥 โหลดข้อมูลเริ่มต้น</button>
             <button onclick="addNewSystem()" class="bg-blue-600/20 hover:bg-blue-600 text-blue-400 hover:text-white px-3 py-1.5 rounded-lg text-xs transition border border-blue-600/30 dev-only">➕ เพิ่มหมวดหมู่</button>
             <button onclick="clearAllData()" class="bg-rose-600/20 hover:bg-rose-600 text-rose-400 hover:text-white px-3 py-1.5 rounded-lg text-xs transition border border-rose-600/30 dev-only">🧹 ล้าง Cloud</button>
+
+            <input type="file" id="importBackupFile" accept=".json" class="hidden" onchange="handleImportBackup(event)">
+            <button onclick="document.getElementById('importBackupFile').click()" class="bg-teal-600/20 hover:bg-teal-600 text-teal-400 hover:text-white px-3 py-1.5 rounded-lg text-xs transition border border-teal-600/30">📂 นำเข้าข้อมูล</button>
             <button onclick="exportBackup()" class="bg-indigo-600/20 hover:bg-indigo-600 text-indigo-400 hover:text-white px-3 py-1.5 rounded-lg text-xs transition border border-indigo-600/30">💾 สำรองข้อมูล</button>
             <div class="w-[1px] bg-slate-700 mx-1 h-6"></div>
             <button onclick="toggleFullScreen()" id="fsBtnHeader" class="bg-slate-700 hover:bg-slate-600 text-white w-8 h-8 rounded-lg flex items-center justify-center transition" title="ขยายเต็มจอ"></button>
@@ -956,6 +959,60 @@ function exportBackup() {
     dl.setAttribute("download", "biolens_backup_" + new Date().toISOString().split('T')[0] + ".json");
     dl.click();
     showToast("ดาวน์โหลดไฟล์สำรองข้อมูลสำเร็จ!", "success");
+}
+// 🌟 ฟังก์ชันนำเข้าข้อมูลจากไฟล์ JSON (Restore) 🌟
+function handleImportBackup(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // 1. ตรวจสอบนามสกุลไฟล์
+    if (!file.name.toLowerCase().endsWith('.json')) {
+        showToast("❌ กรุณาอัปโหลดไฟล์นามสกุล .json เท่านั้น", "error");
+        event.target.value = ''; // รีเซ็ต input
+        return;
+    }
+
+    // 2. อ่านไฟล์ด้วย FileReader
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            // แปลงข้อความจากไฟล์ให้เป็น JSON Object
+            const importedData = JSON.parse(e.target.result);
+
+            // 3. ตรวจสอบโครงสร้างไฟล์เบื้องต้น ว่าใช่ข้อมูลของ BioLens ไหม
+            if (!importedData.systems || !Array.isArray(importedData.systems)) {
+                throw new Error("โครงสร้างไฟล์ข้อมูลไม่ถูกต้อง");
+            }
+
+            // 4. เด้งป๊อปอัปยืนยันก่อนเขียนทับข้อมูลเดิม
+            openCustomConfirm(
+                "<span class='text-rose-400'>คำเตือน: ข้อมูลบทเรียนและข้อสอบบน Cloud ทั้งหมดจะถูกแทนที่ด้วยข้อมูลจากไฟล์นี้!</span><br><br>คุณแน่ใจหรือไม่ที่จะนำเข้าข้อมูล?", 
+                "📂 ยืนยันการนำเข้าข้อมูล", 
+                () => {
+                    // ถ้ายืนยัน ให้บันทึกข้อมูลทับลง Firebase ทันที
+                    db.collection("database").doc("anatomy").set(importedData)
+                        .then(() => {
+                            showToast("นำเข้าข้อมูลสำเร็จ! ระบบกำลังรีโหลด...", "success");
+                            // รีเฟรชหน้าเว็บใหม่หลังจากผ่านไป 1.5 วินาที เพื่อแสดงข้อมูลใหม่
+                            setTimeout(() => location.reload(), 1500); 
+                        })
+                        .catch((error) => {
+                            showToast("❌ เกิดข้อผิดพลาดในการบันทึกลง Cloud", "error");
+                            console.error(error);
+                        });
+                }, 
+                true // ให้ปุ่มยืนยันเป็นสีแดง (แจ้งเตือนความเสี่ยง)
+            );
+        } catch (error) {
+            showToast("❌ ไฟล์ JSON ไม่ถูกต้อง หรือโครงสร้างพัง", "error");
+            console.error(error);
+        }
+        
+        event.target.value = ''; // รีเซ็ต input ให้กดอัปโหลดไฟล์เดิมซ้ำได้ในอนาคต
+    };
+    
+    // เริ่มอ่านไฟล์เป็นข้อความ
+    reader.readAsText(file);
 }
 </script>
 </body>
