@@ -1,623 +1,1628 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="th">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-<title>BioLens AR</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
+    <title>BioLens AR</title>
 
-<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js" defer></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500&display=swap" rel="stylesheet">
+    <script
+      type="module"
+      src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"
+      defer
+    ></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    />
 
-<style>
-/* =========================================
+    <style>
+      /* =========================================
    1. Base & Reset
    ========================================= */
-:root { --primary: #ff4757; --bg: #020617; --glass: rgba(15, 23, 42, 0.85); --border: rgba(255, 255, 255, 0.15); }
-body{ margin:0; padding:0; font-family:Kanit,sans-serif; background:var(--bg); color:white; height:100vh; width: 100vw; overflow:hidden; }
-* { box-sizing: border-box; }
+      :root {
+        --primary: #ff4757;
+        --bg: #020617;
+        --glass: rgba(15, 23, 42, 0.85);
+        --border: rgba(255, 255, 255, 0.15);
+      }
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: Kanit, sans-serif;
+        background: var(--bg);
+        color: white;
+        height: 100vh;
+        width: 100vw;
+        overflow: hidden;
+      }
+      * {
+        box-sizing: border-box;
+      }
 
-#load-shell { position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: #1e293b; z-index: 2000; display: none; }
-#load-bar { height: 100%; background: var(--primary); width: 0%; transition: width 0.3s; }
+      #load-shell {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: #1e293b;
+        z-index: 2000;
+        display: none;
+      }
+      #load-bar {
+        height: 100%;
+        background: var(--primary);
+        width: 0%;
+        transition: width 0.3s;
+      }
 
-/* =========================================
+      /* =========================================
    2. Home & Quiz Pages
    ========================================= */
-.home, .quiz-page { position:fixed; inset:0; display:flex; justify-content:center; align-items:center; background:var(--bg); z-index:1000; padding: 20px; }
-.quiz-page { display:none; }
-.box { width:100%; max-width:480px; max-height: 90vh; overflow-y: auto; background:var(--glass); border-radius:28px; padding:35px; text-align:center; border: 1px solid var(--border); box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
-.box::-webkit-scrollbar { display: none; }
+      .home,
+      .quiz-page {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: var(--bg);
+        z-index: 1000;
+        padding: 20px;
+      }
+      .quiz-page {
+        display: none;
+      }
+      .box {
+        width: 100%;
+        max-width: 480px;
+        max-height: 90vh;
+        overflow-y: auto;
+        background: var(--glass);
+        border-radius: 28px;
+        padding: 35px;
+        text-align: center;
+        border: 1px solid var(--border);
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+      }
+      .box::-webkit-scrollbar {
+        display: none;
+      }
 
-button { padding:14px 20px; border:none; border-radius:16px; background:var(--primary); color:white; font-size:1rem; cursor:pointer; transition: 0.2s; font-family: Kanit; font-weight: 500; }
-button:active { transform: scale(0.95); }
-button:disabled { background: #475569; opacity: 0.5; cursor: not-allowed; }
+      button {
+        padding: 14px 20px;
+        border: none;
+        border-radius: 16px;
+        background: var(--primary);
+        color: white;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: 0.2s;
+        font-family: Kanit;
+        font-weight: 500;
+      }
+      button:active {
+        transform: scale(0.95);
+      }
+      button:disabled {
+        background: #475569;
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
 
-.choice { background:#1e293b; padding:16px; border-radius:16px; margin:12px 0; cursor:pointer; text-align: left; border: 1px solid transparent; transition: 0.2s; }
-.choice:hover { background: #334155; }
-.choice.selected { background: #3b82f6 !important; border-color: #93c5fd; }
-.choice.disabled { pointer-events: none; opacity: 0.6; }
+      .choice {
+        background: #1e293b;
+        padding: 16px;
+        border-radius: 16px;
+        margin: 12px 0;
+        cursor: pointer;
+        text-align: left;
+        border: 1px solid transparent;
+        transition: 0.2s;
+      }
+      .choice:hover {
+        background: #334155;
+      }
+      .choice.selected {
+        background: #3b82f6 !important;
+        border-color: #93c5fd;
+      }
+      .choice.disabled {
+        pointer-events: none;
+        opacity: 0.6;
+      }
 
-.grade-text { font-size: 4rem; font-weight: bold; color: var(--primary); margin: 10px 0; }
+      .grade-text {
+        font-size: 4rem;
+        font-weight: bold;
+        color: var(--primary);
+        margin: 10px 0;
+      }
 
-.fs-icon-btn { position: absolute; top: 25px; right: 25px; width: 50px; height: 50px; background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 50%; color: white; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: all 0.3s ease; backdrop-filter: blur(5px); z-index: 2000; box-shadow: 0 4px 15px rgba(0,0,0,0.3); padding: 0; }
-.fs-icon-btn:hover { background: var(--primary); border-color: var(--primary); transform: scale(1.1); }
+      .fs-icon-btn {
+        position: absolute;
+        top: 25px;
+        right: 25px;
+        width: 50px;
+        height: 50px;
+        background: rgba(30, 41, 59, 0.7);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(5px);
+        z-index: 2000;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        padding: 0;
+      }
+      .fs-icon-btn:hover {
+        background: var(--primary);
+        border-color: var(--primary);
+        transform: scale(1.1);
+      }
 
-/* =========================================
+      /* =========================================
    3. Main Workspace & Header
    ========================================= */
-.main { position:fixed; top:0; left:0; width:100vw; height:100vh; display: none; z-index: 1; }
-model-viewer { width:100%; height:calc(100vh - 60px); margin-top: 60px; --poster-color: transparent; outline: none; cursor: crosshair; }
+      .main {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        display: none;
+        z-index: 1;
+      }
+      model-viewer {
+        width: 100%;
+        height: calc(100vh - 60px);
+        margin-top: 60px;
+        --poster-color: transparent;
+        outline: none;
+        cursor: crosshair;
+      }
 
-.app-header { position: absolute; top:0; left:0; width:100%; height: 60px; display: none; align-items: center; justify-content: space-between; padding: 0 20px; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); z-index: 500; }
+      .app-header {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 60px;
+        display: none;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 20px;
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid var(--border);
+        z-index: 500;
+      }
 
-.header-buttons { display: flex; gap: 8px; align-items: center; }
-.header-btn { background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border); font-size: 0.85rem; padding: 6px 14px; color: white; transition: 0.3s; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; font-family: 'Kanit'; }
-.header-btn:hover { background: rgba(255, 255, 255, 0.15); }
+      .header-buttons {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+      .header-btn {
+        background: rgba(15, 23, 42, 0.6);
+        border: 1px solid var(--border);
+        font-size: 0.85rem;
+        padding: 6px 14px;
+        color: white;
+        transition: 0.3s;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        white-space: nowrap;
+        font-family: "Kanit";
+      }
+      .header-btn:hover {
+        background: rgba(255, 255, 255, 0.15);
+      }
 
-.tabs { top: 80px; left: 50%; transform: translateX(-50%); flex-direction: row; position: absolute; display: none; gap: 10px; z-index: 100; pointer-events: none; }
-.tab-btn { pointer-events: auto; background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255,255,255,0.1); border-radius: 30px; color: #cbd5e1; cursor: pointer; text-align: center; transition: 0.3s; padding: 6px 18px; font-weight: 500; font-size: 0.95rem; box-shadow: 0 4px 15px rgba(0,0,0,0.3); backdrop-filter: blur(10px); white-space: nowrap; }
-.tab-btn:hover { background: rgba(255, 255, 255, 0.1); color: white; transform: translateY(-2px); }
-.tab-btn.active { background: var(--primary); border-color: var(--primary); color: white; box-shadow: 0 8px 25px rgba(255, 71, 87, 0.4); transform: translateY(-2px); }
+      .tabs {
+        top: 80px;
+        left: 50%;
+        transform: translateX(-50%);
+        flex-direction: row;
+        position: absolute;
+        display: none;
+        gap: 10px;
+        z-index: 100;
+        pointer-events: none;
+      }
+      .tab-btn {
+        pointer-events: auto;
+        background: rgba(15, 23, 42, 0.7);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 30px;
+        color: #cbd5e1;
+        cursor: pointer;
+        text-align: center;
+        transition: 0.3s;
+        padding: 6px 18px;
+        font-weight: 500;
+        font-size: 0.95rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(10px);
+        white-space: nowrap;
+      }
+      .tab-btn:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        transform: translateY(-2px);
+      }
+      .tab-btn.active {
+        background: var(--primary);
+        border-color: var(--primary);
+        color: white;
+        box-shadow: 0 8px 25px rgba(255, 71, 87, 0.4);
+        transform: translateY(-2px);
+      }
 
-.menu { right: 30px; top: 50%; transform: translateY(-50%); flex-direction: column; position: absolute; display: none; gap: 4px; z-index: 100; pointer-events: auto; background: rgba(15, 23, 42, 0.6); padding: 10px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(15px); box-shadow: 0 10px 30px rgba(0,0,0,0.4); min-width: 180px; }
-.menu-item { background: transparent; border: none; border-radius: 8px; color: #94a3b8; cursor: pointer; text-align: right; transition: 0.3s; padding: 10px 16px; font-size: 0.9rem; width: 100%; border-right: 4px solid transparent; font-family: 'Kanit'; }
-.menu-item:hover { background: rgba(255, 255, 255, 0.05); color: white; }
-.menu-item.active { background: linear-gradient(90deg, rgba(255,71,87,0) 0%, rgba(255,71,87,0.15) 100%); color: white; font-weight: 500; border-right: 4px solid var(--primary); }
+      .menu {
+        right: 30px;
+        top: 50%;
+        transform: translateY(-50%);
+        flex-direction: column;
+        position: absolute;
+        display: none;
+        gap: 4px;
+        z-index: 100;
+        pointer-events: auto;
+        background: rgba(15, 23, 42, 0.6);
+        padding: 10px;
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(15px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        min-width: 180px;
+      }
+      .menu-item {
+        background: transparent;
+        border: none;
+        border-radius: 8px;
+        color: #94a3b8;
+        cursor: pointer;
+        text-align: right;
+        transition: 0.3s;
+        padding: 10px 16px;
+        font-size: 0.9rem;
+        width: 100%;
+        border-right: 4px solid transparent;
+        font-family: "Kanit";
+      }
+      .menu-item:hover {
+        background: rgba(255, 255, 255, 0.05);
+        color: white;
+      }
+      .menu-item.active {
+        background: linear-gradient(
+          90deg,
+          rgba(255, 71, 87, 0) 0%,
+          rgba(255, 71, 87, 0.15) 100%
+        );
+        color: white;
+        font-weight: 500;
+        border-right: 4px solid var(--primary);
+      }
 
-.info-panel { position: absolute; top: 50%; left: 30px; transform: translateY(-50%); width: 380px; background: var(--glass); border-radius: 24px; border: 1px solid var(--border); pointer-events: auto; z-index: 10; padding: 24px; backdrop-filter: blur(10px); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-.toggle-mode-btn { position: absolute; top: 80px; right: 20px; background: rgba(15, 23, 42, 0.9); color: white; border: 1px solid var(--primary); border-radius: 12px; padding: 8px 14px; font-size: 0.9rem; z-index: 200; cursor: pointer; display: none; transition: 0.3s; }
-.toggle-mode-btn:hover { background: var(--primary); }
+      .info-panel {
+        position: absolute;
+        top: 50%;
+        left: 30px;
+        transform: translateY(-50%);
+        width: 380px;
+        background: var(--glass);
+        border-radius: 24px;
+        border: 1px solid var(--border);
+        pointer-events: auto;
+        z-index: 10;
+        padding: 24px;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      }
+      .toggle-mode-btn {
+        position: absolute;
+        top: 80px;
+        right: 20px;
+        background: rgba(15, 23, 42, 0.9);
+        color: white;
+        border: 1px solid var(--primary);
+        border-radius: 12px;
+        padding: 8px 14px;
+        font-size: 0.9rem;
+        z-index: 200;
+        cursor: pointer;
+        display: none;
+        transition: 0.3s;
+      }
+      .toggle-mode-btn:hover {
+        background: var(--primary);
+      }
 
-/* =========================================
+      /* =========================================
    4. Modals & Floating Cards (QR & Info)
    ========================================= */
-.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center; z-index: 3000; padding: 20px; opacity: 0; animation: fadeIn 0.3s forwards; }
-@keyframes fadeIn { to { opacity: 1; } }
-.modal-box { background: var(--glass); border: 1px solid var(--border); border-radius: 24px; padding: 25px; width: 100%; max-width: 400px; text-align: center; color: white; transform: scale(0.95); animation: popUp 0.3s forwards ease-out; }
-@keyframes popUp { to { transform: scale(1); } }
+      .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(5px);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 3000;
+        padding: 20px;
+        opacity: 0;
+        animation: fadeIn 0.3s forwards;
+      }
+      @keyframes fadeIn {
+        to {
+          opacity: 1;
+        }
+      }
+      .modal-box {
+        background: var(--glass);
+        border: 1px solid var(--border);
+        border-radius: 24px;
+        padding: 25px;
+        width: 100%;
+        max-width: 400px;
+        text-align: center;
+        color: white;
+        transform: scale(0.95);
+        animation: popUp 0.3s forwards ease-out;
+      }
+      @keyframes popUp {
+        to {
+          transform: scale(1);
+        }
+      }
 
-.part-info-card { position: absolute; top: 50%; right: 170px; transform: translateY(-50%); width: 360px; background: var(--glass); border: 1px solid var(--border); border-radius: 24px; padding: 25px; color: white; z-index: 20; backdrop-filter: blur(10px); box-shadow: 0 15px 40px rgba(0,0,0,0.6); display: none; flex-direction: column; animation: slideInRight 0.3s forwards ease-out; }
-@keyframes slideInRight { from { opacity: 0; transform: translate(30px, -50%); } to { opacity: 1; transform: translate(0, -50%); } }
+      .part-info-card {
+        position: absolute;
+        top: 50%;
+        right: 170px;
+        transform: translateY(-50%);
+        width: 360px;
+        background: var(--glass);
+        border: 1px solid var(--border);
+        border-radius: 24px;
+        padding: 25px;
+        color: white;
+        z-index: 20;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+        display: none;
+        flex-direction: column;
+        animation: slideInRight 0.3s forwards ease-out;
+      }
+      @keyframes slideInRight {
+        from {
+          opacity: 0;
+          transform: translate(30px, -50%);
+        }
+        to {
+          opacity: 1;
+          transform: translate(0, -50%);
+        }
+      }
 
-.modal-title { color: #ffffff; background: transparent; font-size: 1.3rem; margin: 0 0 15px 0; padding: 0 0 12px 0; border: none; border-bottom: 2px solid var(--primary); border-radius: 0; line-height: 1.4; text-align: center; box-shadow: none; letter-spacing: 0.5px; }
-.modal-desc { font-size: 0.95rem; color: #cbd5e1; line-height: 1.5; margin-bottom: 20px; text-align: left; max-height: 250px; overflow-y: auto; padding-right: 5px; }
-.modal-desc::-webkit-scrollbar { width: 6px; }
-.modal-desc::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); border-radius: 10px; }
-.modal-desc::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 10px; }
-.modal-desc::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.4); }
+      .modal-title {
+        color: #ffffff;
+        background: transparent;
+        font-size: 1.3rem;
+        margin: 0 0 15px 0;
+        padding: 0 0 12px 0;
+        border: none;
+        border-bottom: 2px solid var(--primary);
+        border-radius: 0;
+        line-height: 1.4;
+        text-align: center;
+        box-shadow: none;
+        letter-spacing: 0.5px;
+      }
+      .modal-desc {
+        font-size: 0.95rem;
+        color: #cbd5e1;
+        line-height: 1.5;
+        margin-bottom: 20px;
+        text-align: left;
+        max-height: 250px;
+        overflow-y: auto;
+        padding-right: 5px;
+      }
+      .modal-desc::-webkit-scrollbar {
+        width: 6px;
+      }
+      .modal-desc::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 10px;
+      }
+      .modal-desc::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+      }
+      .modal-desc::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.4);
+      }
 
-.close-modal-btn { background: var(--primary); color: white; border: none; padding: 10px 32px; border-radius: 12px; cursor: pointer; font-family: 'Kanit'; font-size: 1rem; width: max-content; display: block; margin: 5px auto 0 auto; align-self: center; box-shadow: 0 4px 15px rgba(255, 71, 87, 0.3); transition: 0.2s; }
-.close-modal-btn:hover { background: #ff6b81; transform: translateY(-2px); }
-.close-info-btn { position: absolute; top: 15px; right: 15px; background: transparent; color: #94a3b8; border: none; font-size: 1.2rem; cursor: pointer; padding: 0; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: 0.3s; box-shadow: none; }
-.close-info-btn:hover { background: rgba(255, 255, 255, 0.1); color: white; }
+      .close-modal-btn {
+        background: var(--primary);
+        color: white;
+        border: none;
+        padding: 10px 32px;
+        border-radius: 12px;
+        cursor: pointer;
+        font-family: "Kanit";
+        font-size: 1rem;
+        width: max-content;
+        display: block;
+        margin: 5px auto 0 auto;
+        align-self: center;
+        box-shadow: 0 4px 15px rgba(255, 71, 87, 0.3);
+        transition: 0.2s;
+      }
+      .close-modal-btn:hover {
+        background: #ff6b81;
+        transform: translateY(-2px);
+      }
+      .close-info-btn {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: transparent;
+        color: #94a3b8;
+        border: none;
+        font-size: 1.2rem;
+        cursor: pointer;
+        padding: 0;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: 0.3s;
+        box-shadow: none;
+      }
+      .close-info-btn:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+      }
 
-/* =========================================
+      /* =========================================
    5. ซ่อน UI (Focus Mode)
    ========================================= */
-.info-panel, .menu, .tabs, .toggle-mode-btn, .app-header, .app-header span.title-text, .part-info-card { transition: all 0.3s ease-in-out; }
-.ui-hidden .info-panel, .ui-hidden .menu, .ui-hidden .tabs, .ui-hidden .toggle-mode-btn { opacity: 0; pointer-events: none; visibility: hidden; }
-.ui-hidden .app-header { background: transparent; backdrop-filter: none; border-bottom: transparent; }
-.ui-hidden .app-header .title-text { opacity: 0; }
+      .info-panel,
+      .menu,
+      .tabs,
+      .toggle-mode-btn,
+      .app-header,
+      .app-header span.title-text,
+      .part-info-card {
+        transition: all 0.3s ease-in-out;
+      }
+      .ui-hidden .info-panel,
+      .ui-hidden .menu,
+      .ui-hidden .tabs,
+      .ui-hidden .toggle-mode-btn {
+        opacity: 0;
+        pointer-events: none;
+        visibility: hidden;
+      }
+      .ui-hidden .app-header {
+        background: transparent;
+        backdrop-filter: none;
+        border-bottom: transparent;
+      }
+      .ui-hidden .app-header .title-text {
+        opacity: 0;
+      }
 
-/* =========================================
+      /* =========================================
    6. Custom Scrollbar (Premium)
    ========================================= */
-.premium-scroll::-webkit-scrollbar { width: 6px; }
-.premium-scroll::-webkit-scrollbar-track { background: transparent; }
-.premium-scroll::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 10px; }
-.premium-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.4); }
+      .premium-scroll::-webkit-scrollbar {
+        width: 6px;
+      }
+      .premium-scroll::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .premium-scroll::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+      }
+      .premium-scroll::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.4);
+      }
 
-/* =========================================
+      /* =========================================
    📱 7. โหมดมือถือ (Mobile Responsive)
    ========================================= */
-@media (max-width: 768px) {
-    model-viewer { height: calc(100vh - 120px) !important; }
+      @media (max-width: 768px) {
+        model-viewer {
+          height: calc(100vh - 120px) !important;
+        }
 
-    .app-header { padding: 0 10px; height: 60px; justify-content: center; }
-    .title-text { display: none; } 
-    .header-buttons { gap: 12px; justify-content: center; width: 100%; }
-    
-    .header-btn { padding: 0; width: 42px; height: 42px; border-radius: 50%; justify-content: center; font-size: 1.2rem; background: rgba(15, 23, 42, 0.8); }
-    .btn-text { display: none; } 
+        .app-header {
+          padding: 0 10px;
+          height: 60px;
+          justify-content: center;
+        }
+        .title-text {
+          display: none;
+        }
+        .header-buttons {
+          gap: 12px;
+          justify-content: center;
+          width: 100%;
+        }
 
-    .tabs { top: 75px; width: 95%; overflow-x: auto; justify-content: flex-start; padding-bottom: 10px; }
-    .tabs::-webkit-scrollbar { display: none; }
-    .tab-btn { white-space: nowrap; font-size: 0.85rem; padding: 6px 15px; flex-shrink: 0; transform: none !important; }
-    
-    .menu { top: auto; bottom: 20px; right: 50%; transform: translateX(50%); flex-direction: row; width: 95%; overflow-x: auto; padding: 8px; border-radius: 16px; justify-content: flex-start; }
-    .menu::-webkit-scrollbar { display: none; }
-    .menu-item { white-space: nowrap; font-size: 0.85rem; padding: 8px 12px; flex-shrink: 0; text-align: center; border-right: none; border-bottom: 3px solid transparent; min-width: auto; }
-    .menu-item.active { background: linear-gradient(180deg, rgba(255,71,87,0) 0%, rgba(255,71,87,0.15) 100%); border-right: none; border-bottom: 3px solid var(--primary); }
+        .header-btn {
+          padding: 0;
+          width: 42px;
+          height: 42px;
+          border-radius: 50%;
+          justify-content: center;
+          font-size: 1.2rem;
+          background: rgba(15, 23, 42, 0.8);
+        }
+        .btn-text {
+          display: none;
+        }
 
-    .info-panel { top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; padding: 15px; max-height: 40vh; overflow-y: auto; background: rgba(15, 23, 42, 0.95); }
-    .part-info-card { top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-height: 50vh; overflow-y: auto; }
-    @keyframes slideInRight { from { opacity: 0; transform: translate(-50%, -40%); } to { opacity: 1; transform: translate(-50%, -50%); } }
-    .toggle-mode-btn { top: 125px; right: 10px; font-size: 0.8rem; padding: 8px 12px; }
-    .fs-icon-btn { top: 15px; right: 15px; width: 40px; height: 40px; font-size: 1rem; }
+        .tabs {
+          top: 75px;
+          width: 95%;
+          overflow-x: auto;
+          justify-content: flex-start;
+          padding-bottom: 10px;
+        }
+        .tabs::-webkit-scrollbar {
+          display: none;
+        }
+        .tab-btn {
+          white-space: nowrap;
+          font-size: 0.85rem;
+          padding: 6px 15px;
+          flex-shrink: 0;
+          transform: none !important;
+        }
 
-    .hide-on-mobile { display: none !important; }
-}
+        .menu {
+          top: auto;
+          bottom: 20px;
+          right: 50%;
+          transform: translateX(50%);
+          flex-direction: row;
+          width: 95%;
+          overflow-x: auto;
+          padding: 8px;
+          border-radius: 16px;
+          justify-content: flex-start;
+        }
+        .menu::-webkit-scrollbar {
+          display: none;
+        }
+        .menu-item {
+          white-space: nowrap;
+          font-size: 0.85rem;
+          padding: 8px 12px;
+          flex-shrink: 0;
+          text-align: center;
+          border-right: none;
+          border-bottom: 3px solid transparent;
+          min-width: auto;
+        }
+        .menu-item.active {
+          background: linear-gradient(
+            180deg,
+            rgba(255, 71, 87, 0) 0%,
+            rgba(255, 71, 87, 0.15) 100%
+          );
+          border-right: none;
+          border-bottom: 3px solid var(--primary);
+        }
 
-/* =========================================
+        .info-panel {
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 90%;
+          padding: 15px;
+          max-height: 40vh;
+          overflow-y: auto;
+          background: rgba(15, 23, 42, 0.95);
+        }
+        .part-info-card {
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 90%;
+          max-height: 50vh;
+          overflow-y: auto;
+        }
+        @keyframes slideInRight {
+          from {
+            opacity: 0;
+            transform: translate(-50%, -40%);
+          }
+          to {
+            opacity: 1;
+            transform: translate(-50%, -50%);
+          }
+        }
+        .toggle-mode-btn {
+          top: 125px;
+          right: 10px;
+          font-size: 0.8rem;
+          padding: 8px 12px;
+        }
+        .fs-icon-btn {
+          top: 15px;
+          right: 15px;
+          width: 40px;
+          height: 40px;
+          font-size: 1rem;
+        }
+
+        .hide-on-mobile {
+          display: none !important;
+        }
+      }
+
+      /* =========================================
    🔄 8. บังคับหมุนจอ (Orientation Warning)
    ========================================= */
-#orientation-warning {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(2, 6, 23, 0.95); 
-    backdrop-filter: blur(10px);
-    z-index: 99999; 
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 20px;
-}
+      #orientation-warning {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(2, 6, 23, 0.95);
+        backdrop-filter: blur(10px);
+        z-index: 99999;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 20px;
+      }
 
-@media screen and (max-width: 900px) and (max-height: 500px) and (orientation: landscape) {
-    #orientation-warning {
-        display: flex !important; 
-    }
-    body > *:not(#orientation-warning) {
-        display: none !important; 
-    }
-}
-</style>
-</head>
+      @media screen and (max-width: 900px) and (max-height: 500px) and (orientation: landscape) {
+        #orientation-warning {
+          display: flex !important;
+        }
+        body > *:not(#orientation-warning) {
+          display: none !important;
+        }
+      }
+    </style>
+  </head>
 
-<body>
-
-<div id="orientation-warning">
-    <div style="background: rgba(15, 23, 42, 0.9); border: 1px solid #334155; padding: 40px; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); max-width: 400px; width: 100%;">
-        <span style="font-size: 4rem; display: block; margin-bottom: 15px;">📱🔄</span>
-        <h2 style="color: #ff4757; font-size: 1.5rem; margin-top: 0; margin-bottom: 10px;">กรุณาหมุนโทรศัพท์</h2>
-        <p style="color: #cbd5e1; font-size: 0.95rem; margin-bottom: 0; line-height: 1.5;">แอปพลิเคชันนี้ออกแบบมาให้ใช้งานใน <b>"แนวตั้ง"</b><br>โปรดหมุนอุปกรณ์ของคุณเพื่อเริ่มใช้งานครับ</p>
+  <body>
+    <div id="orientation-warning">
+      <div
+        style="
+          background: rgba(15, 23, 42, 0.9);
+          border: 1px solid #334155;
+          padding: 40px;
+          border-radius: 24px;
+          box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+          max-width: 400px;
+          width: 100%;
+        "
+      >
+        <span style="font-size: 4rem; display: block; margin-bottom: 15px"
+          >📱🔄</span
+        >
+        <h2
+          style="
+            color: #ff4757;
+            font-size: 1.5rem;
+            margin-top: 0;
+            margin-bottom: 10px;
+          "
+        >
+          กรุณาหมุนโทรศัพท์
+        </h2>
+        <p
+          style="
+            color: #cbd5e1;
+            font-size: 0.95rem;
+            margin-bottom: 0;
+            line-height: 1.5;
+          "
+        >
+          แอปพลิเคชันนี้ออกแบบมาให้ใช้งานใน <b>"แนวตั้ง"</b
+          ><br />โปรดหมุนอุปกรณ์ของคุณเพื่อเริ่มใช้งานครับ
+        </p>
+      </div>
     </div>
-</div>
 
-<div id="preQuizModal" class="modal-overlay">
-    <div class="modal-box" style="max-width: 420px; padding: 30px;">
-        <h3 class="modal-title" style="border-bottom:none; margin-bottom:5px;">📋 ข้อมูลแบบทดสอบ</h3>
-        
-        <div style="background: rgba(15,23,42,0.6); padding: 15px; border-radius: 16px; margin-bottom: 20px; text-align: left; border: 1px solid var(--border);">
-            <p style="margin: 0 0 10px 0; color: #cbd5e1; font-size: 0.95rem;">📖 หัวข้อ: <b id="preQuizTopic" style="color: white; font-size: 1rem;">...</b></p>
-            <p style="margin: 0 0 10px 0; color: #cbd5e1; font-size: 0.95rem;">📌 จำนวนข้อทั้งหมด: <b id="preQuizCount" style="color: #4ade80;">... ข้อ</b></p>
-            <p style="margin: 0; color: #cbd5e1; font-size: 0.95rem;">🏆 คะแนนเต็ม: <b id="preQuizTotalScore" style="color: #fbbf24;">... คะแนน</b></p>
+    <div id="preQuizModal" class="modal-overlay">
+      <div class="modal-box" style="max-width: 420px; padding: 30px">
+        <h3 class="modal-title" style="border-bottom: none; margin-bottom: 5px">
+          📋 ข้อมูลแบบทดสอบ
+        </h3>
+
+        <div
+          style="
+            background: rgba(15, 23, 42, 0.6);
+            padding: 15px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            text-align: left;
+            border: 1px solid var(--border);
+          "
+        >
+          <p style="margin: 0 0 10px 0; color: #cbd5e1; font-size: 0.95rem">
+            📖 หัวข้อ:
+            <b id="preQuizTopic" style="color: white; font-size: 1rem">...</b>
+          </p>
+          <p style="margin: 0 0 10px 0; color: #cbd5e1; font-size: 0.95rem">
+            📌 จำนวนข้อทั้งหมด:
+            <b id="preQuizCount" style="color: #4ade80">... ข้อ</b>
+          </p>
+          <p style="margin: 0; color: #cbd5e1; font-size: 0.95rem">
+            🏆 คะแนนเต็ม:
+            <b id="preQuizTotalScore" style="color: #fbbf24">... คะแนน</b>
+          </p>
         </div>
 
-        <div style="text-align: left; margin-bottom: 20px;">
-            <h4 style="font-size: 0.9rem; color: #94a3b8; margin-top: 0; margin-bottom: 12px; display:flex; align-items:center; gap:6px;">📊 เกณฑ์การประเมินผล:</h4>
-            <div style="background: rgba(15,23,42,0.5); border: 1px dashed rgba(255,255,255,0.2); border-radius: 12px; padding: 15px; text-align: center;">
-                <div style="font-size: 1.1rem; color: white; margin-bottom: 5px;">เกณฑ์ผ่าน: <b id="preQuizPassingCriteria" style="color: #4ade80;">50%</b></div>
-                <div style="font-size: 0.85rem; color: #94a3b8;">(ระบบจะรวมคะแนนจากทุกข้อที่ทำได้)</div>
+        <div style="text-align: left; margin-bottom: 20px">
+          <h4
+            style="
+              font-size: 0.9rem;
+              color: #94a3b8;
+              margin-top: 0;
+              margin-bottom: 12px;
+              display: flex;
+              align-items: center;
+              gap: 6px;
+            "
+          >
+            📊 เกณฑ์การประเมินผล:
+          </h4>
+          <div
+            style="
+              background: rgba(15, 23, 42, 0.5);
+              border: 1px dashed rgba(255, 255, 255, 0.2);
+              border-radius: 12px;
+              padding: 15px;
+              text-align: center;
+            "
+          >
+            <div style="font-size: 1.1rem; color: white; margin-bottom: 5px">
+              เกณฑ์ผ่าน:
+              <b id="preQuizPassingCriteria" style="color: #4ade80">50%</b>
             </div>
+            <div style="font-size: 0.85rem; color: #94a3b8">
+              (ระบบจะรวมคะแนนจากทุกข้อที่ทำได้)
+            </div>
+          </div>
         </div>
 
-        <div style="display: flex; gap: 10px;">
-            <button onclick="closeModals()" style="flex: 1; background: #475569; padding: 12px; font-size: 1rem; box-shadow:none;">ยกเลิก</button>
-            <button id="startQuizConfirmBtn" onclick="startQuizConfirm()" style="flex: 1; background: #3b82f6; padding: 12px; font-size: 1rem; box-shadow: 0 4px 15px rgba(59,130,246,0.4);">เริ่มทำข้อสอบ 🚀</button>
+        <div style="display: flex; gap: 10px">
+          <button
+            onclick="closeModals()"
+            style="
+              flex: 1;
+              background: #475569;
+              padding: 12px;
+              font-size: 1rem;
+              box-shadow: none;
+            "
+          >
+            ยกเลิก
+          </button>
+          <button
+            id="startQuizConfirmBtn"
+            onclick="startQuizConfirm()"
+            style="
+              flex: 1;
+              background: #3b82f6;
+              padding: 12px;
+              font-size: 1rem;
+              box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+            "
+          >
+            เริ่มทำข้อสอบ 🚀
+          </button>
         </div>
+      </div>
     </div>
-</div>
 
-<div id="infoModal" class="part-info-card">
-  <h3 id="modalTitle" class="modal-title">ชื่อส่วนประกอบ</h3>
-  <div id="modalDesc" class="modal-desc">รายละเอียด...</div>
-  
-  <button onclick="speakText('modalDesc', this)" style="background: #10b981; color: white; border: none; padding: 10px 20px; border-radius: 12px; cursor: pointer; font-family: 'Kanit'; width: 100%; margin-top: 5px; margin-bottom: 10px;">🔊 ฟังเสียงบรรยาย</button>
-  
-  <button class="close-modal-btn" onclick="closeInfoAndUnfocus()">ปิดหน้าต่าง</button>
-</div>
+    <div id="infoModal" class="part-info-card">
+      <h3 id="modalTitle" class="modal-title">ชื่อส่วนประกอบ</h3>
+      <div id="modalDesc" class="modal-desc">รายละเอียด...</div>
 
-<div id="qrModal" class="modal-overlay">
-    <div class="modal-box">
-      <h3 id="qrModalTitle" class="modal-title" style="background:transparent; border:none; padding:0; box-shadow:none;">📱 สแกนเพื่อดูแบบ AR</h3>
-      <div id="qrcode" style="display:flex; justify-content:center; margin: 20px 0; background: white; padding: 15px; border-radius: 10px;"></div>
-      <p id="qrModalDesc" style="font-size: 0.85rem; color: #cbd5e1; margin-bottom: 15px;">ใช้กล้องมือถือสแกนเพื่อแสดงโมเดล 3 มิติเสมือนจริงบนโต๊ะเรียน</p>
-      <button class="close-modal-btn" onclick="closeModals()" style="background: #475569; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">ปิดหน้าต่าง</button>
+      <button
+        onclick="speakText('modalDesc', this)"
+        style="
+          background: #10b981;
+          color: white;
+          border: none;
+          padding: 10px 20px;
+          border-radius: 12px;
+          cursor: pointer;
+          font-family: &quot;Kanit&quot;;
+          width: 100%;
+          margin-top: 5px;
+          margin-bottom: 10px;
+        "
+      >
+        🔊 ฟังเสียงบรรยาย
+      </button>
+
+      <button class="close-modal-btn" onclick="closeInfoAndUnfocus()">
+        ปิดหน้าต่าง
+      </button>
     </div>
-</div>
 
-<div id="home" class="home">
-  <button class="fs-icon-btn fs-toggle" onclick="toggleFullScreen()"></button>
+    <div id="qrModal" class="modal-overlay">
+      <div class="modal-box">
+        <h3
+          id="qrModalTitle"
+          class="modal-title"
+          style="
+            background: transparent;
+            border: none;
+            padding: 0;
+            box-shadow: none;
+          "
+        >
+          📱 สแกนเพื่อดูแบบ AR
+        </h3>
+        <div
+          id="qrcode"
+          style="
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+          "
+        ></div>
+        <p
+          id="qrModalDesc"
+          style="font-size: 0.85rem; color: #cbd5e1; margin-bottom: 15px"
+        >
+          ใช้กล้องมือถือสแกนเพื่อแสดงโมเดล 3 มิติเสมือนจริงบนโต๊ะเรียน
+        </p>
+        <button
+          class="close-modal-btn"
+          onclick="closeModals()"
+          style="background: #475569; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3)"
+        >
+          ปิดหน้าต่าง
+        </button>
+      </div>
+    </div>
 
-  <div class="box">
-    <h1 style="margin-bottom: 0px; color: var(--primary); font-size: 2.2rem;">BioLens AR</h1>
-    
-    <h2 style="font-size: 1.1rem; color: #cbd5e1; margin-top: 5px; margin-bottom: 8px; font-weight: 400;">ท่องโลกกายวิภาคศาสตร์ | วิทยาศาสตร์ ม.2</h2>
-    <p style="font-size: 0.85rem; color: #94a3b8; margin-top: 0; margin-bottom: 25px; font-weight: 300; line-height: 1.6;">
-        ระบบหมุนเวียนเลือด • ระบบหายใจ • ระบบขับถ่าย<br>
-        ระบบประสาท • ระบบสืบพันธุ์
-    </p>
-    
-    <p id="loadingText" style="color: #fbbf24; margin-bottom: 25px;">กำลังโหลดข้อมูลบทเรียน...</p>
-    
-    <button id="btnLearn" onclick="startLearning()" style="width: 100%; margin-bottom: 12px;" disabled>📚 เข้าบทเรียนเนื้อหา 3D</button>
-    <button id="btnQuizMenu" onclick="showQuizMenu()" style="width: 100%; background: #8b5cf6; box-shadow: 0 10px 25px rgba(139, 92, 246, 0.4); margin-bottom: 12px;" disabled>📝 เมนูแบบทดสอบ (Quiz)</button>
+    <div id="home" class="home">
+      <button
+        class="fs-icon-btn fs-toggle"
+        onclick="toggleFullScreen()"
+      ></button>
 
-    <button onclick="showAppQRCode()" style="width: 100%; background: #0ea5e9; box-shadow: 0 10px 25px rgba(14, 165, 233, 0.4); margin-bottom: 25px;">📲 แสดง QR Code ของแอป</button>
+      <div class="box">
+        <h1
+          style="margin-bottom: 0px; color: var(--primary); font-size: 2.2rem"
+        >
+          BioLens AR
+        </h1>
 
-    <div class="hide-on-mobile" style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; display: flex; flex-direction: column; gap: 10px;">
-        <button onclick="window.location.href='admin.html'" 
-            style="background: transparent; border: 1px dashed #475569; color: #94a3b8; font-size: 0.85rem; width: 100%; box-shadow: none;">
+        <h2
+          style="
+            font-size: 1.1rem;
+            color: #cbd5e1;
+            margin-top: 5px;
+            margin-bottom: 8px;
+            font-weight: 400;
+          "
+        >
+          ท่องโลกกายวิภาคศาสตร์ | วิทยาศาสตร์ ม.2
+        </h2>
+        <p
+          style="
+            font-size: 0.85rem;
+            color: #94a3b8;
+            margin-top: 0;
+            margin-bottom: 25px;
+            font-weight: 300;
+            line-height: 1.6;
+          "
+        >
+          ระบบหมุนเวียนเลือด • ระบบหายใจ • ระบบขับถ่าย<br />
+          ระบบประสาท • ระบบสืบพันธุ์
+        </p>
+
+        <p id="loadingText" style="color: #fbbf24; margin-bottom: 25px">
+          กำลังโหลดข้อมูลบทเรียน...
+        </p>
+
+        <button
+          id="btnLearn"
+          onclick="startLearning()"
+          style="width: 100%; margin-bottom: 12px"
+          disabled
+        >
+          📚 เข้าบทเรียนเนื้อหา 3D
+        </button>
+        <button
+          id="btnQuizMenu"
+          onclick="showQuizMenu()"
+          style="
+            width: 100%;
+            background: #8b5cf6;
+            box-shadow: 0 10px 25px rgba(139, 92, 246, 0.4);
+            margin-bottom: 12px;
+          "
+          disabled
+        >
+          📝 เมนูแบบทดสอบ (Quiz)
+        </button>
+
+        <button
+          onclick="showAppQRCode()"
+          style="
+            width: 100%;
+            background: #0ea5e9;
+            box-shadow: 0 10px 25px rgba(14, 165, 233, 0.4);
+            margin-bottom: 25px;
+          "
+        >
+          📲 แสดง QR Code ของแอป
+        </button>
+
+        <div
+          class="hide-on-mobile"
+          style="
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+          "
+        >
+          <button
+            onclick="window.location.href = 'admin.html'"
+            style="
+              background: transparent;
+              border: 1px dashed #475569;
+              color: #94a3b8;
+              font-size: 0.85rem;
+              width: 100%;
+              box-shadow: none;
+            "
+          >
             ⚙️ จัดการระบบ
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="quizMenuPage" class="quiz-page">
+      <button
+        class="fs-icon-btn fs-toggle"
+        onclick="toggleFullScreen()"
+      ></button>
+
+      <div class="box">
+        <h2
+          style="
+            color: var(--primary);
+            margin-top: 0;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 15px;
+          "
+        >
+          เมนูแบบทดสอบ
+        </h2>
+        <p style="color: #94a3b8; font-size: 0.9rem; margin-bottom: 25px">
+          เลือกทำแบบทดสอบแยกตามระบบ หรือ ทำแบบทดสอบรวมเพื่อวัดความรู้ทั้งหมด
+        </p>
+
+        <div
+          id="quizMenuButtons"
+          style="display: flex; flex-direction: column; gap: 12px"
+        ></div>
+
+        <button
+          onclick="closeQuizMenu()"
+          style="
+            background: none;
+            border: 1px solid #4b5563;
+            color: #94a3b8;
+            margin-top: 20px;
+            width: 100%;
+          "
+        >
+          🔙 กลับหน้าหลัก
         </button>
+      </div>
     </div>
-  </div>
-</div>
 
-<div id="quizMenuPage" class="quiz-page">
-  <button class="fs-icon-btn fs-toggle" onclick="toggleFullScreen()"></button>
-  
-  <div class="box">
-    <h2 style="color:var(--primary); margin-top:0; border-bottom: 2px solid var(--border); padding-bottom: 15px;">เมนูแบบทดสอบ</h2>
-    <p style="color: #94a3b8; font-size: 0.9rem; margin-bottom: 25px;">เลือกทำแบบทดสอบแยกตามระบบ หรือ ทำแบบทดสอบรวมเพื่อวัดความรู้ทั้งหมด</p>
-    
-    <div id="quizMenuButtons" style="display:flex; flex-direction:column; gap:12px;"></div>
-    
-    <button onclick="closeQuizMenu()" style="background:none; border:1px solid #4b5563; color:#94a3b8; margin-top:20px; width: 100%;">🔙 กลับหน้าหลัก</button>
-  </div>
-</div>
-
-<div id="quizPage" class="quiz-page">
-  <div class="box" id="quizBox">
-    <div id="quizHeader" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 15px;">
-        <div id="quizType" style="color:var(--primary); font-weight:500; font-size: 1.1rem; text-align: left;"></div>
-        <div id="quizTimer" style="background: #ef4444; color: white; padding: 4px 12px; border-radius: 20px; font-weight: 500; font-size: 1rem; display: none; box-shadow: 0 0 10px rgba(239,68,68,0.5);">⏱️ 30s</div>
+    <div id="quizPage" class="quiz-page">
+      <div class="box" id="quizBox">
+        <div
+          id="quizHeader"
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+          "
+        >
+          <div
+            id="quizType"
+            style="
+              color: var(--primary);
+              font-weight: 500;
+              font-size: 1.1rem;
+              text-align: left;
+            "
+          ></div>
+          <div
+            id="quizTimer"
+            style="
+              background: #ef4444;
+              color: white;
+              padding: 4px 12px;
+              border-radius: 20px;
+              font-weight: 500;
+              font-size: 1rem;
+              display: none;
+              box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+            "
+          >
+            ⏱️ 30s
+          </div>
+        </div>
+        <div id="quizBody">
+          <h2
+            id="qTitle"
+            style="
+              font-size: 1.1rem;
+              min-height: 60px;
+              line-height: 1.4;
+              margin-top: 0;
+            "
+          ></h2>
+          <div id="qChoices"></div>
+          <button
+            id="nextQuestionBtn"
+            onclick="nextQuestion()"
+            style="
+              display: none;
+              width: 100%;
+              margin-top: 15px;
+              background: #3b82f6;
+            "
+          >
+            ส่งคำตอบ / ข้อต่อไป ➡️
+          </button>
+          <p
+            id="qProgress"
+            style="font-size: 0.8rem; color: #94a3b8; margin-top: 15px"
+          ></p>
+        </div>
+        <button
+          id="exitQuizBtn"
+          onclick="closeQuiz()"
+          style="
+            background: none;
+            border: 1px solid #4b5563;
+            color: #94a3b8;
+            margin-top: 15px;
+            width: 100%;
+          "
+        >
+          ยกเลิก / กลับหน้าหลัก
+        </button>
+      </div>
     </div>
-    <div id="quizBody">
-        <h2 id="qTitle" style="font-size: 1.1rem; min-height: 60px; line-height: 1.4; margin-top:0;"></h2>
-        <div id="qChoices"></div>
-        <button id="nextQuestionBtn" onclick="nextQuestion()" style="display:none; width: 100%; margin-top: 15px; background: #3b82f6;">ส่งคำตอบ / ข้อต่อไป ➡️</button>
-        <p id="qProgress" style="font-size: 0.8rem; color: #94a3b8; margin-top: 15px;"></p>
-    </div>
-    <button id="exitQuizBtn" onclick="closeQuiz()" style="background:none; border:1px solid #4b5563; color:#94a3b8; margin-top:15px; width: 100%;">ยกเลิก / กลับหน้าหลัก</button>
-  </div>
-</div>
 
-<div class="app-header" id="appHeader">
-    <span class="title-text" style="font-size: 1.1rem; color: #ffffff; font-weight: 500; letter-spacing: 1px;">BioLens AR</span>
-    <div class="header-buttons">
-        <button onclick="toggleInfoBox()" class="header-btn">ℹ️<span class="btn-text">ข้อมูล</span></button>
-        <button onclick="resetCamera()" class="header-btn">🔄<span class="btn-text">รีเซ็ตมุมมอง</span></button>
-        <button id="toggleUIBtn" onclick="toggleUI()" class="header-btn">👁️<span class="btn-text">ซ่อน UI</span></button>
-        <button class="fs-text-btn fs-toggle header-btn" onclick="toggleFullScreen()"></button>
-        <button onclick="backToHome()" class="header-btn">🏠<span class="btn-text">กลับหน้าหลัก</span></button>
+    <div class="app-header" id="appHeader">
+      <span
+        class="title-text"
+        style="
+          font-size: 1.1rem;
+          color: #ffffff;
+          font-weight: 500;
+          letter-spacing: 1px;
+        "
+        >BioLens AR</span
+      >
+      <div class="header-buttons">
+        <button onclick="toggleInfoBox()" class="header-btn">
+          ℹ️<span class="btn-text">ข้อมูล</span>
+        </button>
+        <button onclick="resetCamera()" class="header-btn">
+          🔄<span class="btn-text">รีเซ็ตมุมมอง</span>
+        </button>
+        <button id="toggleUIBtn" onclick="toggleUI()" class="header-btn">
+          👁️<span class="btn-text">ซ่อน UI</span>
+        </button>
+        <button
+          class="fs-text-btn fs-toggle header-btn"
+          onclick="toggleFullScreen()"
+        ></button>
+        <button onclick="backToHome()" class="header-btn">
+          🏠<span class="btn-text">กลับหน้าหลัก</span>
+        </button>
+      </div>
     </div>
-</div>
 
-<main class="main" id="mainArea">
-  <div id="load-shell"><div id="load-bar"></div></div>
-  
-  <nav class="tabs" id="tabs"></nav>
-  <model-viewer id="viewer" autoplay camera-controls auto-rotate disable-tap shadow-intensity="1" exposure="1.2" environment-image="neutral"></model-viewer>
-  <button id="toggleModeBtn" class="toggle-mode-btn" onclick="toggleModelMode()">👁️ ดูแบบเจาะลึก</button>
-  
-  <div class="info-panel" id="mainInfoPanel">
-    <button class="close-info-btn" onclick="toggleInfoBox()">✖</button>
-    <h3 id="title" style="margin-right: 30px;"></h3> 
-    <p id="desc"></p>
-    
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
-        <button onclick="speakText('desc', this)" style="background: #0f172a; border: 1px solid #10b981; color: #10b981; padding: 10px; border-radius: 12px; font-family: 'Kanit'; font-size: 0.85rem; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: inset 0 0 10px rgba(16,185,129,0.1);" onmouseover="this.style.background='rgba(16,185,129,0.1)';" onmouseout="this.style.background='#0f172a';">
+    <main class="main" id="mainArea">
+      <div id="load-shell"><div id="load-bar"></div></div>
+
+      <nav class="tabs" id="tabs"></nav>
+      <model-viewer
+        id="viewer"
+        autoplay
+        camera-controls
+        auto-rotate
+        disable-tap
+        shadow-intensity="1"
+        exposure="1.2"
+        environment-image="neutral"
+      ></model-viewer>
+      <button
+        id="toggleModeBtn"
+        class="toggle-mode-btn"
+        onclick="toggleModelMode()"
+      >
+        👁️ ดูแบบเจาะลึก
+      </button>
+
+      <div class="info-panel" id="mainInfoPanel">
+        <button class="close-info-btn" onclick="toggleInfoBox()">✖</button>
+        <h3 id="title" style="margin-right: 30px"></h3>
+        <p id="desc"></p>
+
+        <div
+          style="
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+          "
+        >
+          <button
+            onclick="speakText('desc', this)"
+            style="
+              background: #0f172a;
+              border: 1px solid #10b981;
+              color: #10b981;
+              padding: 10px;
+              border-radius: 12px;
+              font-family: &quot;Kanit&quot;;
+              font-size: 0.85rem;
+              cursor: pointer;
+              transition: 0.3s;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              gap: 6px;
+              box-shadow: inset 0 0 10px rgba(16, 185, 129, 0.1);
+            "
+            onmouseover="this.style.background = 'rgba(16,185,129,0.1)'"
+            onmouseout="this.style.background = '#0f172a'"
+          >
             🔊 เสียงบรรยาย
-        </button>
-        <button onclick="showQRCode()" style="background: #0f172a; border: 1px solid #3b82f6; color: #3b82f6; padding: 10px; border-radius: 12px; font-family: 'Kanit'; font-size: 0.85rem; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: inset 0 0 10px rgba(59,130,246,0.1);" onmouseover="this.style.background='rgba(59,130,246,0.1)';" onmouseout="this.style.background='#0f172a';">
+          </button>
+          <button
+            onclick="showQRCode()"
+            style="
+              background: #0f172a;
+              border: 1px solid #3b82f6;
+              color: #3b82f6;
+              padding: 10px;
+              border-radius: 12px;
+              font-family: &quot;Kanit&quot;;
+              font-size: 0.85rem;
+              cursor: pointer;
+              transition: 0.3s;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              gap: 6px;
+              box-shadow: inset 0 0 10px rgba(59, 130, 246, 0.1);
+            "
+            onmouseover="this.style.background = 'rgba(59,130,246,0.1)'"
+            onmouseout="this.style.background = '#0f172a'"
+          >
             📱 โหมด AR
-        </button>
-    </div>
-    
-    <div id="partsListContainer" style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px;"></div>
-  </div>
-  
-  <footer class="menu" id="menu"></footer>
-</main>
+          </button>
+        </div>
 
-<script>
-let data = [], currentQuizData = [], qIndex = 0, score = 0;
-let currentCorrectText = "", selectedAnswerText = "", userAnswers = []; 
-let currentOrganData = null, isAltMode = false, currentActiveModelUrl = ""; 
-let originalColors = new Map();
-let timerInterval, timeLeft = 30; 
+        <div
+          id="partsListContainer"
+          style="
+            margin-top: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 10px;
+          "
+        ></div>
+      </div>
 
-let pendingQuizPool = [];
-let pendingQuizTitle = "";
-let currentActiveQuizIndex = null;
+      <footer class="menu" id="menu"></footer>
+    </main>
 
-let globalQuizLimit = 15; 
-let timerEnabled = true; 
-let globalTimeLimit = 30; 
-let globalPassingPercentage = 50; 
-let isSpeaking = false;
+    <script>
+      let data = [],
+        currentQuizData = [],
+        qIndex = 0,
+        score = 0;
+      let currentCorrectText = "",
+        selectedAnswerText = "",
+        userAnswers = [];
+      let currentOrganData = null,
+        isAltMode = false,
+        currentActiveModelUrl = "";
+      let originalColors = new Map();
+      let timerInterval,
+        timeLeft = 30;
 
-const firebaseConfig = {
-  apiKey: "AIzaSyB9TZN4-yUb9Kfh0gdZNp6XglsbS-xEzfk",
-  authDomain: "biolens-ar.firebaseapp.com",
-  projectId: "biolens-ar",
-  storageBucket: "biolens-ar.firebasestorage.app",
-  messagingSenderId: "1088692183155",
-  appId: "1:1088692183155:web:d139f94812eca627e08a06"
-};
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+      let pendingQuizPool = [];
+      let pendingQuizTitle = "";
+      let currentActiveQuizIndex = null;
 
-db.enablePersistence().catch(function(err) {
-    console.log("Firebase Cache Error: ", err);
-});
+      let globalQuizLimit = 15;
+      let timerEnabled = true;
+      let globalTimeLimit = 30;
+      let globalPassingPercentage = 50;
+      let isSpeaking = false;
 
-db.collection("database").doc("anatomy").get()
-.then((docSnap) => {
-    if(docSnap.exists) {
-        const dbData = docSnap.data();
-        data = dbData.systems || [];
-        
-        if(dbData.settings && dbData.settings.global_quiz_limit) {
-            globalQuizLimit = parseInt(dbData.settings.global_quiz_limit);
-        }
-        
-        if(dbData.settings && dbData.settings.passing_percentage) {
-            globalPassingPercentage = parseInt(dbData.settings.passing_percentage);
-        }
+      const firebaseConfig = {
+        apiKey: "AIzaSyB9TZN4-yUb9Kfh0gdZNp6XglsbS-xEzfk",
+        authDomain: "biolens-ar.firebaseapp.com",
+        projectId: "biolens-ar",
+        storageBucket: "biolens-ar.firebasestorage.app",
+        messagingSenderId: "1088692183155",
+        appId: "1:1088692183155:web:d139f94812eca627e08a06",
+      };
+      firebase.initializeApp(firebaseConfig);
+      const db = firebase.firestore();
 
-        if(dbData.settings) {
-            timerEnabled = dbData.settings.timer_enabled !== false;
-            globalTimeLimit = parseInt(dbData.settings.time_limit) || 30;
-        }
-        renderTabs();
-        renderQuizMenu(); 
-        if (data.length > 0) loadSystem(0);
-        
-        document.getElementById("loadingText").textContent = "ระบบพร้อมใช้งานแล้ว";
-        document.getElementById("loadingText").style.color = "#4ade80"; 
-        document.getElementById("btnLearn").disabled = false;
-        document.getElementById("btnQuizMenu").disabled = false;
-    } else {
-        throw new Error("ยังไม่มีข้อมูลใน Database");
-    }
-})
-.catch(err => {
-    console.error("Error:", err);
-    document.getElementById("loadingText").textContent = "ไม่สามารถเชื่อมต่อฐานข้อมูลได้ กรุณาลองใหม่อีกครั้ง";
-    document.getElementById("loadingText").style.color = "#ef4444";
-});
+      db.enablePersistence().catch(function (err) {
+        console.log("Firebase Cache Error: ", err);
+      });
 
-const viewer = document.getElementById("viewer");
-viewer.addEventListener('load', () => {
-    if (viewer.model && viewer.model.materials) {
-        originalColors.clear();
-        for (const mat of viewer.model.materials) {
-            originalColors.set(mat.name, mat.pbrMetallicRoughness.baseColorFactor.slice());
-        }
-    }
-});
+      db.collection("database")
+        .doc("anatomy")
+        .get()
+        .then((docSnap) => {
+          if (docSnap.exists) {
+            const dbData = docSnap.data();
+            data = dbData.systems || [];
 
-function resetHighlight() {
-    if (viewer && viewer.model && viewer.model.materials) {
-        for (const mat of viewer.model.materials) {
-            if (originalColors.has(mat.name)) {
-                mat.pbrMetallicRoughness.setBaseColorFactor(originalColors.get(mat.name));
-            } else {
-                mat.pbrMetallicRoughness.setBaseColorFactor([1, 1, 1, 1]); 
+            if (dbData.settings && dbData.settings.global_quiz_limit) {
+              globalQuizLimit = parseInt(dbData.settings.global_quiz_limit);
             }
-            mat.setEmissiveFactor([0, 0, 0]); 
-        }
-    }
-}
 
-function resetCamera() {
-    if (viewer) {
-        viewer.cameraTarget = "auto auto auto"; 
-        viewer.cameraOrbit = "0deg 75deg auto"; 
-    }
-}
-
-function closeInfoAndUnfocus() {
-    closeModals();
-    if (viewer) {
-        viewer.cameraTarget = "auto auto auto"; 
-    }
-}
-
-const home = document.getElementById("home");
-const quizMenuPage = document.getElementById("quizMenuPage");
-const quizPage = document.getElementById("quizPage");
-const tabs = document.getElementById("tabs");
-const menu = document.getElementById("menu");
-const loadBar = document.getElementById("load-bar");
-const loadShell = document.getElementById("load-shell");
-const infoModal = document.getElementById("infoModal");
-const qrModal = document.getElementById("qrModal");
-const toggleBtn = document.getElementById("toggleModeBtn");
-const preQuizModal = document.getElementById("preQuizModal");
-
-document.querySelectorAll('.modal-overlay').forEach(modal => {
-    modal.addEventListener('click', function(e) { if (e.target === this) closeModals(); });
-});
-
-function closeModals() {
-    infoModal.style.display = 'none'; 
-    qrModal.style.display = 'none'; 
-    preQuizModal.style.display = 'none';
-    resetHighlight(); 
-    if (viewer) viewer.autoRotate = true;
-
-    if ('speechSynthesis' in window) {
-        speechSynthesis.cancel();
-    }
-    isSpeaking = false; 
-
-    const voiceBtns = document.querySelectorAll('[onclick^="speakText"]');
-    voiceBtns.forEach(btn => {
-        if (btn.dataset.originalText) {
-            btn.innerHTML = btn.dataset.originalText;
-        } else {
-            btn.innerHTML = "🔊 ฟังเสียงบรรยาย";
-        }
-    });
-}
-
-function toggleInfoBox() {
-    const panel = document.getElementById("mainInfoPanel");
-    panel.style.display = panel.style.display === "none" ? "block" : "none";
-}
-
-viewer.addEventListener('progress', (e) => {
-    loadShell.style.display = "block";
-    loadBar.style.width = (e.detail.totalProgress * 100) + "%";
-    if(e.detail.totalProgress === 1) setTimeout(() => { loadShell.style.display = "none"; }, 400);
-});
-
-function renderTabs() {
-    tabs.innerHTML = data.map((s, i) => `<div class="tab-btn" id="t${i}" onclick="loadSystem(${i})">${s.category}</div>`).join("");
-}
-
-function renderQuizMenu() {
-    const container = document.getElementById("quizMenuButtons");
-    let html = "";
-    
-    data.forEach((sys, idx) => {
-        html += `<button onclick="openPreQuizInfo('${idx}')" style="background: #1e293b; border: 1px solid var(--border); text-align: left; padding-left: 20px; display:flex; justify-content:space-between; align-items:center;"><span>📝 ${sys.category}</span></button>`;
-    });
-
-    html += `<button onclick="openPreQuizInfo('all')" style="background: var(--primary); text-align: left; padding-left: 20px; box-shadow: 0 5px 15px rgba(255, 71, 87, 0.4); display:flex; justify-content:space-between; align-items:center;"><span>🏆 แบบทดสอบรวมทุกระบบ</span></button>`;
-    container.innerHTML = html;
-}
-
-function openPreQuizInfo(index) {
-    let pool = []; let title = "";
-    currentActiveQuizIndex = index;
-    
-    if (index === 'all') {
-        title = "รวมทุกระบบ";
-        let guaranteedPool = [];
-        let remainingPool = [];
-        
-        data.forEach(sys => { 
-            if (sys.quiz) {
-                let activeQs = sys.quiz.filter(q => q.active !== false);
-                if (activeQs.length > 0) {
-                    activeQs = shuffleArray([...activeQs]);
-                    guaranteedPool.push(activeQs[0]); 
-                    remainingPool = remainingPool.concat(activeQs.slice(1)); 
-                }
+            if (dbData.settings && dbData.settings.passing_percentage) {
+              globalPassingPercentage = parseInt(
+                dbData.settings.passing_percentage,
+              );
             }
+
+            if (dbData.settings) {
+              timerEnabled = dbData.settings.timer_enabled !== false;
+              globalTimeLimit = parseInt(dbData.settings.time_limit) || 30;
+            }
+            renderTabs();
+            renderQuizMenu();
+            if (data.length > 0) loadSystem(0);
+
+            document.getElementById("loadingText").textContent =
+              "ระบบพร้อมใช้งานแล้ว";
+            document.getElementById("loadingText").style.color = "#4ade80";
+            document.getElementById("btnLearn").disabled = false;
+            document.getElementById("btnQuizMenu").disabled = false;
+          } else {
+            throw new Error("ยังไม่มีข้อมูลใน Database");
+          }
+        })
+        .catch((err) => {
+          console.error("Error:", err);
+          document.getElementById("loadingText").textContent =
+            "ไม่สามารถเชื่อมต่อฐานข้อมูลได้ กรุณาลองใหม่อีกครั้ง";
+          document.getElementById("loadingText").style.color = "#ef4444";
         });
-        
-        if (guaranteedPool.length === 0) return alert(`ยังไม่มีคำถามที่ "เปิดใช้งาน" ในระบบครับ`);
-        
-        remainingPool = shuffleArray(remainingPool);
-        let needed = globalQuizLimit - guaranteedPool.length;
-        if (needed > 0) {
+
+      const viewer = document.getElementById("viewer");
+      viewer.addEventListener("load", () => {
+        if (viewer.model && viewer.model.materials) {
+          originalColors.clear();
+          for (const mat of viewer.model.materials) {
+            originalColors.set(
+              mat.name,
+              mat.pbrMetallicRoughness.baseColorFactor.slice(),
+            );
+          }
+        }
+      });
+
+      function resetHighlight() {
+        if (viewer && viewer.model && viewer.model.materials) {
+          for (const mat of viewer.model.materials) {
+            if (originalColors.has(mat.name)) {
+              mat.pbrMetallicRoughness.setBaseColorFactor(
+                originalColors.get(mat.name),
+              );
+            } else {
+              mat.pbrMetallicRoughness.setBaseColorFactor([1, 1, 1, 1]);
+            }
+            mat.setEmissiveFactor([0, 0, 0]);
+          }
+        }
+      }
+
+      function resetCamera() {
+        if (viewer) {
+          viewer.cameraTarget = "auto auto auto";
+          viewer.cameraOrbit = "0deg 75deg auto";
+        }
+      }
+
+      function closeInfoAndUnfocus() {
+        closeModals();
+        if (viewer) {
+          viewer.cameraTarget = "auto auto auto";
+        }
+      }
+
+      const home = document.getElementById("home");
+      const quizMenuPage = document.getElementById("quizMenuPage");
+      const quizPage = document.getElementById("quizPage");
+      const tabs = document.getElementById("tabs");
+      const menu = document.getElementById("menu");
+      const loadBar = document.getElementById("load-bar");
+      const loadShell = document.getElementById("load-shell");
+      const infoModal = document.getElementById("infoModal");
+      const qrModal = document.getElementById("qrModal");
+      const toggleBtn = document.getElementById("toggleModeBtn");
+      const preQuizModal = document.getElementById("preQuizModal");
+
+      document.querySelectorAll(".modal-overlay").forEach((modal) => {
+        modal.addEventListener("click", function (e) {
+          if (e.target === this) closeModals();
+        });
+      });
+
+      function closeModals() {
+        infoModal.style.display = "none";
+        qrModal.style.display = "none";
+        preQuizModal.style.display = "none";
+        resetHighlight();
+        if (viewer) viewer.autoRotate = true;
+
+        if ("speechSynthesis" in window) {
+          speechSynthesis.cancel();
+        }
+        isSpeaking = false;
+
+        const voiceBtns = document.querySelectorAll('[onclick^="speakText"]');
+        voiceBtns.forEach((btn) => {
+          if (btn.dataset.originalText) {
+            btn.innerHTML = btn.dataset.originalText;
+          } else {
+            btn.innerHTML = "🔊 ฟังเสียงบรรยาย";
+          }
+        });
+      }
+
+      function toggleInfoBox() {
+        const panel = document.getElementById("mainInfoPanel");
+        panel.style.display = panel.style.display === "none" ? "block" : "none";
+      }
+
+      viewer.addEventListener("progress", (e) => {
+        loadShell.style.display = "block";
+        loadBar.style.width = e.detail.totalProgress * 100 + "%";
+        if (e.detail.totalProgress === 1)
+          setTimeout(() => {
+            loadShell.style.display = "none";
+          }, 400);
+      });
+
+      function renderTabs() {
+        tabs.innerHTML = data
+          .map(
+            (s, i) =>
+              `<div class="tab-btn" id="t${i}" onclick="loadSystem(${i})">${s.category}</div>`,
+          )
+          .join("");
+      }
+
+      function renderQuizMenu() {
+        const container = document.getElementById("quizMenuButtons");
+        let html = "";
+
+        data.forEach((sys, idx) => {
+          html += `<button onclick="openPreQuizInfo('${idx}')" style="background: #1e293b; border: 1px solid var(--border); text-align: left; padding-left: 20px; display:flex; justify-content:space-between; align-items:center;"><span>📝 ${sys.category}</span></button>`;
+        });
+
+        html += `<button onclick="openPreQuizInfo('all')" style="background: var(--primary); text-align: left; padding-left: 20px; box-shadow: 0 5px 15px rgba(255, 71, 87, 0.4); display:flex; justify-content:space-between; align-items:center;"><span>🏆 แบบทดสอบรวมทุกระบบ</span></button>`;
+        container.innerHTML = html;
+      }
+
+      function openPreQuizInfo(index) {
+        let pool = [];
+        let title = "";
+        currentActiveQuizIndex = index;
+
+        if (index === "all") {
+          title = "รวมทุกระบบ";
+          let guaranteedPool = [];
+          let remainingPool = [];
+
+          data.forEach((sys) => {
+            if (sys.quiz) {
+              let activeQs = sys.quiz.filter((q) => q.active !== false);
+              if (activeQs.length > 0) {
+                activeQs = shuffleArray([...activeQs]);
+                guaranteedPool.push(activeQs[0]);
+                remainingPool = remainingPool.concat(activeQs.slice(1));
+              }
+            }
+          });
+
+          if (guaranteedPool.length === 0)
+            return alert(`ยังไม่มีคำถามที่ "เปิดใช้งาน" ในระบบครับ`);
+
+          remainingPool = shuffleArray(remainingPool);
+          let needed = globalQuizLimit - guaranteedPool.length;
+          if (needed > 0) {
             pool = guaranteedPool.concat(remainingPool.slice(0, needed));
-        } else {
+          } else {
             pool = guaranteedPool.slice(0, globalQuizLimit);
+          }
+
+          let totalQuestionsInPool =
+            guaranteedPool.length + remainingPool.length;
+          pool = shuffleArray(pool);
+
+          document.getElementById("preQuizCount").innerHTML =
+            `${pool.length} ข้อ <span style="font-size: 0.75rem; color: #64748b; font-weight: normal;">(สุ่มจากคลัง ${totalQuestionsInPool} ข้อ มีครบทุกระบบ)</span>`;
+        } else {
+          title = data[index].category;
+
+          if (data[index].quiz) {
+            pool = data[index].quiz.filter((q) => q.active !== false);
+          }
+
+          if (pool.length === 0) {
+            return alert(
+              `หมวดหมู่ "${title}" ยังไม่มีข้อสอบที่เปิดใช้งานครับ แอดมินต้องไปเพิ่มข้อสอบก่อน`,
+            );
+          }
+
+          pool = shuffleArray([...pool]);
+          document.getElementById("preQuizCount").innerHTML =
+            `${pool.length} ข้อ`;
         }
-        
-        let totalQuestionsInPool = guaranteedPool.length + remainingPool.length;
-        pool = shuffleArray(pool); 
-        
-        document.getElementById("preQuizCount").innerHTML = `${pool.length} ข้อ <span style="font-size: 0.75rem; color: #64748b; font-weight: normal;">(สุ่มจากคลัง ${totalQuestionsInPool} ข้อ มีครบทุกระบบ)</span>`;
-        
-    } else {
-        title = data[index].category;
-        
-        if (data[index].quiz) {
-            pool = data[index].quiz.filter(q => q.active !== false);
+
+        let totalScore = 0;
+        pool.forEach((q) => (totalScore += q.points || 1));
+
+        document.getElementById("preQuizTopic").textContent = title;
+        document.getElementById("preQuizTotalScore").textContent =
+          `${totalScore} คะแนน`;
+        document.getElementById("preQuizPassingCriteria").textContent =
+          `${globalPassingPercentage}%`;
+
+        pendingQuizPool = pool;
+        pendingQuizTitle = title;
+
+        preQuizModal.style.display = "flex";
+      }
+
+      function startQuizConfirm() {
+        closeModals();
+        currentQuizData = shuffleArray([...pendingQuizPool]);
+        qIndex = 0;
+        score = 0;
+        userAnswers = [];
+
+        document.getElementById("quizType").textContent =
+          "แบบทดสอบ: " + pendingQuizTitle;
+        quizMenuPage.style.display = "none";
+        quizPage.style.display = "flex";
+        document.getElementById("exitQuizBtn").style.display = "block";
+        showQuestion();
+      }
+
+      function loadSystem(i) {
+        document
+          .querySelectorAll(".tab-btn")
+          .forEach((b) => b.classList.remove("active"));
+        const activeTab = document.getElementById("t" + i);
+        if (activeTab) activeTab.classList.add("active");
+
+        if (data[i].items && data[i].items.length > 0) {
+          menu.innerHTML = data[i].items
+            .map((o, j) => {
+              return `<div class="menu-item" id="m${i}${j}" onclick="selectOrgan(${i},${j})">${o.name}</div>`;
+            })
+            .join("");
+          selectOrgan(i, 0);
+        } else {
+          menu.innerHTML = "";
         }
-        
-        if (pool.length === 0) {
-            return alert(`หมวดหมู่ "${title}" ยังไม่มีข้อสอบที่เปิดใช้งานครับ แอดมินต้องไปเพิ่มข้อสอบก่อน`);
+      }
+
+      function selectOrgan(i, j) {
+        document
+          .querySelectorAll(".menu-item")
+          .forEach((m) => m.classList.remove("active"));
+        const activeMenu = document.getElementById(`m${i}${j}`);
+        if (activeMenu) {
+          activeMenu.classList.add("active");
         }
-        
-        pool = shuffleArray([...pool]); 
-        document.getElementById("preQuizCount").innerHTML = `${pool.length} ข้อ`;
-    }
 
-    let totalScore = 0;
-    pool.forEach(q => totalScore += (q.points || 1));
+        const o = data[i].items[j];
+        currentOrganData = o;
+        isAltMode = false;
 
-    document.getElementById("preQuizTopic").textContent = title;
-    document.getElementById("preQuizTotalScore").textContent = `${totalScore} คะแนน`; 
-    document.getElementById("preQuizPassingCriteria").textContent = `${globalPassingPercentage}%`;
-    
-    pendingQuizPool = pool;
-    pendingQuizTitle = title;
-    
-    preQuizModal.style.display = "flex";
-}
+        if (o.alt_mode) {
+          toggleBtn.style.display = "block";
+          toggleBtn.innerHTML = "👁️ ดูแบบเจาะลึกภายใน";
+        } else {
+          toggleBtn.style.display = "none";
+        }
 
-function startQuizConfirm() {
-    closeModals(); 
-    currentQuizData = shuffleArray([...pendingQuizPool]); 
-    qIndex = 0; score = 0; userAnswers = []; 
-    
-    document.getElementById("quizType").textContent = "แบบทดสอบ: " + pendingQuizTitle;
-    quizMenuPage.style.display = "none"; 
-    quizPage.style.display = "flex"; 
-    document.getElementById("exitQuizBtn").style.display = "block";
-    showQuestion();
-}
+        loadModelData(currentOrganData);
+      }
 
-function loadSystem(i) {
-    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
-    const activeTab = document.getElementById("t" + i);
-    if(activeTab) activeTab.classList.add("active");
-    
-    if (data[i].items && data[i].items.length > 0) {
-        menu.innerHTML = data[i].items.map((o, j) => {
-            return `<div class="menu-item" id="m${i}${j}" onclick="selectOrgan(${i},${j})">${o.name}</div>`;
-        }).join("");
-        selectOrgan(i, 0);
-    } else {
-        menu.innerHTML = "";
-    }
-}
+      function loadModelData(dataObj) {
+        // 🌟 เพิ่มโค้ดส่วนนี้: สั่งตัดเสียงทันทีเมื่อมีการกดเปลี่ยนบทเรียน
+        if ("speechSynthesis" in window) {
+          speechSynthesis.cancel();
+        }
+        isSpeaking = false;
+        // รีเซ็ตข้อความปุ่มเสียงให้กลับเป็นค่าเริ่มต้น
+        const voiceBtns = document.querySelectorAll('[onclick^="speakText"]');
+        voiceBtns.forEach((btn) => {
+          if (btn.dataset.originalText)
+            btn.innerHTML = btn.dataset.originalText;
+        });
+        // 🌟 สิ้นสุดโค้ดที่เพิ่ม
 
-function selectOrgan(i, j) {
-    document.querySelectorAll(".menu-item").forEach(m => m.classList.remove("active"));
-    const activeMenu = document.getElementById(`m${i}${j}`);
-    if(activeMenu) {
-        activeMenu.classList.add("active");
-    }
+        resetHighlight();
+        resetCamera();
+        document.getElementById("mainInfoPanel").style.display = "block";
+        loadShell.style.display = "block";
+        loadBar.style.width = "10%";
+        viewer.src = "";
+        document.getElementById("title").textContent = dataObj.name;
+        document.getElementById("desc").innerHTML = dataObj.description;
+        currentActiveModelUrl = dataObj.model_file;
+        setTimeout(() => {
+          viewer.src = dataObj.model_file;
+        }, 50);
 
-    const o = data[i].items[j];
-    currentOrganData = o;
-    isAltMode = false;
-
-    if (o.alt_mode) {
-        toggleBtn.style.display = "block";
-        toggleBtn.innerHTML = "👁️ ดูแบบเจาะลึกภายใน";
-    } else {
-        toggleBtn.style.display = "none";
-    }
-
-    loadModelData(currentOrganData);
-}
-
-function loadModelData(dataObj) {
-    // 🌟 เพิ่มโค้ดส่วนนี้: สั่งตัดเสียงทันทีเมื่อมีการกดเปลี่ยนบทเรียน
-    if ('speechSynthesis' in window) {
-        speechSynthesis.cancel();
-    }
-    isSpeaking = false;
-    // รีเซ็ตข้อความปุ่มเสียงให้กลับเป็นค่าเริ่มต้น
-    const voiceBtns = document.querySelectorAll('[onclick^="speakText"]');
-    voiceBtns.forEach(btn => { if (btn.dataset.originalText) btn.innerHTML = btn.dataset.originalText; });
-    // 🌟 สิ้นสุดโค้ดที่เพิ่ม
-
-    resetHighlight(); resetCamera();
-    document.getElementById("mainInfoPanel").style.display = "block"; 
-    loadShell.style.display = "block"; loadBar.style.width = "10%"; viewer.src = ""; 
-    document.getElementById("title").textContent = dataObj.name;
-    document.getElementById("desc").innerHTML = dataObj.description; 
-    currentActiveModelUrl = dataObj.model_file; 
-    setTimeout(() => { viewer.src = dataObj.model_file; }, 50); 
-
-    const partsListDiv = document.getElementById("partsListContainer");
-    if(dataObj.click_parts && dataObj.click_parts.length > 0) {
-        let html = `
+        const partsListDiv = document.getElementById("partsListContainer");
+        if (dataObj.click_parts && dataObj.click_parts.length > 0) {
+          let html = `
         <style>
             details.hotspot-accordion { background: rgba(15, 23, 42, 0.4); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 14px; transition: all 0.3s ease; margin-top: 5px; }
             details.hotspot-accordion[open] { background: rgba(15, 23, 42, 0.65); border-color: rgba(255, 255, 255, 0.15); padding-bottom: 14px; }
@@ -636,290 +1641,395 @@ function loadModelData(dataObj) {
             
             <div class="premium-scroll" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap:8px; max-height:130px; overflow-y:auto; padding: 0 15px; margin-top: 5px;">
         `;
-        
-        dataObj.click_parts.forEach(p => {
-            let cleanName = p.name.replace(/<[^>]*>?/gm, '').split('(')[0].trim(); 
+
+          dataObj.click_parts.forEach((p) => {
+            let cleanName = p.name
+              .replace(/<[^>]*>?/gm, "")
+              .split("(")[0]
+              .trim();
             html += `<button onclick="forceClickPart('${p.material_name}')" style="background: #0f172a; border: 1px solid #334155; color: #cbd5e1; padding: 8px 12px; font-size: 0.85rem; font-family: 'Kanit'; border-radius: 10px; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: flex-start; gap: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.2); width: 100%; text-align: left;" onmouseover="this.style.borderColor='#ff4757'; this.style.color='#ffffff'; this.style.background='rgba(255, 71, 87, 0.1)';" onmouseout="this.style.borderColor='#334155'; this.style.color='#cbd5e1'; this.style.background='#0f172a';">
                         <span style="color:#ff4757; font-size:1.1rem; flex-shrink:0;">📍</span> 
                         <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; width: 100%;">${cleanName}</span>
                      </button>`;
-        });
-        
-        html += `</div></details>`;
-        partsListDiv.innerHTML = html;
-    } else {
-        partsListDiv.innerHTML = '';
-    }
-}
+          });
 
-function forceClickPart(matName) {
-    const partsData = isAltMode ? currentOrganData.alt_mode.click_parts : currentOrganData.click_parts;
-    const clickedPart = partsData.find(p => p.material_name === matName);
+          html += `</div></details>`;
+          partsListDiv.innerHTML = html;
+        } else {
+          partsListDiv.innerHTML = "";
+        }
+      }
 
-    if(clickedPart) {
-        for (const mat of viewer.model.materials) {
+      function forceClickPart(matName) {
+        const partsData = isAltMode
+          ? currentOrganData.alt_mode.click_parts
+          : currentOrganData.click_parts;
+        const clickedPart = partsData.find((p) => p.material_name === matName);
+
+        if (clickedPart) {
+          for (const mat of viewer.model.materials) {
             const origColor = originalColors.get(mat.name) || [1, 1, 1, 1];
             if (mat.name !== matName) {
-                mat.pbrMetallicRoughness.setBaseColorFactor([origColor[0]*0.15, origColor[1]*0.15, origColor[2]*0.15, origColor[3]]); 
-                mat.setEmissiveFactor([0, 0, 0]);
+              mat.pbrMetallicRoughness.setBaseColorFactor([
+                origColor[0] * 0.15,
+                origColor[1] * 0.15,
+                origColor[2] * 0.15,
+                origColor[3],
+              ]);
+              mat.setEmissiveFactor([0, 0, 0]);
             } else {
-                mat.pbrMetallicRoughness.setBaseColorFactor(origColor);
-                mat.setEmissiveFactor([0, 0, 0]);
+              mat.pbrMetallicRoughness.setBaseColorFactor(origColor);
+              mat.setEmissiveFactor([0, 0, 0]);
             }
-        }
-        
-        if (clickedPart.position) {
+          }
+
+          if (clickedPart.position) {
             viewer.cameraTarget = clickedPart.position;
+          } else {
+            viewer.cameraTarget = "auto auto auto";
+          }
+
+          document.getElementById("modalTitle").innerHTML = clickedPart.name;
+          document.getElementById("modalDesc").innerHTML =
+            clickedPart.info || "ไม่มีข้อมูลรายละเอียดเพิ่มเติม";
+          infoModal.style.display = "flex";
+          viewer.autoRotate = false;
+        }
+      }
+
+      function toggleModelMode() {
+        if (!currentOrganData || !currentOrganData.alt_mode) return;
+
+        toggleBtn.style.pointerEvents = "none";
+        toggleBtn.style.opacity = "0.5";
+
+        if (isAltMode) {
+          isAltMode = false;
+          toggleBtn.innerHTML = "👁️ ดูแบบเจาะลึกภายใน";
+          loadModelData(currentOrganData);
         } else {
-            viewer.cameraTarget = 'auto auto auto'; 
+          isAltMode = true;
+          toggleBtn.innerHTML = "🫀 กลับสู่โหมดมองภายนอก";
+          loadModelData(currentOrganData.alt_mode);
         }
-        
-        document.getElementById('modalTitle').innerHTML = clickedPart.name;
-        document.getElementById('modalDesc').innerHTML = clickedPart.info || "ไม่มีข้อมูลรายละเอียดเพิ่มเติม"; 
-        infoModal.style.display = 'flex';
-        viewer.autoRotate = false;
-    }
-}
 
-function toggleModelMode() {
-    if (!currentOrganData || !currentOrganData.alt_mode) return;
+        const unlockButton = () => {
+          toggleBtn.style.pointerEvents = "auto";
+          toggleBtn.style.opacity = "1";
+          viewer.removeEventListener("load", unlockButton);
+        };
+        viewer.addEventListener("load", unlockButton);
+      }
 
-    toggleBtn.style.pointerEvents = "none"; toggleBtn.style.opacity = "0.5";
+      let pointerDownX = 0;
+      let pointerDownY = 0;
 
-    if (isAltMode) {
-        isAltMode = false; toggleBtn.innerHTML = "👁️ ดูแบบเจาะลึกภายใน"; loadModelData(currentOrganData);
-    } else {
-        isAltMode = true; toggleBtn.innerHTML = "🫀 กลับสู่โหมดมองภายนอก"; loadModelData(currentOrganData.alt_mode);
-    }
+      viewer.addEventListener("pointerdown", (event) => {
+        pointerDownX = event.clientX;
+        pointerDownY = event.clientY;
+      });
 
-    const unlockButton = () => { toggleBtn.style.pointerEvents = "auto"; toggleBtn.style.opacity = "1"; viewer.removeEventListener('load', unlockButton); };
-    viewer.addEventListener('load', unlockButton);
-}
+      viewer.addEventListener("pointerup", (event) => {
+        const diffX = Math.abs(event.clientX - pointerDownX);
+        const diffY = Math.abs(event.clientY - pointerDownY);
+        if (diffX > 5 || diffY > 5) return;
 
-let pointerDownX = 0;
-let pointerDownY = 0;
+        const material = viewer.materialFromPoint(event.clientX, event.clientY);
+        let isInteractivePartClicked = false;
 
-viewer.addEventListener('pointerdown', (event) => {
-    pointerDownX = event.clientX;
-    pointerDownY = event.clientY;
-});
-
-viewer.addEventListener('pointerup', (event) => {
-    const diffX = Math.abs(event.clientX - pointerDownX);
-    const diffY = Math.abs(event.clientY - pointerDownY);
-    if (diffX > 5 || diffY > 5) return; 
-
-    const material = viewer.materialFromPoint(event.clientX, event.clientY);
-    let isInteractivePartClicked = false;
-
-    if (material != null) {
-        const partsData = isAltMode ? currentOrganData.alt_mode.click_parts : currentOrganData.click_parts;
-        if (partsData) {
-            const clickedPart = partsData.find(p => p.material_name === material.name);
+        if (material != null) {
+          const partsData = isAltMode
+            ? currentOrganData.alt_mode.click_parts
+            : currentOrganData.click_parts;
+          if (partsData) {
+            const clickedPart = partsData.find(
+              (p) => p.material_name === material.name,
+            );
             if (clickedPart) {
-                isInteractivePartClicked = true;
+              isInteractivePartClicked = true;
 
-                for (const mat of viewer.model.materials) {
-                    const origColor = originalColors.get(mat.name) || [1, 1, 1, 1];
-                    if (mat.name !== material.name) {
-                        mat.pbrMetallicRoughness.setBaseColorFactor([origColor[0] * 0.15, origColor[1] * 0.15, origColor[2] * 0.15, origColor[3]]); 
-                        mat.setEmissiveFactor([0, 0, 0]); 
-                    } else {
-                        mat.pbrMetallicRoughness.setBaseColorFactor(origColor);
-                        mat.setEmissiveFactor([0, 0, 0]); 
-                    }
+              for (const mat of viewer.model.materials) {
+                const origColor = originalColors.get(mat.name) || [1, 1, 1, 1];
+                if (mat.name !== material.name) {
+                  mat.pbrMetallicRoughness.setBaseColorFactor([
+                    origColor[0] * 0.15,
+                    origColor[1] * 0.15,
+                    origColor[2] * 0.15,
+                    origColor[3],
+                  ]);
+                  mat.setEmissiveFactor([0, 0, 0]);
+                } else {
+                  mat.pbrMetallicRoughness.setBaseColorFactor(origColor);
+                  mat.setEmissiveFactor([0, 0, 0]);
                 }
-                
-                document.getElementById('modalTitle').innerHTML = clickedPart.name;
-                document.getElementById('modalDesc').innerHTML = clickedPart.info || "ไม่มีข้อมูลรายละเอียดเพิ่มเติม"; 
-                infoModal.style.display = 'flex';
-                viewer.autoRotate = false;
+              }
 
-                const hit = viewer.positionAndNormalFromPoint(event.clientX, event.clientY);
-                if (hit != null) {
-                    viewer.cameraTarget = `${hit.position.x}m ${hit.position.y}m ${hit.position.z}m`;
-                }
+              document.getElementById("modalTitle").innerHTML =
+                clickedPart.name;
+              document.getElementById("modalDesc").innerHTML =
+                clickedPart.info || "ไม่มีข้อมูลรายละเอียดเพิ่มเติม";
+              infoModal.style.display = "flex";
+              viewer.autoRotate = false;
+
+              const hit = viewer.positionAndNormalFromPoint(
+                event.clientX,
+                event.clientY,
+              );
+              if (hit != null) {
+                viewer.cameraTarget = `${hit.position.x}m ${hit.position.y}m ${hit.position.z}m`;
+              }
             }
+          }
         }
-    } 
 
-    if (!isInteractivePartClicked) {
-        closeInfoAndUnfocus();
-    }
-});
+        if (!isInteractivePartClicked) {
+          closeInfoAndUnfocus();
+        }
+      });
 
-function showQRCode() {
-    qrModal.style.display = 'flex';
-    document.getElementById("qrModalTitle").innerHTML = "📱 สแกนเพื่อดูแบบ AR";
-    document.getElementById("qrModalDesc").innerHTML = "ใช้กล้องมือถือสแกนเพื่อโชว์โมเดล 3 มิติแบบทะลุจอบนโต๊ะเรียน";
-    
-    const qrcodeContainer = document.getElementById("qrcode");
-    qrcodeContainer.innerHTML = ""; 
-    const baseUrl = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
-    const arUrl = `${baseUrl}/ar-viewer.html?model=${encodeURIComponent(currentActiveModelUrl)}`;
-    new QRCode(qrcodeContainer, { text: arUrl, width: 150, height: 150, colorDark : "#0f172a", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H });
-}
+      function showQRCode() {
+        qrModal.style.display = "flex";
+        document.getElementById("qrModalTitle").innerHTML =
+          "📱 สแกนเพื่อดูแบบ AR";
+        document.getElementById("qrModalDesc").innerHTML =
+          "ใช้กล้องมือถือสแกนเพื่อโชว์โมเดล 3 มิติแบบทะลุจอบนโต๊ะเรียน";
 
-function showAppQRCode() {
-    qrModal.style.display = 'flex';
-    document.getElementById("qrModalTitle").innerHTML = "📲 สแกนเพื่อเปิดแอปพลิเคชัน";
-    document.getElementById("qrModalDesc").innerHTML = "ใช้กล้องมือถือสแกนเพื่อให้นักเรียนเข้าใช้งานบทเรียนในเครื่องของตนเอง";
-    
-    const qrcodeContainer = document.getElementById("qrcode");
-    qrcodeContainer.innerHTML = ""; 
-    const appUrl = window.location.href.split('?')[0];
-    new QRCode(qrcodeContainer, { text: appUrl, width: 150, height: 150, colorDark : "#0f172a", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H });
-}
+        const qrcodeContainer = document.getElementById("qrcode");
+        qrcodeContainer.innerHTML = "";
+        const baseUrl = window.location.href.substring(
+          0,
+          window.location.href.lastIndexOf("/"),
+        );
+        const arUrl = `${baseUrl}/ar-viewer.html?model=${encodeURIComponent(currentActiveModelUrl)}`;
+        new QRCode(qrcodeContainer, {
+          text: arUrl,
+          width: 150,
+          height: 150,
+          colorDark: "#0f172a",
+          colorLight: "#ffffff",
+          correctLevel: QRCode.CorrectLevel.H,
+        });
+      }
 
-function startLearning() {
-    home.style.display = "none"; document.getElementById("appHeader").style.display = "flex";
-    document.getElementById("mainArea").style.display = "block"; tabs.style.display = "flex"; menu.style.display = "flex"; 
-}
-function backToHome() {
-    // 1. สั่งตัดเสียง AI ก่อน
-    if ('speechSynthesis' in window) {
-        speechSynthesis.cancel();
-    }
-    isSpeaking = false;
+      function showAppQRCode() {
+        qrModal.style.display = "flex";
+        document.getElementById("qrModalTitle").innerHTML =
+          "📲 สแกนเพื่อเปิดแอปพลิเคชัน";
+        document.getElementById("qrModalDesc").innerHTML =
+          "ใช้กล้องมือถือสแกนเพื่อให้นักเรียนเข้าใช้งานบทเรียนในเครื่องของตนเอง";
 
-    // 2. ปิดหน้าจอ AR และกลับหน้า Home
-    document.getElementById("appHeader").style.display = "none"; 
-    document.getElementById("mainArea").style.display = "none";
-    tabs.style.display = "none"; 
-    menu.style.display = "none"; 
-    home.style.display = "flex";
-}
-function shuffleArray(array) {
-    for (let i = array.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [array[i], array[j]] = [array[j], array[i]]; }
-    return array;
-}
+        const qrcodeContainer = document.getElementById("qrcode");
+        qrcodeContainer.innerHTML = "";
+        const appUrl = window.location.href.split("?")[0];
+        new QRCode(qrcodeContainer, {
+          text: appUrl,
+          width: 150,
+          height: 150,
+          colorDark: "#0f172a",
+          colorLight: "#ffffff",
+          correctLevel: QRCode.CorrectLevel.H,
+        });
+      }
 
-function showQuizMenu() { home.style.display = "none"; quizMenuPage.style.display = "flex"; }
-function closeQuizMenu() { quizMenuPage.style.display = "none"; home.style.display = "flex"; }
+      function startLearning() {
+        home.style.display = "none";
+        document.getElementById("appHeader").style.display = "flex";
+        document.getElementById("mainArea").style.display = "block";
+        tabs.style.display = "flex";
+        menu.style.display = "flex";
+      }
+      function backToHome() {
+        // 1. สั่งตัดเสียง AI ก่อน
+        if ("speechSynthesis" in window) {
+          speechSynthesis.cancel();
+        }
+        isSpeaking = false;
 
-function startTimer() {
-    clearInterval(timerInterval); 
-    const timerDisplay = document.getElementById("quizTimer");
-    
-    if (!timerEnabled) {
-        timerDisplay.style.display = "none";
-        return; 
-    }
-    
-    timeLeft = globalTimeLimit; 
-    timerDisplay.style.display = "block"; timerDisplay.textContent = `⏱️ ${timeLeft}s`; timerDisplay.style.background = "#ef4444";
-    
-    timerInterval = setInterval(() => {
-        timeLeft--; timerDisplay.textContent = `⏱️ ${timeLeft}s`;
-        if (timeLeft <= 5 && timeLeft > 0) timerDisplay.style.background = timeLeft % 2 === 0 ? "#b91c1c" : "#ef4444"; 
-        if (timeLeft <= 0) { clearInterval(timerInterval); nextQuestion(); }
-    }, 1000);
-}
+        // 2. ปิดหน้าจอ AR และกลับหน้า Home
+        document.getElementById("appHeader").style.display = "none";
+        document.getElementById("mainArea").style.display = "none";
+        tabs.style.display = "none";
+        menu.style.display = "none";
+        home.style.display = "flex";
+      }
+      function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+      }
 
-function showQuestion() {
-    selectedAnswerText = ""; document.getElementById("nextQuestionBtn").style.display = "none"; 
-    if (qIndex >= currentQuizData.length) return showResult();
-    
-    const q = currentQuizData[qIndex]; currentCorrectText = q.choices[q.answer];
-    const shuffledChoices = shuffleArray([...q.choices]);
-    
-    const pt = q.points || 1;
-    document.getElementById("qTitle").innerHTML = `${q.question} <span style="color:#fbbf24; font-size:0.85rem; font-weight:normal; margin-left:8px;">(${pt} คะแนน)</span>`;
-    
-    document.getElementById("qChoices").innerHTML = shuffledChoices.map(c => `<div class="choice" onclick="selectChoice(this)">${c}</div>`).join("");
-    document.getElementById("qProgress").textContent = `ข้อที่ ${qIndex + 1} / ${currentQuizData.length}`;
-    startTimer(); 
-}
+      function showQuizMenu() {
+        home.style.display = "none";
+        quizMenuPage.style.display = "flex";
+      }
+      function closeQuizMenu() {
+        quizMenuPage.style.display = "none";
+        home.style.display = "flex";
+      }
 
-function selectChoice(element) {
-    document.querySelectorAll(".choice").forEach(c => c.classList.remove("selected"));
-    element.classList.add("selected"); selectedAnswerText = element.textContent;
-    const nextBtn = document.getElementById("nextQuestionBtn");
-    nextBtn.innerHTML = "ส่งคำตอบ / ข้อต่อไป ➡️"; nextBtn.style.background = "#3b82f6"; nextBtn.style.display = "block";
-}
+      function startTimer() {
+        clearInterval(timerInterval);
+        const timerDisplay = document.getElementById("quizTimer");
 
-function nextQuestion() {
-    if (!selectedAnswerText) selectedAnswerText = "⏳ หมดเวลา (ไม่ได้ตอบ)";
-    const q = currentQuizData[qIndex];
-    const isCorrect = (selectedAnswerText === currentCorrectText);
-    
-    if (isCorrect) {
-        score += (q.points || 1); 
-    }
-    
-    userAnswers.push({ 
-        question: q.question, 
-        selected: selectedAnswerText, 
-        correct: currentCorrectText, 
-        isCorrect: isCorrect,
-        points: (q.points || 1),
-        explanation: q.explanation || '' 
-    });
-    qIndex++; showQuestion();
-}
+        if (!timerEnabled) {
+          timerDisplay.style.display = "none";
+          return;
+        }
 
-// 🌟 อัปเกรดหน้าตาเฉลยแบบพรีเมียมการ์ด (Premium Card Layout) 🌟
-function showResult() {
-    clearInterval(timerInterval); document.getElementById("quizTimer").style.display = "none";
+        timeLeft = globalTimeLimit;
+        timerDisplay.style.display = "block";
+        timerDisplay.textContent = `⏱️ ${timeLeft}s`;
+        timerDisplay.style.background = "#ef4444";
 
-    let totalMaxScore = 0;
-    let correctCount = 0; 
+        timerInterval = setInterval(() => {
+          timeLeft--;
+          timerDisplay.textContent = `⏱️ ${timeLeft}s`;
+          if (timeLeft <= 5 && timeLeft > 0)
+            timerDisplay.style.background =
+              timeLeft % 2 === 0 ? "#b91c1c" : "#ef4444";
+          if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            nextQuestion();
+          }
+        }, 1000);
+      }
 
-    currentQuizData.forEach(q => totalMaxScore += (q.points || 1));
+      function showQuestion() {
+        selectedAnswerText = "";
+        document.getElementById("nextQuestionBtn").style.display = "none";
+        if (qIndex >= currentQuizData.length) return showResult();
 
-    const percent = (score / totalMaxScore) * 100;
-    const isPass = percent >= globalPassingPercentage; 
+        const q = currentQuizData[qIndex];
+        currentCorrectText = q.choices[q.answer];
+        const shuffledChoices = shuffleArray([...q.choices]);
 
-    let summaryHTML = `<div class="premium-scroll" style="max-height: 40vh; overflow-y: auto; padding-right: 10px; margin-bottom: 20px; text-align: left;">`;
+        const pt = q.points || 1;
+        document.getElementById("qTitle").innerHTML =
+          `${q.question} <span style="color:#fbbf24; font-size:0.85rem; font-weight:normal; margin-left:8px;">(${pt} คะแนน)</span>`;
 
-    userAnswers.forEach((ans, idx) => {
-        const isCorrect = ans.isCorrect;
-        if (isCorrect) correctCount++; 
+        document.getElementById("qChoices").innerHTML = shuffledChoices
+          .map(
+            (c) =>
+              `<div class="choice" onclick="selectChoice(this)">${c}</div>`,
+          )
+          .join("");
+        document.getElementById("qProgress").textContent =
+          `ข้อที่ ${qIndex + 1} / ${currentQuizData.length}`;
+        startTimer();
+      }
 
-        const cardBorder = isCorrect ? 'rgba(74, 222, 128, 0.6)' : 'rgba(248, 113, 113, 0.6)';
-        const badgeBg = isCorrect ? 'rgba(74, 222, 128, 0.2)' : 'rgba(248, 113, 113, 0.2)';
-        const badgeColor = isCorrect ? '#4ade80' : '#f87171';
-        const ptsColor = isCorrect ? '#4ade80' : '#f87171';
-        const ptsText = isCorrect ? `${ans.points}` : `0`;
-        const iconAns = isCorrect ? '✅' : '❌';
+      function selectChoice(element) {
+        document
+          .querySelectorAll(".choice")
+          .forEach((c) => c.classList.remove("selected"));
+        element.classList.add("selected");
+        selectedAnswerText = element.textContent;
+        const nextBtn = document.getElementById("nextQuestionBtn");
+        nextBtn.innerHTML = "ส่งคำตอบ / ข้อต่อไป ➡️";
+        nextBtn.style.background = "#3b82f6";
+        nextBtn.style.display = "block";
+      }
 
-        summaryHTML += `
+      function nextQuestion() {
+        if (!selectedAnswerText) selectedAnswerText = "⏳ หมดเวลา (ไม่ได้ตอบ)";
+        const q = currentQuizData[qIndex];
+        const isCorrect = selectedAnswerText === currentCorrectText;
+
+        if (isCorrect) {
+          score += q.points || 1;
+        }
+
+        userAnswers.push({
+          question: q.question,
+          selected: selectedAnswerText,
+          correct: currentCorrectText,
+          isCorrect: isCorrect,
+          points: q.points || 1,
+          explanation: q.explanation || "",
+        });
+        qIndex++;
+        showQuestion();
+      }
+
+      // 🌟 อัปเกรดหน้าตาเฉลยแบบพรีเมียมการ์ด (Premium Card Layout) 🌟
+      function showResult() {
+        clearInterval(timerInterval);
+        document.getElementById("quizTimer").style.display = "none";
+
+        let totalMaxScore = 0;
+        let correctCount = 0;
+
+        currentQuizData.forEach((q) => (totalMaxScore += q.points || 1));
+
+        const percent = (score / totalMaxScore) * 100;
+        const isPass = percent >= globalPassingPercentage;
+
+        let summaryHTML = `<div class="premium-scroll" style="max-height: 40vh; overflow-y: auto; padding-right: 10px; margin-bottom: 20px; text-align: left;">`;
+
+        userAnswers.forEach((ans, idx) => {
+          const isCorrect = ans.isCorrect;
+          if (isCorrect) correctCount++;
+
+          const cardBorder = isCorrect
+            ? "rgba(74, 222, 128, 0.6)"
+            : "rgba(248, 113, 113, 0.6)";
+          const badgeBg = isCorrect
+            ? "rgba(74, 222, 128, 0.2)"
+            : "rgba(248, 113, 113, 0.2)";
+          const badgeColor = isCorrect ? "#4ade80" : "#f87171";
+          const ptsColor = isCorrect ? "#4ade80" : "#f87171";
+          const ptsText = isCorrect ? `${ans.points}` : `0`;
+          const iconAns = isCorrect ? "✅" : "❌";
+
+          summaryHTML += `
             <div style="background: rgba(15,23,42,0.6); border: 1px solid ${cardBorder}; padding: 16px; border-radius: 16px; margin-bottom: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.2);">
                 <div style="display: flex; align-items: flex-start; gap: 10px; margin-bottom: 15px;">
-                    <span style="background: ${badgeBg}; color: ${badgeColor}; padding: 4px 10px; border-radius: 8px; font-size: 0.85rem; font-weight: bold; flex-shrink: 0;">ข้อ ${idx+1}</span>
+                    <span style="background: ${badgeBg}; color: ${badgeColor}; padding: 4px 10px; border-radius: 8px; font-size: 0.85rem; font-weight: bold; flex-shrink: 0;">ข้อ ${idx + 1}</span>
                     <div style="color: white; font-size: 0.95rem; line-height: 1.4; flex-grow: 1;">
                         ${ans.question} <span style="color: ${ptsColor}; font-size: 0.85rem; margin-left: 5px;">(${ptsText}/${ans.points} pt)</span>
                     </div>
                 </div>
                 <div style="background: rgba(0,0,0,0.4); padding: 15px; border-radius: 12px;">
-                    <div style="color: ${ptsColor}; font-size: 0.9rem; font-weight: bold; margin-bottom: ${isCorrect && !ans.explanation ? '0' : '10px'};">
+                    <div style="color: ${ptsColor}; font-size: 0.9rem; font-weight: bold; margin-bottom: ${isCorrect && !ans.explanation ? "0" : "10px"};">
                         ${iconAns} นักเรียนตอบ: <span style="font-weight: normal;">${ans.selected}</span>
                     </div>
-                    ${!isCorrect ? `
+                    ${
+                      !isCorrect
+                        ? `
                     <div style="border-top: 1px dashed rgba(255,255,255,0.15); padding-top: 10px;">
                         <div style="color: #4ade80; font-size: 0.9rem; font-weight: bold;">
                             💡 เฉลยที่ถูกต้อง: <span style="font-weight: normal;">${ans.correct}</span>
                         </div>
-                    </div>` : ''}
-                    ${ans.explanation ? `
+                    </div>`
+                        : ""
+                    }
+                    ${
+                      ans.explanation
+                        ? `
                     <div style="border-top: 1px dashed rgba(255,255,255,0.15); padding-top: 10px; margin-top: 10px;">
                         <div style="color: #cbd5e1; font-size: 0.85rem; line-height: 1.4;">
                             📝 <b>คำอธิบาย:</b> ${ans.explanation}
                         </div>
-                    </div>` : ''}
+                    </div>`
+                        : ""
+                    }
                 </div>
             </div>`;
-    });
-    summaryHTML += `</div>`;
+        });
+        summaryHTML += `</div>`;
 
-    document.getElementById("qTitle").textContent = "🎉 สรุปผลการทดสอบ";
+        document.getElementById("qTitle").textContent = "🎉 สรุปผลการทดสอบ";
 
-    const statusColor = isPass ? "#4ade80" : "#f87171";
-    const statusIcon = isPass ? "🎊" : "💡";
-    const statusText = isPass ? "ผ่านเกณฑ์" : "ไม่ผ่านเกณฑ์";
-    const statusMessage = isPass ? "ยอดเยี่ยมมาก! คุณมีความเข้าใจในบทเรียนนี้" : "ไม่ต้องเสียใจ ลองทบทวนเนื้อหาแล้วทำใหม่อีกครั้งนะครับ";
+        const statusColor = isPass ? "#4ade80" : "#f87171";
+        const statusIcon = isPass ? "🎊" : "💡";
+        const statusText = isPass ? "ผ่านเกณฑ์" : "ไม่ผ่านเกณฑ์";
+        const statusMessage = isPass
+          ? "ยอดเยี่ยมมาก! คุณมีความเข้าใจในบทเรียนนี้"
+          : "ไม่ต้องเสียใจ ลองทบทวนเนื้อหาแล้วทำใหม่อีกครั้งนะครับ";
 
-    document.getElementById("qChoices").innerHTML = `
+        document.getElementById("qChoices").innerHTML = `
         <div style="font-size: 1rem; color: #cbd5e1; margin-top:10px;">ผลการประเมิน</div>
         <div style="font-size: 3rem; font-weight: bold; color: ${statusColor}; margin-bottom: 5px;">${statusText}</div>
         <p style="color: #94a3b8; font-size: 0.95rem; margin-top: 0; margin-bottom: 20px;">${statusIcon} ${statusMessage}</p>
@@ -933,7 +2043,7 @@ function showResult() {
                 <div style="font-size: 0.75rem; color: #94a3b8; margin-bottom: 2px;">ตอบถูก (ข้อ)</div>
                 <div style="font-size: 1.3rem; font-weight: bold; color: #4ade80;">${correctCount}</div>
             </div>
-            <div style="background: rgba(15,23,42,0.6); border: 1px solid ${statusColor}; border-radius: 12px; padding: 10px; flex: 1; box-shadow: 0 0 15px ${isPass ? 'rgba(74,222,128,0.2)' : 'rgba(248,113,113,0.2)'};">
+            <div style="background: rgba(15,23,42,0.6); border: 1px solid ${statusColor}; border-radius: 12px; padding: 10px; flex: 1; box-shadow: 0 0 15px ${isPass ? "rgba(74,222,128,0.2)" : "rgba(248,113,113,0.2)"};">
                 <div style="font-size: 0.75rem; color: #94a3b8; margin-bottom: 2px;">คะแนนรวม</div>
                 <div style="font-size: 1.3rem; font-weight: bold; color: ${statusColor};">${score}<span style="font-size:0.8rem; color:#64748b;">/${totalMaxScore}</span></div>
             </div>
@@ -948,144 +2058,179 @@ function showResult() {
         </div>
     `;
 
-    document.getElementById("qProgress").textContent = "";
-    document.getElementById("nextQuestionBtn").style.display = "none";
-    document.getElementById("exitQuizBtn").style.display = "none";
-}
+        document.getElementById("qProgress").textContent = "";
+        document.getElementById("nextQuestionBtn").style.display = "none";
+        document.getElementById("exitQuizBtn").style.display = "none";
+      }
 
-function closeQuiz() { clearInterval(timerInterval); quizPage.style.display = "none"; home.style.display = "flex"; }
+      function closeQuiz() {
+        clearInterval(timerInterval);
+        quizPage.style.display = "none";
+        home.style.display = "flex";
+      }
 
-const svgExpand = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" style="display: inline-block; vertical-align: middle;"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>`;
-const svgCollapse = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" style="display: inline-block; vertical-align: middle;"><polyline points="4 14 10 14 10 20"></polyline><polyline points="20 10 14 10 14 4"></polyline><line x1="14" y1="10" x2="21" y2="3"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>`;
+      const svgExpand = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" style="display: inline-block; vertical-align: middle;"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>`;
+      const svgCollapse = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" style="display: inline-block; vertical-align: middle;"><polyline points="4 14 10 14 10 20"></polyline><polyline points="20 10 14 10 14 4"></polyline><line x1="14" y1="10" x2="21" y2="3"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>`;
 
-function updateFsButtons(isFull) {
-    document.querySelectorAll(".fs-text-btn").forEach(btn => {
-        btn.innerHTML = isFull ? svgCollapse + "<span class='btn-text' style='margin-left:6px;'>ย่อหน้าจอ</span>" : svgExpand + "<span class='btn-text' style='margin-left:6px;'>ขยายเต็มจอ</span>";
-    });
-    document.querySelectorAll(".fs-icon-btn").forEach(btn => {
-        btn.innerHTML = isFull ? svgCollapse : svgExpand;
-    });
-}
+      function updateFsButtons(isFull) {
+        document.querySelectorAll(".fs-text-btn").forEach((btn) => {
+          btn.innerHTML = isFull
+            ? svgCollapse +
+              "<span class='btn-text' style='margin-left:6px;'>ย่อหน้าจอ</span>"
+            : svgExpand +
+              "<span class='btn-text' style='margin-left:6px;'>ขยายเต็มจอ</span>";
+        });
+        document.querySelectorAll(".fs-icon-btn").forEach((btn) => {
+          btn.innerHTML = isFull ? svgCollapse : svgExpand;
+        });
+      }
 
-updateFsButtons(localStorage.getItem('isFullScreen') === 'true');
+      updateFsButtons(localStorage.getItem("isFullScreen") === "true");
 
-window.onload = function() {
-    if (localStorage.getItem('isFullScreen') === 'true') {
-        tryFullScreen();
-    }
-};
+      window.onload = function () {
+        if (localStorage.getItem("isFullScreen") === "true") {
+          tryFullScreen();
+        }
+      };
 
-function tryFullScreen() {
-    const doc = document.documentElement;
-    if (!document.fullscreenElement) {
-        if (doc.requestFullscreen) { doc.requestFullscreen().catch(err => console.log(err)); }
-        else if (doc.webkitRequestFullscreen) { doc.webkitRequestFullscreen().catch(err => console.log(err)); }
-        else if (doc.msRequestFullscreen) { doc.msRequestFullscreen().catch(err => console.log(err)); }
-    }
-}
+      function tryFullScreen() {
+        const doc = document.documentElement;
+        if (!document.fullscreenElement) {
+          if (doc.requestFullscreen) {
+            doc.requestFullscreen().catch((err) => console.log(err));
+          } else if (doc.webkitRequestFullscreen) {
+            doc.webkitRequestFullscreen().catch((err) => console.log(err));
+          } else if (doc.msRequestFullscreen) {
+            doc.msRequestFullscreen().catch((err) => console.log(err));
+          }
+        }
+      }
 
-function toggleFullScreen() {
-    const doc = document.documentElement;
-    if (!document.fullscreenElement) {
-        if (doc.requestFullscreen) doc.requestFullscreen();
-        else if (doc.webkitRequestFullscreen) doc.webkitRequestFullscreen();
-        else if (doc.msRequestFullscreen) doc.msRequestFullscreen();
-        updateFsButtons(true);
-        localStorage.setItem('isFullScreen', 'true');
-    } else {
-        if (document.exitFullscreen) document.exitFullscreen();
-        else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
-        else if (document.msExitFullscreen) document.msExitFullscreen();
-        updateFsButtons(false);
-        localStorage.setItem('isFullScreen', 'false');
-    }
-}
+      function toggleFullScreen() {
+        const doc = document.documentElement;
+        if (!document.fullscreenElement) {
+          if (doc.requestFullscreen) doc.requestFullscreen();
+          else if (doc.webkitRequestFullscreen) doc.webkitRequestFullscreen();
+          else if (doc.msRequestFullscreen) doc.msRequestFullscreen();
+          updateFsButtons(true);
+          localStorage.setItem("isFullScreen", "true");
+        } else {
+          if (document.exitFullscreen) document.exitFullscreen();
+          else if (document.webkitExitFullscreen)
+            document.webkitExitFullscreen();
+          else if (document.msExitFullscreen) document.msExitFullscreen();
+          updateFsButtons(false);
+          localStorage.setItem("isFullScreen", "false");
+        }
+      }
 
-document.addEventListener('fullscreenchange', exitHandler);
-document.addEventListener('webkitfullscreenchange', exitHandler);
-document.addEventListener('mozfullscreenchange', exitHandler);
-document.addEventListener('MSFullscreenChange', exitHandler);
+      document.addEventListener("fullscreenchange", exitHandler);
+      document.addEventListener("webkitfullscreenchange", exitHandler);
+      document.addEventListener("mozfullscreenchange", exitHandler);
+      document.addEventListener("MSFullscreenChange", exitHandler);
 
-function exitHandler() {
-    if (!document.fullscreenElement && !document.webkitIsFullScreen && !document.mozFullScreen && !document.msFullscreenElement) {
-        updateFsButtons(false);
-        localStorage.setItem('isFullScreen', 'false');
-    }
-}
+      function exitHandler() {
+        if (
+          !document.fullscreenElement &&
+          !document.webkitIsFullScreen &&
+          !document.mozFullScreen &&
+          !document.msFullscreenElement
+        ) {
+          updateFsButtons(false);
+          localStorage.setItem("isFullScreen", "false");
+        }
+      }
 
-function toggleUI() {
-    const body = document.body; const btn = document.getElementById("toggleUIBtn");
-    body.classList.toggle("ui-hidden");
-    if (body.classList.contains("ui-hidden")) { 
-        btn.innerHTML = "👁️‍🗨️<span class='btn-text' style='margin-left:4px;'>แสดง UI</span>"; 
-        btn.style.borderColor = "var(--primary)"; btn.style.color = "var(--primary)"; 
-    } 
-    else { 
-        btn.innerHTML = "👁️<span class='btn-text' style='margin-left:4px;'>ซ่อน UI</span>"; 
-        btn.style.borderColor = "var(--border)"; btn.style.color = "white"; 
-    }
-}
+      function toggleUI() {
+        const body = document.body;
+        const btn = document.getElementById("toggleUIBtn");
+        body.classList.toggle("ui-hidden");
+        if (body.classList.contains("ui-hidden")) {
+          btn.innerHTML =
+            "👁️‍🗨️<span class='btn-text' style='margin-left:4px;'>แสดง UI</span>";
+          btn.style.borderColor = "var(--primary)";
+          btn.style.color = "var(--primary)";
+        } else {
+          btn.innerHTML =
+            "👁️<span class='btn-text' style='margin-left:4px;'>ซ่อน UI</span>";
+          btn.style.borderColor = "var(--border)";
+          btn.style.color = "white";
+        }
+      }
 
-function speakText(elementId, btnElement) {
-    if (!btnElement.dataset.originalText) {
-        btnElement.dataset.originalText = btnElement.innerHTML;
-    }
+      function speakText(elementId, btnElement) {
+        if (!btnElement.dataset.originalText) {
+          btnElement.dataset.originalText = btnElement.innerHTML;
+        }
 
-    if (isSpeaking) {
-        speechSynthesis.cancel(); 
-        isSpeaking = false;
-        btnElement.innerHTML = btnElement.dataset.originalText;
-        return;
-    }
-    
-    let textRaw = "";
-    if (elementId === 'desc') {
-        textRaw = document.getElementById('title').innerText + " " + document.getElementById('desc').innerText;
-    } else if (elementId === 'modalDesc') {
-        textRaw = document.getElementById('modalTitle').innerText + " " + document.getElementById('modalDesc').innerText;
-    } else {
-        textRaw = document.getElementById(elementId).innerText;
-    }
-    
-    textRaw = textRaw.replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, '');
-    
-    const isWindows = navigator.userAgent.indexOf('Windows') !== -1;
-    if (isWindows) {
-        textRaw = textRaw.replace(/\(.*?\)/g, ''); 
-        textRaw = textRaw.replace(/C-shaped/gi, "รูปตัวซี"); 
-        textRaw = textRaw.replace(/RBC/gi, "อาร์ บี ซี");
-        textRaw = textRaw.replace(/WBC/gi, "ดับเบิลยู บี ซี");
-        textRaw = textRaw.replace(/[a-zA-Z]/g, ''); 
-    } else {
-        textRaw = textRaw.replace(/RBC/gi, "อาร์ บี ซี");
-        textRaw = textRaw.replace(/WBC/gi, "ดับเบิลยู บี ซี");
-    }
+        if (isSpeaking) {
+          speechSynthesis.cancel();
+          isSpeaking = false;
+          btnElement.innerHTML = btnElement.dataset.originalText;
+          return;
+        }
+
+        let textRaw = "";
+        if (elementId === "desc") {
+          textRaw =
+            document.getElementById("title").innerText +
+            " " +
+            document.getElementById("desc").innerText;
+        } else if (elementId === "modalDesc") {
+          textRaw =
+            document.getElementById("modalTitle").innerText +
+            " " +
+            document.getElementById("modalDesc").innerText;
+        } else {
+          textRaw = document.getElementById(elementId).innerText;
+        }
+
+        textRaw = textRaw.replace(
+          /[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu,
+          "",
+        );
+
+        const isWindows = navigator.userAgent.indexOf("Windows") !== -1;
+        if (isWindows) {
+          textRaw = textRaw.replace(/\(.*?\)/g, "");
+          textRaw = textRaw.replace(/C-shaped/gi, "รูปตัวซี");
+          textRaw = textRaw.replace(/RBC/gi, "อาร์ บี ซี");
+          textRaw = textRaw.replace(/WBC/gi, "ดับเบิลยู บี ซี");
+          textRaw = textRaw.replace(/[a-zA-Z]/g, "");
+        } else {
+          textRaw = textRaw.replace(/RBC/gi, "อาร์ บี ซี");
+          textRaw = textRaw.replace(/WBC/gi, "ดับเบิลยู บี ซี");
+        }
         // เปลี่ยนช่องว่างยาวๆ หรือการขึ้นบรรทัดใหม่ ให้เป็นเครื่องหมาย , เพื่อให้ AI พักหายใจ
-        textRaw = textRaw.replace(/\n+/g, ' , '); 
-        textRaw = textRaw.replace(/\s{2,}/g, ' , ');
-    const utterance = new SpeechSynthesisUtterance(textRaw);
-    utterance.lang = 'th-TH'; 
-    utterance.rate = 1.0; 
+        textRaw = textRaw.replace(/\n+/g, " , ");
+        textRaw = textRaw.replace(/\s{2,}/g, " , ");
+        const utterance = new SpeechSynthesisUtterance(textRaw);
+        utterance.lang = "th-TH";
+        utterance.rate = 1.0;
 
-    const voices = speechSynthesis.getVoices();
-    const bestVoice = voices.find(v => v.lang === 'th-TH' && v.name.includes('Google')) || voices.find(v => v.lang === 'th-TH');
-    if (bestVoice) {
-        utterance.voice = bestVoice;
-    }
+        const voices = speechSynthesis.getVoices();
+        const bestVoice =
+          voices.find((v) => v.lang === "th-TH" && v.name.includes("Google")) ||
+          voices.find((v) => v.lang === "th-TH");
+        if (bestVoice) {
+          utterance.voice = bestVoice;
+        }
 
-    utterance.onend = () => { 
-        isSpeaking = false; 
-        btnElement.innerHTML = btnElement.dataset.originalText;
-    };
-    
-    speechSynthesis.speak(utterance);
-    isSpeaking = true; 
-    btnElement.innerHTML = "🔇 หยุดฟังเสียง";
-}
+        utterance.onend = () => {
+          isSpeaking = false;
+          btnElement.innerHTML = btnElement.dataset.originalText;
+        };
 
-if ('speechSynthesis' in window) {
-    speechSynthesis.onvoiceschanged = () => { speechSynthesis.getVoices(); };
-}
-</script>
-</body>
+        speechSynthesis.speak(utterance);
+        isSpeaking = true;
+        btnElement.innerHTML = "🔇 หยุดฟังเสียง";
+      }
+
+      if ("speechSynthesis" in window) {
+        speechSynthesis.onvoiceschanged = () => {
+          speechSynthesis.getVoices();
+        };
+      }
+    </script>
+  </body>
 </html>

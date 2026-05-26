@@ -1,732 +1,1500 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="th">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>BioLens AR - Admin Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500&display=swap" rel="stylesheet">
+    <link
+      href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    />
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
-    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
+    <script
+      type="module"
+      src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"
+    ></script>
     <style>
-        html, body { height: 100%; margin: 0; font-family: 'Kanit', sans-serif; background: #0f172a; color: #f8fafc; overflow: hidden; }
-        .input-box { background: #1e293b; border: 1px solid #334155; color: white; border-radius: 8px; padding: 8px 12px; width: 100%; outline: none; transition: 0.2s; font-size: 0.9rem; }
-        .input-box:focus { border-color: #3b82f6; }
-        .rich-editor-content { padding: 12px; min-height: 80px; background: #1e293b; color: white; outline: none; line-height: 1.5; font-size: 0.9rem; }
-        .rich-editor-content b { color: #fbbf24; }
-        
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
-        
-        .preview-scroll::-webkit-scrollbar { width: 4px; }
-        .preview-scroll::-webkit-scrollbar-track { background: transparent; }
-        .preview-scroll::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 10px; }
-        .preview-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.4); }
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        font-family: "Kanit", sans-serif;
+        background: #0f172a;
+        color: #f8fafc;
+        overflow: hidden;
+      }
+      .input-box {
+        background: #1e293b;
+        border: 1px solid #334155;
+        color: white;
+        border-radius: 8px;
+        padding: 8px 12px;
+        width: 100%;
+        outline: none;
+        transition: 0.2s;
+        font-size: 0.9rem;
+      }
+      .input-box:focus {
+        border-color: #3b82f6;
+      }
+      .rich-editor-content {
+        padding: 12px;
+        min-height: 80px;
+        background: #1e293b;
+        color: white;
+        outline: none;
+        line-height: 1.5;
+        font-size: 0.9rem;
+      }
+      .rich-editor-content b {
+        color: #fbbf24;
+      }
 
-        .sidebar-item.active { background: #2563eb; color: white; border-color: #3b82f6; }
-        .sidebar-quiz.active { background: #e11d48; color: white; border-color: #f43f5e; }
-        .delete-btn-sm { position: absolute; top: 8px; right: 8px; width: 24px; height: 24px; display: flex; justify-content: center; align-items: center; border-radius: 6px; background: rgba(225, 29, 72, 0.1); color: #fb7185; transition: 0.2s; cursor: pointer; }
-        .delete-btn-sm:hover { background: rgba(225, 29, 72, 0.8); color: white; }
+      ::-webkit-scrollbar {
+        width: 6px;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #334155;
+        border-radius: 10px;
+      }
 
-        [contenteditable="true"]:empty:before { content: attr(placeholder); color: #64748b; pointer-events: none; display: block; }
-        body:not(.dev-mode) .dev-only { display: none !important; }
-        body:not(.dev-mode) .dev-lock-input { pointer-events: none; opacity: 0.5; background-color: #0f172a; border-color: #1e293b; }
+      .preview-scroll::-webkit-scrollbar {
+        width: 4px;
+      }
+      .preview-scroll::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .preview-scroll::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+      }
+      .preview-scroll::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.4);
+      }
+
+      .sidebar-item.active {
+        background: #2563eb;
+        color: white;
+        border-color: #3b82f6;
+      }
+      .sidebar-quiz.active {
+        background: #e11d48;
+        color: white;
+        border-color: #f43f5e;
+      }
+      .delete-btn-sm {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 6px;
+        background: rgba(225, 29, 72, 0.1);
+        color: #fb7185;
+        transition: 0.2s;
+        cursor: pointer;
+      }
+      .delete-btn-sm:hover {
+        background: rgba(225, 29, 72, 0.8);
+        color: white;
+      }
+
+      [contenteditable="true"]:empty:before {
+        content: attr(placeholder);
+        color: #64748b;
+        pointer-events: none;
+        display: block;
+      }
+      body:not(.dev-mode) .dev-only {
+        display: none !important;
+      }
+      body:not(.dev-mode) .dev-lock-input {
+        pointer-events: none;
+        opacity: 0.5;
+        background-color: #0f172a;
+        border-color: #1e293b;
+      }
     </style>
-</head>
-<body class="h-screen w-screen flex flex-col">
-
-    <div id="devPassModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] flex justify-center items-center p-4 transition-opacity">
-        <div class="bg-slate-900 border border-slate-700 p-6 rounded-2xl shadow-2xl w-full max-w-xs transform scale-100">
-            <h3 class="text-white text-lg font-bold mb-2 flex items-center gap-2">🔑 ปลดล็อกสิทธิ์</h3>
-            <p class="text-slate-300 text-xs mb-4">กรุณาใส่รหัสผ่านนักพัฒนาเพื่อดำเนินการต่อ</p>
-            <input type="password" id="devPassInput" class="input-box mb-4 text-center text-lg tracking-[0.3em]" placeholder="••••">
-            <div class="flex justify-end gap-2">
-                <button onclick="closeDevPassModal()" class="px-4 py-2 rounded-lg text-xs text-slate-300 hover:text-white hover:bg-slate-800 transition">ยกเลิก</button>
-                <button onclick="confirmDevPass()" class="bg-blue-600 hover:bg-blue-500 px-6 py-2 rounded-lg text-xs text-white font-bold transition shadow-lg">ยืนยัน</button>
-            </div>
+  </head>
+  <body class="h-screen w-screen flex flex-col">
+    <div
+      id="devPassModal"
+      class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] flex justify-center items-center p-4 transition-opacity"
+    >
+      <div
+        class="bg-slate-900 border border-slate-700 p-6 rounded-2xl shadow-2xl w-full max-w-xs transform scale-100"
+      >
+        <h3 class="text-white text-lg font-bold mb-2 flex items-center gap-2">
+          🔑 ปลดล็อกสิทธิ์
+        </h3>
+        <p class="text-slate-300 text-xs mb-4">
+          กรุณาใส่รหัสผ่านนักพัฒนาเพื่อดำเนินการต่อ
+        </p>
+        <input
+          type="password"
+          id="devPassInput"
+          class="input-box mb-4 text-center text-lg tracking-[0.3em]"
+          placeholder="••••"
+        />
+        <div class="flex justify-end gap-2">
+          <button
+            onclick="closeDevPassModal()"
+            class="px-4 py-2 rounded-lg text-xs text-slate-300 hover:text-white hover:bg-slate-800 transition"
+          >
+            ยกเลิก
+          </button>
+          <button
+            onclick="confirmDevPass()"
+            class="bg-blue-600 hover:bg-blue-500 px-6 py-2 rounded-lg text-xs text-white font-bold transition shadow-lg"
+          >
+            ยืนยัน
+          </button>
         </div>
+      </div>
     </div>
 
-    <div id="customPromptModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] flex justify-center items-center p-4 transition-opacity">
-        <div class="bg-slate-900 border border-slate-700 p-6 rounded-2xl shadow-2xl w-full max-w-sm transform scale-100">
-            <h3 id="promptTitle" class="text-white text-lg font-bold mb-2">Title</h3>
-            <p id="promptDesc" class="text-slate-300 text-xs mb-4 hidden">Description</p>
-            <input type="text" id="promptInput" class="input-box mb-4 text-sm font-medium" placeholder="...">
-            <div class="flex justify-end gap-2">
-                <button onclick="closeCustomPrompt()" class="px-4 py-2 rounded-lg text-xs text-slate-300 hover:text-white hover:bg-slate-800 transition">ยกเลิก</button>
-                <button id="promptConfirmBtn" class="bg-blue-600 hover:bg-blue-500 px-6 py-2 rounded-lg text-xs text-white font-bold transition shadow-lg">ตกลง</button>
-            </div>
+    <div
+      id="customPromptModal"
+      class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] flex justify-center items-center p-4 transition-opacity"
+    >
+      <div
+        class="bg-slate-900 border border-slate-700 p-6 rounded-2xl shadow-2xl w-full max-w-sm transform scale-100"
+      >
+        <h3 id="promptTitle" class="text-white text-lg font-bold mb-2">
+          Title
+        </h3>
+        <p id="promptDesc" class="text-slate-300 text-xs mb-4 hidden">
+          Description
+        </p>
+        <input
+          type="text"
+          id="promptInput"
+          class="input-box mb-4 text-sm font-medium"
+          placeholder="..."
+        />
+        <div class="flex justify-end gap-2">
+          <button
+            onclick="closeCustomPrompt()"
+            class="px-4 py-2 rounded-lg text-xs text-slate-300 hover:text-white hover:bg-slate-800 transition"
+          >
+            ยกเลิก
+          </button>
+          <button
+            id="promptConfirmBtn"
+            class="bg-blue-600 hover:bg-blue-500 px-6 py-2 rounded-lg text-xs text-white font-bold transition shadow-lg"
+          >
+            ตกลง
+          </button>
         </div>
+      </div>
     </div>
 
-    <div id="customConfirmModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] flex justify-center items-center p-4 transition-opacity">
-        <div class="bg-slate-900 border border-slate-700 p-6 rounded-2xl shadow-2xl w-full max-w-sm transform scale-100 text-center">
-            <div id="confirmIcon" class="text-4xl mb-3">⚠️</div>
-            <h3 id="confirmTitle" class="text-white text-lg font-bold mb-2">ยืนยันการดำเนินการ</h3>
-            <p id="confirmDesc" class="text-slate-300 text-sm mb-6">คุณแน่ใจหรือไม่?</p>
-            <div class="flex justify-center gap-3">
-                <button onclick="closeCustomConfirm()" class="px-6 py-2 rounded-lg text-sm text-slate-300 hover:text-white hover:bg-slate-800 transition">ยกเลิก</button>
-                <button id="confirmBtn" class="bg-rose-600 hover:bg-rose-500 px-6 py-2 rounded-lg text-sm text-white font-bold transition shadow-lg">ยืนยัน</button>
-            </div>
+    <div
+      id="customConfirmModal"
+      class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] flex justify-center items-center p-4 transition-opacity"
+    >
+      <div
+        class="bg-slate-900 border border-slate-700 p-6 rounded-2xl shadow-2xl w-full max-w-sm transform scale-100 text-center"
+      >
+        <div id="confirmIcon" class="text-4xl mb-3">⚠️</div>
+        <h3 id="confirmTitle" class="text-white text-lg font-bold mb-2">
+          ยืนยันการดำเนินการ
+        </h3>
+        <p id="confirmDesc" class="text-slate-300 text-sm mb-6">
+          คุณแน่ใจหรือไม่?
+        </p>
+        <div class="flex justify-center gap-3">
+          <button
+            onclick="closeCustomConfirm()"
+            class="px-6 py-2 rounded-lg text-sm text-slate-300 hover:text-white hover:bg-slate-800 transition"
+          >
+            ยกเลิก
+          </button>
+          <button
+            id="confirmBtn"
+            class="bg-rose-600 hover:bg-rose-500 px-6 py-2 rounded-lg text-sm text-white font-bold transition shadow-lg"
+          >
+            ยืนยัน
+          </button>
         </div>
+      </div>
     </div>
 
-    <div id="loginPage" class="flex flex-col items-center justify-center h-full w-full p-6 bg-slate-950 absolute inset-0 z-50">
-        <button onclick="toggleFullScreen()" id="fsBtnLogin" class="absolute top-6 right-6 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 p-2 rounded-full transition shadow-lg w-10 h-10 flex justify-center items-center"></button>
-        <div class="bg-slate-900 p-8 rounded-3xl shadow-2xl w-full max-w-md text-center border border-slate-800">
-            <div class="text-5xl mb-4">⚙️</div>
-            <h1 class="text-2xl font-bold text-white mb-2">BioLens Admin</h1>
-            <p class="text-slate-300 mb-6 text-sm">เข้าสู่ระบบจัดการเนื้อหาและโครงสร้าง</p>
-            <input type="email" id="email" class="input-box mb-3" placeholder="อีเมล">
-            <input type="password" id="pass" class="input-box mb-5" placeholder="รหัสผ่าน">
-            <button onclick="login()" class="w-full bg-blue-600 hover:bg-blue-500 py-3 rounded-xl text-white font-bold transition">เข้าสู่ระบบ</button>
-            <p id="errorMsg" class="text-red-400 mt-4 text-xs hidden">❌ เข้าสู่ระบบไม่สำเร็จ ตรวจสอบอีเมลหรือรหัสผ่าน</p>
-            <button onclick="window.location.href='index.html'" class="mt-5 text-slate-400 hover:text-white text-xs transition">🔙 กลับหน้าแอป</button>
-        </div>
+    <div
+      id="loginPage"
+      class="flex flex-col items-center justify-center h-full w-full p-6 bg-slate-950 absolute inset-0 z-50"
+    >
+      <button
+        onclick="toggleFullScreen()"
+        id="fsBtnLogin"
+        class="absolute top-6 right-6 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 p-2 rounded-full transition shadow-lg w-10 h-10 flex justify-center items-center"
+      ></button>
+      <div
+        class="bg-slate-900 p-8 rounded-3xl shadow-2xl w-full max-w-md text-center border border-slate-800"
+      >
+        <div class="text-5xl mb-4">⚙️</div>
+        <h1 class="text-2xl font-bold text-white mb-2">BioLens Admin</h1>
+        <p class="text-slate-300 mb-6 text-sm">
+          เข้าสู่ระบบจัดการเนื้อหาและโครงสร้าง
+        </p>
+        <input
+          type="email"
+          id="email"
+          class="input-box mb-3"
+          placeholder="อีเมล"
+        />
+        <input
+          type="password"
+          id="pass"
+          class="input-box mb-5"
+          placeholder="รหัสผ่าน"
+        />
+        <button
+          onclick="login()"
+          class="w-full bg-blue-600 hover:bg-blue-500 py-3 rounded-xl text-white font-bold transition"
+        >
+          เข้าสู่ระบบ
+        </button>
+        <p id="errorMsg" class="text-red-400 mt-4 text-xs hidden">
+          ❌ เข้าสู่ระบบไม่สำเร็จ ตรวจสอบอีเมลหรือรหัสผ่าน
+        </p>
+        <button
+          onclick="window.location.href = 'index.html'"
+          class="mt-5 text-slate-400 hover:text-white text-xs transition"
+        >
+          🔙 กลับหน้าแอป
+        </button>
+      </div>
     </div>
 
-    <header class="bg-slate-800 p-3 flex justify-between items-center border-b border-slate-700 shrink-0 z-10 shadow-sm">
-        <div class="flex items-center gap-3">
-            <h1 class="text-lg font-bold text-white ml-2">Admin Dashboard</h1>
-        </div>
-        <div class="flex gap-2 items-center">
-            <button onclick="toggleDevMode()" id="btnDevMode" class="bg-slate-600/20 hover:bg-slate-600 text-slate-300 hover:text-white px-3 py-1.5 rounded-lg text-xs transition border border-slate-600/30 flex items-center gap-1">🔒 โหมดปกติ</button>
-            <button onclick="syncInitialData()" class="bg-amber-600 hover:bg-amber-500 px-3 py-1.5 rounded-lg text-xs dev-only hidden" id="btnSync">📥 โหลดข้อมูลเริ่มต้น</button>
-            <button onclick="addNewSystem()" class="bg-blue-600/20 hover:bg-blue-600 text-blue-400 hover:text-white px-3 py-1.5 rounded-lg text-xs transition border border-blue-600/30 dev-only">➕ เพิ่มหมวดหมู่</button>
-            <button onclick="clearAllData()" class="bg-rose-600/20 hover:bg-rose-600 text-rose-400 hover:text-white px-3 py-1.5 rounded-lg text-xs transition border border-rose-600/30 dev-only">🧹 ล้าง Cloud</button>
+    <header
+      class="bg-slate-800 p-3 flex justify-between items-center border-b border-slate-700 shrink-0 z-10 shadow-sm"
+    >
+      <div class="flex items-center gap-3">
+        <h1 class="text-lg font-bold text-white ml-2">Admin Dashboard</h1>
+      </div>
+      <div class="flex gap-2 items-center">
+        <button
+          onclick="toggleDevMode()"
+          id="btnDevMode"
+          class="bg-slate-600/20 hover:bg-slate-600 text-slate-300 hover:text-white px-3 py-1.5 rounded-lg text-xs transition border border-slate-600/30 flex items-center gap-1"
+        >
+          🔒 โหมดปกติ
+        </button>
+        <button
+          onclick="syncInitialData()"
+          class="bg-amber-600 hover:bg-amber-500 px-3 py-1.5 rounded-lg text-xs dev-only hidden"
+          id="btnSync"
+        >
+          📥 โหลดข้อมูลเริ่มต้น
+        </button>
+        <button
+          onclick="addNewSystem()"
+          class="bg-blue-600/20 hover:bg-blue-600 text-blue-400 hover:text-white px-3 py-1.5 rounded-lg text-xs transition border border-blue-600/30 dev-only"
+        >
+          ➕ เพิ่มหมวดหมู่
+        </button>
+        <button
+          onclick="clearAllData()"
+          class="bg-rose-600/20 hover:bg-rose-600 text-rose-400 hover:text-white px-3 py-1.5 rounded-lg text-xs transition border border-rose-600/30 dev-only"
+        >
+          🧹 ล้าง Cloud
+        </button>
 
-            <input type="file" id="importBackupFile" accept=".json" class="hidden" onchange="handleImportBackup(event)">
-            <button onclick="document.getElementById('importBackupFile').click()" class="bg-teal-600/20 hover:bg-teal-600 text-teal-400 hover:text-white px-3 py-1.5 rounded-lg text-xs transition border border-teal-600/30">📂 นำเข้าข้อมูล</button>
-            <button onclick="exportBackup()" class="bg-indigo-600/20 hover:bg-indigo-600 text-indigo-400 hover:text-white px-3 py-1.5 rounded-lg text-xs transition border border-indigo-600/30">💾 สำรองข้อมูล</button>
-            <div class="w-[1px] bg-slate-700 mx-1 h-6"></div>
-            <button onclick="toggleFullScreen()" id="fsBtnHeader" class="bg-slate-700 hover:bg-slate-600 text-white w-8 h-8 rounded-lg flex items-center justify-center transition" title="ขยายเต็มจอ"></button>
-            <button onclick="returnToHomeSecurely()" class="bg-slate-700 hover:bg-slate-600 px-3 py-1.5 rounded-lg text-xs">🏠 หน้าหลัก</button>
-            <button onclick="logout()" class="bg-slate-900 hover:bg-rose-700 px-3 py-1.5 rounded-lg text-xs border border-slate-700">🚪 ออกจากระบบ</button>
-        </div>
+        <input
+          type="file"
+          id="importBackupFile"
+          accept=".json"
+          class="hidden"
+          onchange="handleImportBackup(event)"
+        />
+        <button
+          onclick="document.getElementById('importBackupFile').click()"
+          class="bg-teal-600/20 hover:bg-teal-600 text-teal-400 hover:text-white px-3 py-1.5 rounded-lg text-xs transition border border-teal-600/30"
+        >
+          📂 นำเข้าข้อมูล
+        </button>
+        <button
+          onclick="exportBackup()"
+          class="bg-indigo-600/20 hover:bg-indigo-600 text-indigo-400 hover:text-white px-3 py-1.5 rounded-lg text-xs transition border border-indigo-600/30"
+        >
+          💾 สำรองข้อมูล
+        </button>
+        <div class="w-[1px] bg-slate-700 mx-1 h-6"></div>
+        <button
+          onclick="toggleFullScreen()"
+          id="fsBtnHeader"
+          class="bg-slate-700 hover:bg-slate-600 text-white w-8 h-8 rounded-lg flex items-center justify-center transition"
+          title="ขยายเต็มจอ"
+        ></button>
+        <button
+          onclick="returnToHomeSecurely()"
+          class="bg-slate-700 hover:bg-slate-600 px-3 py-1.5 rounded-lg text-xs"
+        >
+          🏠 หน้าหลัก
+        </button>
+        <button
+          onclick="logout()"
+          class="bg-slate-900 hover:bg-rose-700 px-3 py-1.5 rounded-lg text-xs border border-slate-700"
+        >
+          🚪 ออกจากระบบ
+        </button>
+      </div>
     </header>
 
-    <div id="dashboard" class="hidden flex-col md:flex-row h-full overflow-hidden">
-        
-        <div class="w-full md:w-72 h-1/3 md:h-full bg-slate-800 border-b md:border-b-0 md:border-r border-slate-700 p-4 overflow-y-auto shrink-0 flex flex-col">
-            <div id="sidebarMenu" class="space-y-4 flex-grow"></div>
+    <div
+      id="dashboard"
+      class="hidden flex-col md:flex-row h-full overflow-hidden"
+    >
+      <div
+        class="w-full md:w-72 h-1/3 md:h-full bg-slate-800 border-b md:border-b-0 md:border-r border-slate-700 p-4 overflow-y-auto shrink-0 flex flex-col"
+      >
+        <div id="sidebarMenu" class="space-y-4 flex-grow"></div>
+      </div>
+
+      <div
+        class="flex-grow bg-slate-900 flex flex-col h-full overflow-hidden relative"
+      >
+        <div
+          id="welcomeScreen"
+          class="absolute inset-0 flex flex-col items-center justify-center bg-slate-900 z-10 text-slate-400"
+        >
+          <span class="text-4xl mb-3">👈</span>
+          <p class="text-base">เลือกเมนูด้านซ้ายเพื่อเริ่มจัดการข้อมูล</p>
         </div>
 
-        <div class="flex-grow bg-slate-900 flex flex-col h-full overflow-hidden relative">
-            <div id="welcomeScreen" class="absolute inset-0 flex flex-col items-center justify-center bg-slate-900 z-10 text-slate-400">
-                <span class="text-4xl mb-3">👈</span>
-                <p class="text-base">เลือกเมนูด้านซ้ายเพื่อเริ่มจัดการข้อมูล</p>
-            </div>
-
-            <div id="editorHeader" class="bg-slate-800 px-6 py-4 border-b border-slate-700 flex justify-between items-center shrink-0 hidden">
-                <h2 id="editingTitle" class="text-xl font-bold text-blue-400 truncate w-1/2">Editor</h2>
-                <div class="flex gap-2">
-                    <button id="btnDeleteTarget" onclick="deleteCurrentTarget()" class="text-rose-400 hover:bg-rose-400/10 px-3 py-2 rounded-lg text-xs border border-rose-400/20 transition dev-only hidden">🗑️ ลบหน้านี้ทิ้ง</button>
-                    <button onclick="confirmSaveData()" class="bg-emerald-600 hover:bg-emerald-500 px-6 py-2 rounded-lg font-bold text-white text-sm shadow-md transition flex items-center gap-2">💾 บันทึกข้อมูล</button>
-                </div>
-            </div>
-            
-            <div class="flex-grow px-6 py-4 overflow-y-auto">
-                
-                <div id="adminContentSection" class="space-y-4 hidden">
-                    <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-sm relative">
-                        <div class="flex justify-between items-center mb-3">
-                            <h3 class="text-indigo-400 font-bold text-sm">📺 จอพรีวิวแอปพลิเคชัน</h3>
-                            <span class="text-[10px] bg-slate-700 text-slate-300 px-2 py-1 rounded">อัปเดตเรียลไทม์</span>
-                        </div>
-                        <p class="text-xs text-slate-300 mb-4 leading-relaxed">
-                            💡 <b>ทริค:</b> ลอง <b>"คลิก"</b> ชิ้นส่วนบนโมเดล 3D ด้านซ้าย เพื่อดูผลลัพธ์ในการ์ดจำลองด้านขวา และดึง ID มาใช้งานครับ
-                        </p>
-                        
-                        <div id="allMaterialsContainer" class="hidden mb-4 p-3 bg-slate-900/50 rounded-xl border border-slate-700">
-                            <div class="text-[10px] text-slate-300 mb-2 uppercase flex justify-between items-center">
-                                <span>🏷️ รายชื่อ ID ทั้งหมดที่พบในโมเดล (คลิกปุ่มแทนการเลือกบนโมเดลได้เลย)</span>
-                            </div>
-                            <div id="materialChips" class="flex flex-wrap gap-1.5"></div>
-                        </div>
-                        
-                        <div class="flex flex-col lg:flex-row gap-4 h-[400px]">
-                            <div class="flex-grow bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] bg-slate-950 rounded-xl overflow-hidden border border-slate-700 relative shadow-inner">
-                                <model-viewer id="adminViewer" class="w-full h-full" camera-controls auto-rotate shadow-intensity="1" exposure="1.2" environment-image="neutral" disable-pan></model-viewer>
-                                
-                                <div id="clickedIdDisplay" class="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-slate-900/90 backdrop-blur-md text-white px-4 py-2 rounded-full text-xs font-mono shadow-[0_10px_20px_rgba(0,0,0,0.5)] border border-slate-600 hidden flex items-center gap-2 transition-all pointer-events-none whitespace-nowrap z-10">
-                                    📌 ID: <span id="idTextSpan" class="bg-indigo-600/50 text-indigo-300 px-2 py-1 rounded font-bold">Name</span>
-                                </div>
-                            </div>
-
-                            <div class="w-full lg:w-[350px] bg-[rgba(15,23,42,0.85)] border border-[rgba(255,255,255,0.15)] rounded-xl p-5 text-white shadow-lg flex flex-col shrink-0 relative overflow-hidden">
-                                <div id="previewBadge" class="absolute top-0 right-0 bg-blue-500 text-white text-[10px] font-bold px-3 py-1.5 rounded-bl-xl shadow-md">โหมดภาพรวม</div>
-                                <h3 id="previewTitle" class="text-[1.2rem] font-medium border-b border-[#ff4757] pb-2 mb-3 mt-2 shrink-0 leading-[1.3]">ชื่อหัวข้อ...</h3>
-                                <div id="previewDesc" class="text-[0.9rem] text-[#cbd5e1] leading-[1.6] overflow-y-auto flex-grow pr-2 preview-scroll">รายละเอียด...</div>
-                                <button id="resetPreviewBtn" onclick="resetLivePreview()" class="mt-4 w-full bg-slate-700/50 hover:bg-[#ff4757] text-white text-xs px-3 py-2 rounded-lg border border-slate-600 transition shadow-sm hidden shrink-0 font-medium">🔙 ย้อนกลับไปหน้าภาพรวม</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-sm">
-                        <div class="grid grid-cols-2 gap-4 mb-4">
-                            <div>
-                                <label class="text-[10px] text-slate-300 mb-1 block uppercase">ชื่อหัวข้อ (Name)</label>
-                                <input type="text" id="frmName" class="input-box font-bold">
-                            </div>
-                            <div>
-                                <label class="text-[10px] text-slate-300 mb-1 block uppercase">ลิงก์โมเดล (GLB Path) <span class="dev-only text-emerald-400">🔓 ปลดล็อกแล้ว</span></label>
-                                <div class="flex gap-2 items-center">
-                                    <input type="text" id="frmModelPath" class="input-box font-mono text-emerald-400 dev-lock-input" placeholder="อัปโหลดเพื่อสร้างลิงก์อัตโนมัติ" onchange="updateLiveModel()">
-                                    <div class="dev-only shrink-0 flex items-center gap-2">
-                                        <input type="file" id="modelUploader" accept=".glb" class="hidden" onchange="uploadModelToCloud(this)">
-                                        <button onclick="document.getElementById('modelUploader').click()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-2 rounded-lg text-xs font-bold transition shadow-md whitespace-nowrap">📤 อัปโหลด .GLB</button>
-                                    </div>
-                                </div>
-                                <p id="uploadStatus" class="text-[10px] text-indigo-400 mt-2 font-medium hidden">กำลังอัปโหลด... 0%</p>
-                            </div>
-                        </div>
-                        <div>
-                            <label class="text-[10px] text-slate-300 mb-1 block uppercase">คำอธิบายประกอบภาพรวม</label>
-                            <div class="border border-slate-700 rounded-lg overflow-hidden focus-within:border-blue-500 transition">
-                                <div class="bg-slate-900 p-1.5 border-b border-slate-700 flex gap-2 items-center">
-                                    <button type="button" onmousedown="event.preventDefault(); document.execCommand('bold', false, null);" class="bg-slate-700 hover:bg-slate-600 text-white text-[10px] px-2 py-1 rounded transition"><b>B</b> ตัวหนา</button>
-                                </div>
-                                <div id="frmDesc" class="rich-editor-content border-none" contenteditable="true" placeholder="ระบุเนื้อหา..."></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-sm mb-10">
-                        <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-amber-400 font-bold text-sm">🎯 จุดคลิกบนโมเดล</h3>
-                            <button onclick="addClickPart()" class="bg-amber-500/20 text-amber-400 hover:bg-amber-500 hover:text-white px-3 py-1 rounded-lg text-xs transition dev-only">+ เพิ่มจุดคลิก</button>
-                        </div>
-                        <div id="clickPartsContainer" class="space-y-4"></div>
-                    </div>
-                </div>
-            <div id="adminSettingsSection" class="space-y-4 hidden mb-10">
-                    <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-sm">
-                        <div class="flex justify-between items-center mb-6 border-b border-slate-700/50 pb-4">
-                            <h3 class="text-amber-400 font-bold text-lg">⚙️ ตั้งค่าระบบประเมินผล</h3>
-                        </div>
-                        <p class="text-xs text-slate-300 mb-6 bg-slate-900/50 p-4 rounded-xl border border-slate-700/50 leading-relaxed">
-                            💡 <b>คำแนะนำ:</b> ตั้งค่าจำนวนข้อสอบที่จะสุ่มมาแสดงในโหมด "แบบทดสอบรวมทุกระบบ" และกำหนดเกณฑ์เปอร์เซ็นต์ขั้นต่ำที่นักเรียนต้องทำได้เพื่อให้สอบผ่าน (ต้องกดปุ่มบันทึกข้อมูลด้านบนขวาหลังแก้ไขเสร็จ)
-                        </p>
-                        
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div class="bg-slate-900/40 p-5 rounded-xl border border-slate-700">
-                                <label class="text-xs text-slate-300 mb-3 block uppercase font-bold">🎯 จำนวนสุ่มข้อสอบ (ข้อ)</label>
-                                <input type="number" id="frmGlobalQuizLimit" class="input-box text-emerald-400 font-bold text-2xl text-center py-4" min="1">
-                                <p class="text-[10px] text-slate-400 mt-3 text-center">จำนวนข้อสอบที่จะสุ่มดึงมา (เฉพาะข้อที่เปิดใช้งาน)</p>
-                            </div>
-
-                            <div class="bg-slate-900/40 p-5 rounded-xl border border-slate-700">
-                                <label class="text-xs text-slate-300 mb-3 block uppercase font-bold">🏆 เกณฑ์สอบผ่าน (%)</label>
-                                <input type="number" id="frmGlobalPassing" class="input-box text-amber-400 font-bold text-2xl text-center py-4" min="1" max="100">
-                                <p class="text-[10px] text-slate-400 mt-3 text-center">เปอร์เซ็นต์คะแนนรวมที่ต้องทำได้เพื่อผ่านเกณฑ์</p>
-                            </div>
-                            <div class="bg-slate-900/40 p-5 rounded-xl border border-slate-700">
-                                <label class="text-xs text-slate-300 mb-3 block uppercase font-bold">⏱️ เปิด/ปิด การจับเวลา</label>
-                                <div class="flex justify-center items-center py-3">
-                                    <label class="inline-flex items-center cursor-pointer">
-                                        <input type="checkbox" id="frmTimerEnabled" class="w-5 h-5 rounded border-slate-700 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
-                                        <span class="ml-2 text-sm text-slate-300 font-bold">เปิดใช้งานตัวจับเวลา</span>
-                                    </label>
-                                </div>
-                                <p class="text-[10px] text-slate-500 mt-3 text-center">ติ๊กถูกเพื่อเปิดระบบเลื่อนเวลาถอยหลังในหน้าทำข้อสอบ</p>
-                            </div>
-
-                            <div class="bg-slate-900/40 p-5 rounded-xl border border-slate-700">
-                                <label class="text-xs text-slate-300 mb-3 block uppercase font-bold">⏳ เวลาต่อข้อ (วินาที)</label>
-                                <input type="number" id="frmGlobalTimeLimit" class="input-box text-rose-400 font-bold text-2xl text-center py-4" min="5" placeholder="30">
-                                <p class="text-[10px] text-slate-500 mt-3 text-center">กำหนดเวลาถอยหลังในแต่ละข้อ (วินาที)</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div id="adminQuizSection" class="space-y-4 hidden mb-10">
-                    <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-sm">
-                        <div class="flex justify-between items-center mb-4">
-                            <h3 id="quizSectionTitle" class="text-rose-400 font-bold text-sm">📝 คลังแบบทดสอบประจำหมวด</h3>
-                            <button onclick="addQuiz()" class="bg-rose-500/20 text-rose-400 hover:bg-rose-500 hover:text-white px-3 py-1 rounded-lg text-xs transition shadow-sm">+ เพิ่มข้อสอบ</button>
-                        </div>
-                        <p class="text-[11px] text-slate-300 mb-6 bg-slate-900/50 p-3 rounded-lg border border-slate-700/50">
-                            💡 <b>ระบบคลังสลับข้ออัจฉริยะ:</b> ข้อสอบที่เปิดใช้งาน (✅) ทั้งหมดในหมวดนี้ จะถูกนำไปสลับลำดับข้อ/ตัวเลือกอัตโนมัติ เพื่อป้องกันนักเรียนลอกกัน 
-                        </p>
-                        
-                        <div id="quizContainer" class="space-y-3"></div>
-                        
-                        <div id="emptyQuizMsg" class="hidden text-center py-10 bg-slate-900/50 rounded-xl border border-dashed border-slate-700 mt-4">
-                            <span class="text-4xl block mb-2">📋</span>
-                            <p class="text-slate-300 text-sm">คลังข้อสอบหมวดนี้ยังว่างเปล่า<br>กดปุ่ม "+ เพิ่มข้อสอบ" ด้านบนเพื่อเริ่มสร้างแบบทดสอบ</p>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
+        <div
+          id="editorHeader"
+          class="bg-slate-800 px-6 py-4 border-b border-slate-700 flex justify-between items-center shrink-0 hidden"
+        >
+          <h2
+            id="editingTitle"
+            class="text-xl font-bold text-blue-400 truncate w-1/2"
+          >
+            Editor
+          </h2>
+          <div class="flex gap-2">
+            <button
+              id="btnDeleteTarget"
+              onclick="deleteCurrentTarget()"
+              class="text-rose-400 hover:bg-rose-400/10 px-3 py-2 rounded-lg text-xs border border-rose-400/20 transition dev-only hidden"
+            >
+              🗑️ ลบหน้านี้ทิ้ง
+            </button>
+            <button
+              onclick="confirmSaveData()"
+              class="bg-emerald-600 hover:bg-emerald-500 px-6 py-2 rounded-lg font-bold text-white text-sm shadow-md transition flex items-center gap-2"
+            >
+              💾 บันทึกข้อมูล
+            </button>
+          </div>
         </div>
+
+        <div class="flex-grow px-6 py-4 overflow-y-auto">
+          <div id="adminContentSection" class="space-y-4 hidden">
+            <div
+              class="bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-sm relative"
+            >
+              <div class="flex justify-between items-center mb-3">
+                <h3 class="text-indigo-400 font-bold text-sm">
+                  📺 จอพรีวิวแอปพลิเคชัน
+                </h3>
+                <span
+                  class="text-[10px] bg-slate-700 text-slate-300 px-2 py-1 rounded"
+                  >อัปเดตเรียลไทม์</span
+                >
+              </div>
+              <p class="text-xs text-slate-300 mb-4 leading-relaxed">
+                💡 <b>ทริค:</b> ลอง <b>"คลิก"</b> ชิ้นส่วนบนโมเดล 3D ด้านซ้าย
+                เพื่อดูผลลัพธ์ในการ์ดจำลองด้านขวา และดึง ID มาใช้งานครับ
+              </p>
+
+              <div
+                id="allMaterialsContainer"
+                class="hidden mb-4 p-3 bg-slate-900/50 rounded-xl border border-slate-700"
+              >
+                <div
+                  class="text-[10px] text-slate-300 mb-2 uppercase flex justify-between items-center"
+                >
+                  <span
+                    >🏷️ รายชื่อ ID ทั้งหมดที่พบในโมเดล
+                    (คลิกปุ่มแทนการเลือกบนโมเดลได้เลย)</span
+                  >
+                </div>
+                <div id="materialChips" class="flex flex-wrap gap-1.5"></div>
+              </div>
+
+              <div class="flex flex-col lg:flex-row gap-4 h-[400px]">
+                <div
+                  class="flex-grow bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] bg-slate-950 rounded-xl overflow-hidden border border-slate-700 relative shadow-inner"
+                >
+                  <model-viewer
+                    id="adminViewer"
+                    class="w-full h-full"
+                    camera-controls
+                    auto-rotate
+                    shadow-intensity="1"
+                    exposure="1.2"
+                    environment-image="neutral"
+                    disable-pan
+                  ></model-viewer>
+
+                  <div
+                    id="clickedIdDisplay"
+                    class="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-slate-900/90 backdrop-blur-md text-white px-4 py-2 rounded-full text-xs font-mono shadow-[0_10px_20px_rgba(0,0,0,0.5)] border border-slate-600 hidden flex items-center gap-2 transition-all pointer-events-none whitespace-nowrap z-10"
+                  >
+                    📌 ID:
+                    <span
+                      id="idTextSpan"
+                      class="bg-indigo-600/50 text-indigo-300 px-2 py-1 rounded font-bold"
+                      >Name</span
+                    >
+                  </div>
+                </div>
+
+                <div
+                  class="w-full lg:w-[350px] bg-[rgba(15,23,42,0.85)] border border-[rgba(255,255,255,0.15)] rounded-xl p-5 text-white shadow-lg flex flex-col shrink-0 relative overflow-hidden"
+                >
+                  <div
+                    id="previewBadge"
+                    class="absolute top-0 right-0 bg-blue-500 text-white text-[10px] font-bold px-3 py-1.5 rounded-bl-xl shadow-md"
+                  >
+                    โหมดภาพรวม
+                  </div>
+                  <h3
+                    id="previewTitle"
+                    class="text-[1.2rem] font-medium border-b border-[#ff4757] pb-2 mb-3 mt-2 shrink-0 leading-[1.3]"
+                  >
+                    ชื่อหัวข้อ...
+                  </h3>
+                  <div
+                    id="previewDesc"
+                    class="text-[0.9rem] text-[#cbd5e1] leading-[1.6] overflow-y-auto flex-grow pr-2 preview-scroll"
+                  >
+                    รายละเอียด...
+                  </div>
+                  <button
+                    id="resetPreviewBtn"
+                    onclick="resetLivePreview()"
+                    class="mt-4 w-full bg-slate-700/50 hover:bg-[#ff4757] text-white text-xs px-3 py-2 rounded-lg border border-slate-600 transition shadow-sm hidden shrink-0 font-medium"
+                  >
+                    🔙 ย้อนกลับไปหน้าภาพรวม
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div
+              class="bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-sm"
+            >
+              <div class="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label class="text-[10px] text-slate-300 mb-1 block uppercase"
+                    >ชื่อหัวข้อ (Name)</label
+                  >
+                  <input type="text" id="frmName" class="input-box font-bold" />
+                </div>
+                <div>
+                  <label class="text-[10px] text-slate-300 mb-1 block uppercase"
+                    >ลิงก์โมเดล (GLB Path)
+                    <span class="dev-only text-emerald-400"
+                      >🔓 ปลดล็อกแล้ว</span
+                    ></label
+                  >
+                  <div class="flex gap-2 items-center">
+                    <input
+                      type="text"
+                      id="frmModelPath"
+                      class="input-box font-mono text-emerald-400 dev-lock-input"
+                      placeholder="อัปโหลดเพื่อสร้างลิงก์อัตโนมัติ"
+                      onchange="updateLiveModel()"
+                    />
+                    <div class="dev-only shrink-0 flex items-center gap-2">
+                      <input
+                        type="file"
+                        id="modelUploader"
+                        accept=".glb"
+                        class="hidden"
+                        onchange="uploadModelToCloud(this)"
+                      />
+                      <button
+                        onclick="
+                          document.getElementById('modelUploader').click()
+                        "
+                        class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-2 rounded-lg text-xs font-bold transition shadow-md whitespace-nowrap"
+                      >
+                        📤 อัปโหลด .GLB
+                      </button>
+                    </div>
+                  </div>
+                  <p
+                    id="uploadStatus"
+                    class="text-[10px] text-indigo-400 mt-2 font-medium hidden"
+                  >
+                    กำลังอัปโหลด... 0%
+                  </p>
+                </div>
+              </div>
+              <div>
+                <label class="text-[10px] text-slate-300 mb-1 block uppercase"
+                  >คำอธิบายประกอบภาพรวม</label
+                >
+                <div
+                  class="border border-slate-700 rounded-lg overflow-hidden focus-within:border-blue-500 transition"
+                >
+                  <div
+                    class="bg-slate-900 p-1.5 border-b border-slate-700 flex gap-2 items-center"
+                  >
+                    <button
+                      type="button"
+                      onmousedown="
+                        event.preventDefault();
+                        document.execCommand('bold', false, null);
+                      "
+                      class="bg-slate-700 hover:bg-slate-600 text-white text-[10px] px-2 py-1 rounded transition"
+                    >
+                      <b>B</b> ตัวหนา
+                    </button>
+                  </div>
+                  <div
+                    id="frmDesc"
+                    class="rich-editor-content border-none"
+                    contenteditable="true"
+                    placeholder="ระบุเนื้อหา..."
+                  ></div>
+                </div>
+              </div>
+            </div>
+
+            <div
+              class="bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-sm mb-10"
+            >
+              <div class="flex justify-between items-center mb-4">
+                <h3 class="text-amber-400 font-bold text-sm">
+                  🎯 จุดคลิกบนโมเดล
+                </h3>
+                <button
+                  onclick="addClickPart()"
+                  class="bg-amber-500/20 text-amber-400 hover:bg-amber-500 hover:text-white px-3 py-1 rounded-lg text-xs transition dev-only"
+                >
+                  + เพิ่มจุดคลิก
+                </button>
+              </div>
+              <div id="clickPartsContainer" class="space-y-4"></div>
+            </div>
+          </div>
+          <div id="adminSettingsSection" class="space-y-4 hidden mb-10">
+            <div
+              class="bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-sm"
+            >
+              <div
+                class="flex justify-between items-center mb-6 border-b border-slate-700/50 pb-4"
+              >
+                <h3 class="text-amber-400 font-bold text-lg">
+                  ⚙️ ตั้งค่าระบบประเมินผล
+                </h3>
+              </div>
+              <p
+                class="text-xs text-slate-300 mb-6 bg-slate-900/50 p-4 rounded-xl border border-slate-700/50 leading-relaxed"
+              >
+                💡 <b>คำแนะนำ:</b> ตั้งค่าจำนวนข้อสอบที่จะสุ่มมาแสดงในโหมด
+                "แบบทดสอบรวมทุกระบบ"
+                และกำหนดเกณฑ์เปอร์เซ็นต์ขั้นต่ำที่นักเรียนต้องทำได้เพื่อให้สอบผ่าน
+                (ต้องกดปุ่มบันทึกข้อมูลด้านบนขวาหลังแก้ไขเสร็จ)
+              </p>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div
+                  class="bg-slate-900/40 p-5 rounded-xl border border-slate-700"
+                >
+                  <label
+                    class="text-xs text-slate-300 mb-3 block uppercase font-bold"
+                    >🎯 จำนวนสุ่มข้อสอบ (ข้อ)</label
+                  >
+                  <input
+                    type="number"
+                    id="frmGlobalQuizLimit"
+                    class="input-box text-emerald-400 font-bold text-2xl text-center py-4"
+                    min="1"
+                  />
+                  <p class="text-[10px] text-slate-400 mt-3 text-center">
+                    จำนวนข้อสอบที่จะสุ่มดึงมา (เฉพาะข้อที่เปิดใช้งาน)
+                  </p>
+                </div>
+
+                <div
+                  class="bg-slate-900/40 p-5 rounded-xl border border-slate-700"
+                >
+                  <label
+                    class="text-xs text-slate-300 mb-3 block uppercase font-bold"
+                    >🏆 เกณฑ์สอบผ่าน (%)</label
+                  >
+                  <input
+                    type="number"
+                    id="frmGlobalPassing"
+                    class="input-box text-amber-400 font-bold text-2xl text-center py-4"
+                    min="1"
+                    max="100"
+                  />
+                  <p class="text-[10px] text-slate-400 mt-3 text-center">
+                    เปอร์เซ็นต์คะแนนรวมที่ต้องทำได้เพื่อผ่านเกณฑ์
+                  </p>
+                </div>
+                <div
+                  class="bg-slate-900/40 p-5 rounded-xl border border-slate-700"
+                >
+                  <label
+                    class="text-xs text-slate-300 mb-3 block uppercase font-bold"
+                    >⏱️ เปิด/ปิด การจับเวลา</label
+                  >
+                  <div class="flex justify-center items-center py-3">
+                    <label class="inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        id="frmTimerEnabled"
+                        class="w-5 h-5 rounded border-slate-700 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                      />
+                      <span class="ml-2 text-sm text-slate-300 font-bold"
+                        >เปิดใช้งานตัวจับเวลา</span
+                      >
+                    </label>
+                  </div>
+                  <p class="text-[10px] text-slate-500 mt-3 text-center">
+                    ติ๊กถูกเพื่อเปิดระบบเลื่อนเวลาถอยหลังในหน้าทำข้อสอบ
+                  </p>
+                </div>
+
+                <div
+                  class="bg-slate-900/40 p-5 rounded-xl border border-slate-700"
+                >
+                  <label
+                    class="text-xs text-slate-300 mb-3 block uppercase font-bold"
+                    >⏳ เวลาต่อข้อ (วินาที)</label
+                  >
+                  <input
+                    type="number"
+                    id="frmGlobalTimeLimit"
+                    class="input-box text-rose-400 font-bold text-2xl text-center py-4"
+                    min="5"
+                    placeholder="30"
+                  />
+                  <p class="text-[10px] text-slate-500 mt-3 text-center">
+                    กำหนดเวลาถอยหลังในแต่ละข้อ (วินาที)
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div id="adminQuizSection" class="space-y-4 hidden mb-10">
+            <div
+              class="bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-sm"
+            >
+              <div class="flex justify-between items-center mb-4">
+                <h3
+                  id="quizSectionTitle"
+                  class="text-rose-400 font-bold text-sm"
+                >
+                  📝 คลังแบบทดสอบประจำหมวด
+                </h3>
+                <button
+                  onclick="addQuiz()"
+                  class="bg-rose-500/20 text-rose-400 hover:bg-rose-500 hover:text-white px-3 py-1 rounded-lg text-xs transition shadow-sm"
+                >
+                  + เพิ่มข้อสอบ
+                </button>
+              </div>
+              <p
+                class="text-[11px] text-slate-300 mb-6 bg-slate-900/50 p-3 rounded-lg border border-slate-700/50"
+              >
+                💡 <b>ระบบคลังสลับข้ออัจฉริยะ:</b> ข้อสอบที่เปิดใช้งาน (✅)
+                ทั้งหมดในหมวดนี้ จะถูกนำไปสลับลำดับข้อ/ตัวเลือกอัตโนมัติ
+                เพื่อป้องกันนักเรียนลอกกัน
+              </p>
+
+              <div id="quizContainer" class="space-y-3"></div>
+
+              <div
+                id="emptyQuizMsg"
+                class="hidden text-center py-10 bg-slate-900/50 rounded-xl border border-dashed border-slate-700 mt-4"
+              >
+                <span class="text-4xl block mb-2">📋</span>
+                <p class="text-slate-300 text-sm">
+                  คลังข้อสอบหมวดนี้ยังว่างเปล่า<br />กดปุ่ม "+ เพิ่มข้อสอบ"
+                  ด้านบนเพื่อเริ่มสร้างแบบทดสอบ
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-<div id="toastContainer" class="fixed top-10 left-1/2 transform -translate-x-1/2 z-[9999] flex flex-col gap-3 pointer-events-none items-center"></div>
-<script>
-// 🌟 ใส่รหัส Cloudinary ของคุณตรงนี้เพื่อใช้งานปุ่มอัปโหลด (ถ้ายังไม่มีให้ปล่อยไว้) 🌟
-const CLOUD_NAME = "dv9ejytrx"; 
-const UPLOAD_PRESET = "t1obw6ft"; 
+    <div
+      id="toastContainer"
+      class="fixed top-10 left-1/2 transform -translate-x-1/2 z-[9999] flex flex-col gap-3 pointer-events-none items-center"
+    ></div>
+    <script>
+      // 🌟 ใส่รหัส Cloudinary ของคุณตรงนี้เพื่อใช้งานปุ่มอัปโหลด (ถ้ายังไม่มีให้ปล่อยไว้) 🌟
+      const CLOUD_NAME = "dv9ejytrx";
+      const UPLOAD_PRESET = "t1obw6ft";
 
-const firebaseConfig = { apiKey: "AIzaSyB9TZN4-yUb9Kfh0gdZNp6XglsbS-xEzfk", authDomain: "biolens-ar.firebaseapp.com", projectId: "biolens-ar", storageBucket: "biolens-ar.firebasestorage.app", messagingSenderId: "1088692183155", appId: "1:1088692183155:web:d139f94812eca627e08a06" };
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
+      const firebaseConfig = {
+        apiKey: "AIzaSyB9TZN4-yUb9Kfh0gdZNp6XglsbS-xEzfk",
+        authDomain: "biolens-ar.firebaseapp.com",
+        projectId: "biolens-ar",
+        storageBucket: "biolens-ar.firebasestorage.app",
+        messagingSenderId: "1088692183155",
+        appId: "1:1088692183155:web:d139f94812eca627e08a06",
+      };
+      firebase.initializeApp(firebaseConfig);
+      const auth = firebase.auth();
+      const db = firebase.firestore();
 
-// 🌟 ตัวแปรสถานะ 🌟
-let globalDatabase = null;
-let currentSysIndex = null;
-let currentItemIndex = null; 
-let currentItemData = null; 
-let currentQuizDataRef = null; 
-let editingMode = ''; 
-let sidebarMode = 'content'; 
+      // 🌟 ตัวแปรสถานะ 🌟
+      let globalDatabase = null;
+      let currentSysIndex = null;
+      let currentItemIndex = null;
+      let currentItemData = null;
+      let currentQuizDataRef = null;
+      let editingMode = "";
+      let sidebarMode = "content";
 
-let isDevMode = false;
-let activePreviewMaterial = null; 
-let adminOriginalColors = new Map();
+      let isDevMode = false;
+      let activePreviewMaterial = null;
+      let adminOriginalColors = new Map();
 
-const svgExpand = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>`;
-const svgCollapse = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><polyline points="4 14 10 14 10 20"></polyline><polyline points="20 10 14 10 14 4"></polyline><line x1="14" y1="10" x2="21" y2="3"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>`;
+      const svgExpand = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>`;
+      const svgCollapse = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><polyline points="4 14 10 14 10 20"></polyline><polyline points="20 10 14 10 14 4"></polyline><line x1="14" y1="10" x2="21" y2="3"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>`;
 
-function updateFsBtn() {
-    const isFs = !!document.fullscreenElement;
-    if(document.getElementById('fsBtnHeader')) document.getElementById('fsBtnHeader').innerHTML = isFs ? svgCollapse : svgExpand;
-    if(document.getElementById('fsBtnLogin')) document.getElementById('fsBtnLogin').innerHTML = isFs ? svgCollapse : svgExpand;
-}
-function toggleFullScreen() {
-    const doc = document.documentElement;
-    if (!document.fullscreenElement) { if (doc.requestFullscreen) doc.requestFullscreen(); else if (doc.webkitRequestFullscreen) doc.webkitRequestFullscreen(); } 
-    else { if (document.exitFullscreen) document.exitFullscreen(); else if (document.webkitExitFullscreen) document.webkitExitFullscreen(); }
-}
-document.addEventListener('fullscreenchange', updateFsBtn); document.addEventListener('webkitfullscreenchange', updateFsBtn); document.addEventListener('DOMContentLoaded', updateFsBtn);
-
-auth.onAuthStateChanged(user => {
-    if (user) { document.getElementById('loginPage').classList.add('hidden'); document.getElementById('dashboard').classList.remove('hidden'); document.getElementById('dashboard').classList.add('flex'); loadData(); } 
-    else { document.getElementById('loginPage').classList.remove('hidden'); document.getElementById('dashboard').classList.add('hidden'); }
-});
-
-function login() {
-    auth.setPersistence(firebase.auth.Auth.Persistence.SESSION)
-    .then(() => auth.signInWithEmailAndPassword(document.getElementById('email').value, document.getElementById('pass').value))
-    .then(() => window.location.reload())
-    .catch(() => document.getElementById('errorMsg').classList.remove('hidden'));
-}
-function returnToHomeSecurely() { auth.signOut().then(() => window.location.href = 'index.html').catch(() => window.location.href = 'index.html'); }
-function logout() { openCustomConfirm("คุณต้องการออกจากระบบใช่หรือไม่?", "🚪 ออกจากระบบ", () => { auth.signOut(); }, false); }
-
-let promptCallback = null;
-function openCustomPrompt(t, p, d, cb) { document.getElementById('promptTitle').innerText = t; document.getElementById('promptInput').placeholder = p||''; document.getElementById('promptInput').value = ''; const dEl = document.getElementById('promptDesc'); if(d){dEl.innerHTML = d; dEl.classList.remove('hidden');}else{dEl.classList.add('hidden');} promptCallback = cb; document.getElementById('customPromptModal').classList.remove('hidden'); setTimeout(()=>document.getElementById('promptInput').focus(),100); }
-function closeCustomPrompt() { document.getElementById('customPromptModal').classList.add('hidden'); promptCallback = null; }
-document.getElementById('promptConfirmBtn').addEventListener('click', () => { if(promptCallback) promptCallback(document.getElementById('promptInput').value); closeCustomPrompt(); });
-document.getElementById('promptInput').addEventListener('keypress', (e) => { if(e.key === 'Enter') document.getElementById('promptConfirmBtn').click(); });
-
-let confirmCallback = null;
-function openCustomConfirm(d, t="ยืนยันการดำเนินการ", cb, isD=true) { document.getElementById('confirmTitle').innerText = t; document.getElementById('confirmDesc').innerHTML = d; const btn = document.getElementById('confirmBtn'); const icon = document.getElementById('confirmIcon'); if(isD){btn.className="bg-rose-600 hover:bg-rose-500 px-6 py-2 rounded-lg text-sm text-white font-bold shadow-lg"; icon.innerText="⚠️";}else{btn.className="bg-blue-600 hover:bg-blue-500 px-6 py-2 rounded-lg text-sm text-white font-bold shadow-lg"; icon.innerText="❓";} confirmCallback = cb; document.getElementById('customConfirmModal').classList.remove('hidden'); }
-function closeCustomConfirm() { document.getElementById('customConfirmModal').classList.add('hidden'); confirmCallback = null; }
-document.getElementById('confirmBtn').addEventListener('click', () => { if(confirmCallback) confirmCallback(); closeCustomConfirm(); });
-
-function toggleDevMode() { if(isDevMode){isDevMode=false; document.body.classList.remove('dev-mode'); const btn=document.getElementById('btnDevMode'); btn.innerHTML="🔒 โหมดปกติ"; btn.className="bg-slate-600/20 hover:bg-slate-600 text-slate-300 hover:text-white px-3 py-1.5 rounded-lg text-xs border border-slate-600/30 flex items-center gap-1";}else{document.getElementById('devPassModal').classList.remove('hidden'); document.getElementById('devPassInput').value=''; setTimeout(()=>document.getElementById('devPassInput').focus(),100);} }
-function closeDevPassModal() { document.getElementById('devPassModal').classList.add('hidden'); }
-function confirmDevPass() { if(document.getElementById('devPassInput').value==="122026"){isDevMode=true; document.body.classList.add('dev-mode'); const btn=document.getElementById('btnDevMode'); btn.innerHTML="🔓 โหมดนักพัฒนา"; btn.className="bg-emerald-600/20 hover:bg-emerald-600 text-emerald-400 hover:text-white px-3 py-1.5 rounded-lg text-xs border border-emerald-600/30 flex items-center gap-1 shadow-md"; closeDevPassModal();}else{alert("❌ รหัสผ่านไม่ถูกต้อง!"); document.getElementById('devPassInput').value=''; document.getElementById('devPassInput').focus();} }
-document.getElementById('devPassInput').addEventListener('keypress', (e) => { if(e.key==='Enter') confirmDevPass(); });
-
-function updateLiveModel() {
-    const path = document.getElementById('frmModelPath').value;
-    const viewer = document.getElementById('adminViewer');
-    
-    if (path) {
-        viewer.src = path;
-    } else {
-        viewer.src = "";
-        document.getElementById('allMaterialsContainer').classList.add('hidden');
-        document.getElementById('materialChips').innerHTML = '';
-    }
-    resetLivePreview();
-}
-
-function updateOverviewPreview() {
-    if(!currentItemData) return;
-    document.getElementById('previewTitle').innerHTML = document.getElementById('frmName').value || 'ไม่มีชื่อ';
-    document.getElementById('previewDesc').innerHTML = document.getElementById('frmDesc').innerHTML || 'ไม่มีรายละเอียด';
-    const badge = document.getElementById('previewBadge');
-    badge.textContent = 'โหมดภาพรวม';
-    badge.className = 'absolute top-0 right-0 bg-blue-500 text-white text-[10px] font-bold px-3 py-1.5 rounded-bl-xl shadow-md';
-    document.getElementById('resetPreviewBtn').classList.add('hidden');
-    activePreviewMaterial = null;
-}
-
-function updatePartPreview(partName, partInfo) {
-    document.getElementById('previewTitle').innerHTML = partName || 'ไม่มีชื่อจุดคลิก';
-    document.getElementById('previewDesc').innerHTML = partInfo || 'ไม่มีรายละเอียด';
-    const badge = document.getElementById('previewBadge');
-    badge.textContent = '📍 โหมดจุดคลิก';
-    badge.className = 'absolute top-0 right-0 bg-[#ff4757] text-white text-[10px] font-bold px-3 py-1.5 rounded-bl-xl shadow-md';
-    document.getElementById('resetPreviewBtn').classList.remove('hidden');
-}
-
-function resetLivePreview() {
-    document.getElementById('clickedIdDisplay').classList.add('hidden');
-    updateOverviewPreview();
-    
-    if (adminViewer && adminViewer.model && adminViewer.model.materials) {
-        for (const mat of adminViewer.model.materials) {
-            if (adminOriginalColors.has(mat.name)) {
-                mat.pbrMetallicRoughness.setBaseColorFactor(adminOriginalColors.get(mat.name));
-            } else {
-                mat.pbrMetallicRoughness.setBaseColorFactor([1, 1, 1, 1]); 
-            }
-            mat.setEmissiveFactor([0, 0, 0]); 
-        }
-    }
-}
-
-document.getElementById('frmName').addEventListener('input', () => { if(!activePreviewMaterial) updateOverviewPreview(); });
-document.getElementById('frmDesc').addEventListener('input', () => { if(!activePreviewMaterial) updateOverviewPreview(); });
-
-const adminViewer = document.getElementById('adminViewer');
-let ptDownX = 0, ptDownY = 0;
-
-adminViewer.addEventListener('load', () => {
-    const container = document.getElementById('allMaterialsContainer');
-    const chips = document.getElementById('materialChips');
-    chips.innerHTML = '';
-    
-    if(adminViewer.src && adminViewer.model && adminViewer.model.materials) {
-        adminOriginalColors.clear();
-        const mats = adminViewer.model.materials;
-        
-        if(mats.length > 0) {
-            mats.forEach(mat => {
-                adminOriginalColors.set(mat.name, mat.pbrMetallicRoughness.baseColorFactor.slice());
-                
-                const btn = document.createElement('button');
-                btn.className = "bg-slate-700 hover:bg-indigo-500 text-slate-200 hover:text-white text-[10px] px-2 py-1 rounded transition border border-slate-600";
-                btn.innerText = mat.name;
-                btn.onclick = () => forcePreviewMaterial(mat.name);
-                chips.appendChild(btn);
-            });
-            container.classList.remove('hidden');
+      function updateFsBtn() {
+        const isFs = !!document.fullscreenElement;
+        if (document.getElementById("fsBtnHeader"))
+          document.getElementById("fsBtnHeader").innerHTML = isFs
+            ? svgCollapse
+            : svgExpand;
+        if (document.getElementById("fsBtnLogin"))
+          document.getElementById("fsBtnLogin").innerHTML = isFs
+            ? svgCollapse
+            : svgExpand;
+      }
+      function toggleFullScreen() {
+        const doc = document.documentElement;
+        if (!document.fullscreenElement) {
+          if (doc.requestFullscreen) doc.requestFullscreen();
+          else if (doc.webkitRequestFullscreen) doc.webkitRequestFullscreen();
         } else {
-            container.classList.add('hidden');
+          if (document.exitFullscreen) document.exitFullscreen();
+          else if (document.webkitExitFullscreen)
+            document.webkitExitFullscreen();
         }
-    }
-});
+      }
+      document.addEventListener("fullscreenchange", updateFsBtn);
+      document.addEventListener("webkitfullscreenchange", updateFsBtn);
+      document.addEventListener("DOMContentLoaded", updateFsBtn);
 
-function forcePreviewMaterial(matName) {
-    const disp = document.getElementById('clickedIdDisplay');
-    document.getElementById('idTextSpan').textContent = matName;
-    disp.classList.remove('hidden');
-    
-    activePreviewMaterial = matName;
-    
-    if (adminViewer.model && adminViewer.model.materials) {
-        for (const mat of adminViewer.model.materials) {
+      auth.onAuthStateChanged((user) => {
+        if (user) {
+          document.getElementById("loginPage").classList.add("hidden");
+          document.getElementById("dashboard").classList.remove("hidden");
+          document.getElementById("dashboard").classList.add("flex");
+          loadData();
+        } else {
+          document.getElementById("loginPage").classList.remove("hidden");
+          document.getElementById("dashboard").classList.add("hidden");
+        }
+      });
+
+      function login() {
+        auth
+          .setPersistence(firebase.auth.Auth.Persistence.SESSION)
+          .then(() =>
+            auth.signInWithEmailAndPassword(
+              document.getElementById("email").value,
+              document.getElementById("pass").value,
+            ),
+          )
+          .then(() => window.location.reload())
+          .catch(() =>
+            document.getElementById("errorMsg").classList.remove("hidden"),
+          );
+      }
+      function returnToHomeSecurely() {
+        auth
+          .signOut()
+          .then(() => (window.location.href = "index.html"))
+          .catch(() => (window.location.href = "index.html"));
+      }
+      function logout() {
+        openCustomConfirm(
+          "คุณต้องการออกจากระบบใช่หรือไม่?",
+          "🚪 ออกจากระบบ",
+          () => {
+            auth.signOut();
+          },
+          false,
+        );
+      }
+
+      let promptCallback = null;
+      function openCustomPrompt(t, p, d, cb) {
+        document.getElementById("promptTitle").innerText = t;
+        document.getElementById("promptInput").placeholder = p || "";
+        document.getElementById("promptInput").value = "";
+        const dEl = document.getElementById("promptDesc");
+        if (d) {
+          dEl.innerHTML = d;
+          dEl.classList.remove("hidden");
+        } else {
+          dEl.classList.add("hidden");
+        }
+        promptCallback = cb;
+        document.getElementById("customPromptModal").classList.remove("hidden");
+        setTimeout(() => document.getElementById("promptInput").focus(), 100);
+      }
+      function closeCustomPrompt() {
+        document.getElementById("customPromptModal").classList.add("hidden");
+        promptCallback = null;
+      }
+      document
+        .getElementById("promptConfirmBtn")
+        .addEventListener("click", () => {
+          if (promptCallback)
+            promptCallback(document.getElementById("promptInput").value);
+          closeCustomPrompt();
+        });
+      document
+        .getElementById("promptInput")
+        .addEventListener("keypress", (e) => {
+          if (e.key === "Enter")
+            document.getElementById("promptConfirmBtn").click();
+        });
+
+      let confirmCallback = null;
+      function openCustomConfirm(d, t = "ยืนยันการดำเนินการ", cb, isD = true) {
+        document.getElementById("confirmTitle").innerText = t;
+        document.getElementById("confirmDesc").innerHTML = d;
+        const btn = document.getElementById("confirmBtn");
+        const icon = document.getElementById("confirmIcon");
+        if (isD) {
+          btn.className =
+            "bg-rose-600 hover:bg-rose-500 px-6 py-2 rounded-lg text-sm text-white font-bold shadow-lg";
+          icon.innerText = "⚠️";
+        } else {
+          btn.className =
+            "bg-blue-600 hover:bg-blue-500 px-6 py-2 rounded-lg text-sm text-white font-bold shadow-lg";
+          icon.innerText = "❓";
+        }
+        confirmCallback = cb;
+        document
+          .getElementById("customConfirmModal")
+          .classList.remove("hidden");
+      }
+      function closeCustomConfirm() {
+        document.getElementById("customConfirmModal").classList.add("hidden");
+        confirmCallback = null;
+      }
+      document.getElementById("confirmBtn").addEventListener("click", () => {
+        if (confirmCallback) confirmCallback();
+        closeCustomConfirm();
+      });
+
+      function toggleDevMode() {
+        if (isDevMode) {
+          isDevMode = false;
+          document.body.classList.remove("dev-mode");
+          const btn = document.getElementById("btnDevMode");
+          btn.innerHTML = "🔒 โหมดปกติ";
+          btn.className =
+            "bg-slate-600/20 hover:bg-slate-600 text-slate-300 hover:text-white px-3 py-1.5 rounded-lg text-xs border border-slate-600/30 flex items-center gap-1";
+        } else {
+          document.getElementById("devPassModal").classList.remove("hidden");
+          document.getElementById("devPassInput").value = "";
+          setTimeout(
+            () => document.getElementById("devPassInput").focus(),
+            100,
+          );
+        }
+      }
+      function closeDevPassModal() {
+        document.getElementById("devPassModal").classList.add("hidden");
+      }
+      function confirmDevPass() {
+        if (document.getElementById("devPassInput").value === "122026") {
+          isDevMode = true;
+          document.body.classList.add("dev-mode");
+          const btn = document.getElementById("btnDevMode");
+          btn.innerHTML = "🔓 โหมดนักพัฒนา";
+          btn.className =
+            "bg-emerald-600/20 hover:bg-emerald-600 text-emerald-400 hover:text-white px-3 py-1.5 rounded-lg text-xs border border-emerald-600/30 flex items-center gap-1 shadow-md";
+          closeDevPassModal();
+        } else {
+          alert("❌ รหัสผ่านไม่ถูกต้อง!");
+          document.getElementById("devPassInput").value = "";
+          document.getElementById("devPassInput").focus();
+        }
+      }
+      document
+        .getElementById("devPassInput")
+        .addEventListener("keypress", (e) => {
+          if (e.key === "Enter") confirmDevPass();
+        });
+
+      function updateLiveModel() {
+        const path = document.getElementById("frmModelPath").value;
+        const viewer = document.getElementById("adminViewer");
+
+        if (path) {
+          viewer.src = path;
+        } else {
+          viewer.src = "";
+          document
+            .getElementById("allMaterialsContainer")
+            .classList.add("hidden");
+          document.getElementById("materialChips").innerHTML = "";
+        }
+        resetLivePreview();
+      }
+
+      function updateOverviewPreview() {
+        if (!currentItemData) return;
+        document.getElementById("previewTitle").innerHTML =
+          document.getElementById("frmName").value || "ไม่มีชื่อ";
+        document.getElementById("previewDesc").innerHTML =
+          document.getElementById("frmDesc").innerHTML || "ไม่มีรายละเอียด";
+        const badge = document.getElementById("previewBadge");
+        badge.textContent = "โหมดภาพรวม";
+        badge.className =
+          "absolute top-0 right-0 bg-blue-500 text-white text-[10px] font-bold px-3 py-1.5 rounded-bl-xl shadow-md";
+        document.getElementById("resetPreviewBtn").classList.add("hidden");
+        activePreviewMaterial = null;
+      }
+
+      function updatePartPreview(partName, partInfo) {
+        document.getElementById("previewTitle").innerHTML =
+          partName || "ไม่มีชื่อจุดคลิก";
+        document.getElementById("previewDesc").innerHTML =
+          partInfo || "ไม่มีรายละเอียด";
+        const badge = document.getElementById("previewBadge");
+        badge.textContent = "📍 โหมดจุดคลิก";
+        badge.className =
+          "absolute top-0 right-0 bg-[#ff4757] text-white text-[10px] font-bold px-3 py-1.5 rounded-bl-xl shadow-md";
+        document.getElementById("resetPreviewBtn").classList.remove("hidden");
+      }
+
+      function resetLivePreview() {
+        document.getElementById("clickedIdDisplay").classList.add("hidden");
+        updateOverviewPreview();
+
+        if (adminViewer && adminViewer.model && adminViewer.model.materials) {
+          for (const mat of adminViewer.model.materials) {
+            if (adminOriginalColors.has(mat.name)) {
+              mat.pbrMetallicRoughness.setBaseColorFactor(
+                adminOriginalColors.get(mat.name),
+              );
+            } else {
+              mat.pbrMetallicRoughness.setBaseColorFactor([1, 1, 1, 1]);
+            }
+            mat.setEmissiveFactor([0, 0, 0]);
+          }
+        }
+      }
+
+      document.getElementById("frmName").addEventListener("input", () => {
+        if (!activePreviewMaterial) updateOverviewPreview();
+      });
+      document.getElementById("frmDesc").addEventListener("input", () => {
+        if (!activePreviewMaterial) updateOverviewPreview();
+      });
+
+      const adminViewer = document.getElementById("adminViewer");
+      let ptDownX = 0,
+        ptDownY = 0;
+
+      adminViewer.addEventListener("load", () => {
+        const container = document.getElementById("allMaterialsContainer");
+        const chips = document.getElementById("materialChips");
+        chips.innerHTML = "";
+
+        if (
+          adminViewer.src &&
+          adminViewer.model &&
+          adminViewer.model.materials
+        ) {
+          adminOriginalColors.clear();
+          const mats = adminViewer.model.materials;
+
+          if (mats.length > 0) {
+            mats.forEach((mat) => {
+              adminOriginalColors.set(
+                mat.name,
+                mat.pbrMetallicRoughness.baseColorFactor.slice(),
+              );
+
+              const btn = document.createElement("button");
+              btn.className =
+                "bg-slate-700 hover:bg-indigo-500 text-slate-200 hover:text-white text-[10px] px-2 py-1 rounded transition border border-slate-600";
+              btn.innerText = mat.name;
+              btn.onclick = () => forcePreviewMaterial(mat.name);
+              chips.appendChild(btn);
+            });
+            container.classList.remove("hidden");
+          } else {
+            container.classList.add("hidden");
+          }
+        }
+      });
+
+      function forcePreviewMaterial(matName) {
+        const disp = document.getElementById("clickedIdDisplay");
+        document.getElementById("idTextSpan").textContent = matName;
+        disp.classList.remove("hidden");
+
+        activePreviewMaterial = matName;
+
+        if (adminViewer.model && adminViewer.model.materials) {
+          for (const mat of adminViewer.model.materials) {
             const origColor = adminOriginalColors.get(mat.name) || [1, 1, 1, 1];
             if (mat.name !== matName) {
-                mat.pbrMetallicRoughness.setBaseColorFactor([origColor[0] * 0.1, origColor[1] * 0.1, origColor[2] * 0.1, origColor[3]]); 
-                mat.setEmissiveFactor([0, 0, 0]); 
+              mat.pbrMetallicRoughness.setBaseColorFactor([
+                origColor[0] * 0.1,
+                origColor[1] * 0.1,
+                origColor[2] * 0.1,
+                origColor[3],
+              ]);
+              mat.setEmissiveFactor([0, 0, 0]);
             } else {
-                mat.pbrMetallicRoughness.setBaseColorFactor(origColor);
-                mat.setEmissiveFactor([0, 0, 0]); 
+              mat.pbrMetallicRoughness.setBaseColorFactor(origColor);
+              mat.setEmissiveFactor([0, 0, 0]);
             }
+          }
         }
-    }
-    
-    if(currentItemData && currentItemData.click_parts) {
-        const foundPart = currentItemData.click_parts.find(p => p.material_name === matName);
-        if(foundPart) {
+
+        if (currentItemData && currentItemData.click_parts) {
+          const foundPart = currentItemData.click_parts.find(
+            (p) => p.material_name === matName,
+          );
+          if (foundPart) {
             updatePartPreview(foundPart.name, foundPart.info);
-        } else {
-            updatePartPreview('<span class="text-rose-400">ยังไม่ได้ตั้งชื่อ</span>', '<span class="text-slate-300">พบ ID นี้บนโมเดล แต่คุณยังไม่ได้กด +เพิ่มจุดคลิก ด้านล่างครับ</span>');
+          } else {
+            updatePartPreview(
+              '<span class="text-rose-400">ยังไม่ได้ตั้งชื่อ</span>',
+              '<span class="text-slate-300">พบ ID นี้บนโมเดล แต่คุณยังไม่ได้กด +เพิ่มจุดคลิก ด้านล่างครับ</span>',
+            );
+          }
         }
-    }
-    disp.style.transform = 'translate(-50%, -10px)'; 
-    setTimeout(() => { disp.style.transform = 'translate(-50%, 0)'; }, 150);
-}
+        disp.style.transform = "translate(-50%, -10px)";
+        setTimeout(() => {
+          disp.style.transform = "translate(-50%, 0)";
+        }, 150);
+      }
 
-adminViewer.addEventListener('pointerdown', (e) => { ptDownX = e.clientX; ptDownY = e.clientY; });
-window.lastHitPosition = ""; // 🌟 เพิ่มตัวแปรเก็บพิกัดระดับโกลบอล
+      adminViewer.addEventListener("pointerdown", (e) => {
+        ptDownX = e.clientX;
+        ptDownY = e.clientY;
+      });
+      window.lastHitPosition = ""; // 🌟 เพิ่มตัวแปรเก็บพิกัดระดับโกลบอล
 
-adminViewer.addEventListener('pointerup', (e) => {
-    if (Math.abs(e.clientX - ptDownX) > 15 || Math.abs(e.clientY - ptDownY) > 15) return; 
-    
-    const material = adminViewer.materialFromPoint(e.clientX, e.clientY);
-    const hit = adminViewer.positionAndNormalFromPoint(e.clientX, e.clientY); // 🌟 อ่านพิกัด 3D จากจุดที่คลิก
-    
-    if (material != null) {
-        if (hit != null) {
+      adminViewer.addEventListener("pointerup", (e) => {
+        if (
+          Math.abs(e.clientX - ptDownX) > 15 ||
+          Math.abs(e.clientY - ptDownY) > 15
+        )
+          return;
+
+        const material = adminViewer.materialFromPoint(e.clientX, e.clientY);
+        const hit = adminViewer.positionAndNormalFromPoint(
+          e.clientX,
+          e.clientY,
+        ); // 🌟 อ่านพิกัด 3D จากจุดที่คลิก
+
+        if (material != null) {
+          if (hit != null) {
             window.lastHitPosition = `${hit.position.x}m ${hit.position.y}m ${hit.position.z}m`; // 🌟 จำพิกัดเก็บไว้
+          }
+          forcePreviewMaterial(material.name);
+        } else {
+          resetLivePreview();
         }
-        forcePreviewMaterial(material.name);
-    } else {
-        resetLivePreview(); 
-    }
-});
+      });
 
-function uploadModelToCloud(inputElement) {
-    // ป้องกันการทำงานหากผู้ใช้ยังไม่ได้กำหนดค่า CLOUD_NAME
-    if (!CLOUD_NAME || CLOUD_NAME === "your_cloud_name_here") {
-        alert("❌ โปรดตั้งค่า CLOUD_NAME ในโค้ด admin.html ก่อนใช้งานฟังก์ชันนี้ครับ");
-        inputElement.value = '';
-        return;
-    }
+      function uploadModelToCloud(inputElement) {
+        // ป้องกันการทำงานหากผู้ใช้ยังไม่ได้กำหนดค่า CLOUD_NAME
+        if (!CLOUD_NAME || CLOUD_NAME === "your_cloud_name_here") {
+          alert(
+            "❌ โปรดตั้งค่า CLOUD_NAME ในโค้ด admin.html ก่อนใช้งานฟังก์ชันนี้ครับ",
+          );
+          inputElement.value = "";
+          return;
+        }
 
-    const file = inputElement.files[0]; if(!file) return;
-    if(!file.name.toLowerCase().endsWith('.glb')) { alert("❌ กรุณาอัปโหลดเฉพาะ .glb ครับ"); inputElement.value=''; return; }
-    const st = document.getElementById('uploadStatus'); st.classList.remove('hidden'); st.style.color="#818cf8"; st.innerText="⏳ กำลังเตรียมอัปโหลด...";
-    const fd = new FormData(); fd.append('file', file); fd.append('upload_preset', UPLOAD_PRESET); fd.append('resource_type', 'raw');
-    const xhr = new XMLHttpRequest(); xhr.open('POST', `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/upload`, true);
-    xhr.upload.onprogress = (e) => { if(e.lengthComputable) st.innerText=`⏳ กำลังอัปโหลด... ${Math.round((e.loaded/e.total)*100)}%`; };
-    xhr.onload = () => {
-        if(xhr.status===200){ document.getElementById('frmModelPath').value=JSON.parse(xhr.responseText).secure_url; st.innerText="✅ อัปโหลดเสร็จสมบูรณ์!"; st.style.color="#4ade80"; inputElement.value=''; updateLiveModel(); }
-        else{ st.innerText=`❌ อัปโหลดล้มเหลว (ตรวจสอบ Upload Preset)`; st.style.color="#f87171"; inputElement.value=''; }
-    };
-    xhr.onerror = () => { st.innerText="❌ เกิดข้อผิดพลาดการเชื่อมต่อ"; st.style.color="#f87171"; inputElement.value=''; };
-    xhr.send(fd);
-}
+        const file = inputElement.files[0];
+        if (!file) return;
+        if (!file.name.toLowerCase().endsWith(".glb")) {
+          alert("❌ กรุณาอัปโหลดเฉพาะ .glb ครับ");
+          inputElement.value = "";
+          return;
+        }
+        const st = document.getElementById("uploadStatus");
+        st.classList.remove("hidden");
+        st.style.color = "#818cf8";
+        st.innerText = "⏳ กำลังเตรียมอัปโหลด...";
+        const fd = new FormData();
+        fd.append("file", file);
+        fd.append("upload_preset", UPLOAD_PRESET);
+        fd.append("resource_type", "raw");
+        const xhr = new XMLHttpRequest();
+        xhr.open(
+          "POST",
+          `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/upload`,
+          true,
+        );
+        xhr.upload.onprogress = (e) => {
+          if (e.lengthComputable)
+            st.innerText = `⏳ กำลังอัปโหลด... ${Math.round((e.loaded / e.total) * 100)}%`;
+        };
+        xhr.onload = () => {
+          if (xhr.status === 200) {
+            document.getElementById("frmModelPath").value = JSON.parse(
+              xhr.responseText,
+            ).secure_url;
+            st.innerText = "✅ อัปโหลดเสร็จสมบูรณ์!";
+            st.style.color = "#4ade80";
+            inputElement.value = "";
+            updateLiveModel();
+          } else {
+            st.innerText = `❌ อัปโหลดล้มเหลว (ตรวจสอบ Upload Preset)`;
+            st.style.color = "#f87171";
+            inputElement.value = "";
+          }
+        };
+        xhr.onerror = () => {
+          st.innerText = "❌ เกิดข้อผิดพลาดการเชื่อมต่อ";
+          st.style.color = "#f87171";
+          inputElement.value = "";
+        };
+        xhr.send(fd);
+      }
 
-function loadData() { 
-    db.collection("database").doc("anatomy").get().then(doc => { 
-        if(doc.exists){ 
-            globalDatabase = doc.data(); 
+      function loadData() {
+        db.collection("database")
+          .doc("anatomy")
+          .get()
+          .then((doc) => {
+            if (doc.exists) {
+              globalDatabase = doc.data();
 
-            if(!globalDatabase.settings) {
+              if (!globalDatabase.settings) {
                 globalDatabase.settings = { global_quiz_limit: 15 };
-            }
+              }
 
-            let isMigrated = false;
-            if (globalDatabase.systems) {
-                globalDatabase.systems.forEach(sys => {
-                    if (!sys.quiz) sys.quiz = []; 
-                    
-                    if (sys.items) {
-                        sys.items.forEach(item => {
-                            if (item.quiz && item.quiz.length > 0) {
-                                sys.quiz = sys.quiz.concat(item.quiz);
-                                item.quiz = []; 
-                                isMigrated = true;
-                            }
-                        });
-                    }
+              let isMigrated = false;
+              if (globalDatabase.systems) {
+                globalDatabase.systems.forEach((sys) => {
+                  if (!sys.quiz) sys.quiz = [];
+
+                  if (sys.items) {
+                    sys.items.forEach((item) => {
+                      if (item.quiz && item.quiz.length > 0) {
+                        sys.quiz = sys.quiz.concat(item.quiz);
+                        item.quiz = [];
+                        isMigrated = true;
+                      }
+                    });
+                  }
                 });
-            }
+              }
 
-            if (isMigrated) {
+              if (isMigrated) {
                 db.collection("database").doc("anatomy").set(globalDatabase);
+              }
+
+              renderSidebar();
+              document.getElementById("btnSync").classList.add("hidden");
+            } else {
+              document.getElementById("btnSync").classList.remove("hidden");
             }
+          });
+      }
 
-            renderSidebar(); 
-            document.getElementById('btnSync').classList.add('hidden'); 
-        } else { 
-            document.getElementById('btnSync').classList.remove('hidden'); 
-        } 
-    }); 
-}
+      function updateGlobalLimit(val) {
+        let num = parseInt(val);
+        if (isNaN(num) || num < 1) num = 15;
 
-function updateGlobalLimit(val) {
-    let num = parseInt(val);
-    if(isNaN(num) || num < 1) num = 15;
-    
-    if(!globalDatabase) return;
-    if(!globalDatabase.settings) globalDatabase.settings = {};
-    globalDatabase.settings.global_quiz_limit = num;
-    
-    db.collection("database").doc("anatomy").set(globalDatabase).then(() => {
-        const input = document.getElementById('globalQuizLimitInput');
-        if (input) {
-            input.value = num;
-            input.classList.add('border-emerald-500', 'bg-emerald-900');
-            setTimeout(() => input.classList.remove('border-emerald-500', 'bg-emerald-900'), 1000);
-        }
-    });
-}
-// 🌟 เพิ่มฟังก์ชันเซฟค่าเกณฑ์สอบผ่าน
-function updatePassingPercentage(val) {
-    let num = parseInt(val);
-    if(isNaN(num) || num < 1 || num > 100) num = 50; // บังคับไม่ให้เกิน 100%
-    
-    if(!globalDatabase) return;
-    if(!globalDatabase.settings) globalDatabase.settings = {};
-    globalDatabase.settings.passing_percentage = num;
-    
-    db.collection("database").doc("anatomy").set(globalDatabase).then(() => {
-        const input = document.getElementById('globalPassingInput');
-        if (input) {
-            input.value = num;
-            input.classList.add('border-amber-500', 'bg-amber-900');
-            setTimeout(() => input.classList.remove('border-amber-500', 'bg-amber-900'), 1000);
-        }
-    });
-}
-function syncInitialData() { openCustomConfirm("ดึงข้อมูลเริ่มต้นจาก anatomy_data.json ขึ้น Cloud ใช่หรือไม่?", "📥 โหลดข้อมูลตั้งต้น", () => { fetch("anatomy_data.json").then(r=>r.json()).then(data=>{db.collection("database").doc("anatomy").set(data).then(()=>{alert("สำเร็จ!"); loadData();});}); }, false); }
+        if (!globalDatabase) return;
+        if (!globalDatabase.settings) globalDatabase.settings = {};
+        globalDatabase.settings.global_quiz_limit = num;
 
-function setSidebarMode(mode) {
-    sidebarMode = mode;
-    renderSidebar();
-    
-    document.getElementById('welcomeScreen').classList.remove('hidden');
-    document.getElementById('adminContentSection').classList.add('hidden');
-    document.getElementById('adminQuizSection').classList.add('hidden');
-    document.getElementById('adminSettingsSection').classList.add('hidden'); // ซ่อนหน้าตั้งค่า
-    document.getElementById('editorHeader').classList.add('hidden');
-    editingMode = '';
-    currentSysIndex = null;
-    currentItemIndex = null;
-}
+        db.collection("database")
+          .doc("anatomy")
+          .set(globalDatabase)
+          .then(() => {
+            const input = document.getElementById("globalQuizLimitInput");
+            if (input) {
+              input.value = num;
+              input.classList.add("border-emerald-500", "bg-emerald-900");
+              setTimeout(
+                () =>
+                  input.classList.remove(
+                    "border-emerald-500",
+                    "bg-emerald-900",
+                  ),
+                1000,
+              );
+            }
+          });
+      }
+      // 🌟 เพิ่มฟังก์ชันเซฟค่าเกณฑ์สอบผ่าน
+      function updatePassingPercentage(val) {
+        let num = parseInt(val);
+        if (isNaN(num) || num < 1 || num > 100) num = 50; // บังคับไม่ให้เกิน 100%
 
-// 🌟 แสดงปุ่มเมนูด้านซ้าย พร้อมป้ายกำกับ เปิดใช้ X/Y 🌟
-function renderSidebar() {
-    const menu = document.getElementById('sidebarMenu'); 
-    menu.innerHTML = ''; 
-    if (!globalDatabase || !globalDatabase.systems) return; 
+        if (!globalDatabase) return;
+        if (!globalDatabase.settings) globalDatabase.settings = {};
+        globalDatabase.settings.passing_percentage = num;
 
-    let toggleHTML = `
+        db.collection("database")
+          .doc("anatomy")
+          .set(globalDatabase)
+          .then(() => {
+            const input = document.getElementById("globalPassingInput");
+            if (input) {
+              input.value = num;
+              input.classList.add("border-amber-500", "bg-amber-900");
+              setTimeout(
+                () =>
+                  input.classList.remove("border-amber-500", "bg-amber-900"),
+                1000,
+              );
+            }
+          });
+      }
+      function syncInitialData() {
+        openCustomConfirm(
+          "ดึงข้อมูลเริ่มต้นจาก anatomy_data.json ขึ้น Cloud ใช่หรือไม่?",
+          "📥 โหลดข้อมูลตั้งต้น",
+          () => {
+            fetch("anatomy_data.json")
+              .then((r) => r.json())
+              .then((data) => {
+                db.collection("database")
+                  .doc("anatomy")
+                  .set(data)
+                  .then(() => {
+                    alert("สำเร็จ!");
+                    loadData();
+                  });
+              });
+          },
+          false,
+        );
+      }
+
+      function setSidebarMode(mode) {
+        sidebarMode = mode;
+        renderSidebar();
+
+        document.getElementById("welcomeScreen").classList.remove("hidden");
+        document.getElementById("adminContentSection").classList.add("hidden");
+        document.getElementById("adminQuizSection").classList.add("hidden");
+        document.getElementById("adminSettingsSection").classList.add("hidden"); // ซ่อนหน้าตั้งค่า
+        document.getElementById("editorHeader").classList.add("hidden");
+        editingMode = "";
+        currentSysIndex = null;
+        currentItemIndex = null;
+      }
+
+      // 🌟 แสดงปุ่มเมนูด้านซ้าย พร้อมป้ายกำกับ เปิดใช้ X/Y 🌟
+      function renderSidebar() {
+        const menu = document.getElementById("sidebarMenu");
+        menu.innerHTML = "";
+        if (!globalDatabase || !globalDatabase.systems) return;
+
+        let toggleHTML = `
         <div class="flex bg-slate-900 rounded-lg p-1 mb-6 border border-slate-700 shrink-0">
-            <button onclick="setSidebarMode('content')" class="flex-1 py-1.5 text-xs font-bold rounded-md transition ${sidebarMode === 'content' ? 'bg-blue-600 text-white shadow-md' : 'text-slate-300 hover:text-slate-200'}">📚 เนื้อหาบทเรียน</button>
-            <button onclick="setSidebarMode('quiz')" class="flex-1 py-1.5 text-xs font-bold rounded-md transition ${sidebarMode === 'quiz' ? 'bg-rose-600 text-white shadow-md' : 'text-slate-300 hover:text-slate-200'}">📝 คลังข้อสอบ</button>
+            <button onclick="setSidebarMode('content')" class="flex-1 py-1.5 text-xs font-bold rounded-md transition ${sidebarMode === "content" ? "bg-blue-600 text-white shadow-md" : "text-slate-300 hover:text-slate-200"}">📚 เนื้อหาบทเรียน</button>
+            <button onclick="setSidebarMode('quiz')" class="flex-1 py-1.5 text-xs font-bold rounded-md transition ${sidebarMode === "quiz" ? "bg-rose-600 text-white shadow-md" : "text-slate-300 hover:text-slate-200"}">📝 คลังข้อสอบ</button>
         </div>
     `;
-    menu.innerHTML += toggleHTML;
+        menu.innerHTML += toggleHTML;
 
-    // 🌟 เปลี่ยนจากช่องกรอก เป็นปุ่มกดเปิดหน้าจอขวา
-    if (sidebarMode === 'quiz') {
-        const isSettingsActive = (editingMode === 'settings');
-        menu.innerHTML += `
+        // 🌟 เปลี่ยนจากช่องกรอก เป็นปุ่มกดเปิดหน้าจอขวา
+        if (sidebarMode === "quiz") {
+          const isSettingsActive = editingMode === "settings";
+          menu.innerHTML += `
             <div class="mb-6">
-                <button onclick="editGlobalSettings()" class="w-full text-left px-3 py-3 rounded-xl text-sm transition border flex items-center justify-between ${isSettingsActive ? 'bg-amber-600 border-amber-500 text-white shadow-lg' : 'bg-slate-900/80 border-slate-700 text-slate-300 hover:bg-slate-800 hover:border-slate-600'}">
+                <button onclick="editGlobalSettings()" class="w-full text-left px-3 py-3 rounded-xl text-sm transition border flex items-center justify-between ${isSettingsActive ? "bg-amber-600 border-amber-500 text-white shadow-lg" : "bg-slate-900/80 border-slate-700 text-slate-300 hover:bg-slate-800 hover:border-slate-600"}">
                     <span class="font-bold flex items-center gap-2">⚙️ ตั้งค่าประเมินผล</span>
                     <span class="text-[10px] bg-black/20 px-2 py-1 rounded-md">ทั่วไป</span>
                 </button>
             </div>
         `;
-    }
+        }
 
-    globalDatabase.systems.forEach((sys, sIdx) => {
-        let html = `<div class="mb-5">
+        globalDatabase.systems.forEach((sys, sIdx) => {
+          let html = `<div class="mb-5">
             <div class="flex justify-between items-center px-1 mb-2 border-b border-slate-700/50 pb-1">
                 <h3 class="text-slate-300 font-bold text-[11px] uppercase">${sys.category}</h3>
                 <div class="flex gap-2 dev-only">
-                    ${sidebarMode === 'content' ? `<button onclick="addNewItemToSys(${sIdx})" class="text-[10px] text-emerald-500 hover:text-emerald-400">+ บทเรียน</button>` : ''}
+                    ${sidebarMode === "content" ? `<button onclick="addNewItemToSys(${sIdx})" class="text-[10px] text-emerald-500 hover:text-emerald-400">+ บทเรียน</button>` : ""}
                     <button onclick="deleteSystem(${sIdx})" class="text-[10px] text-slate-400 hover:text-rose-500">ลบหมวด</button>
                 </div>
             </div>
             <div class="flex flex-col gap-1">`;
-        
-        if (sidebarMode === 'content') {
-            if (sys.items && sys.items.length > 0) { 
-                sys.items.forEach((item, iIdx) => { 
-                    const isActive = (editingMode === 'item' && currentSysIndex === sIdx && currentItemIndex === iIdx); 
-                    html += `<button onclick="editItem(${sIdx}, ${iIdx})" class="sidebar-item text-left px-3 py-2 rounded-lg text-xs transition border border-transparent ${isActive ? 'active' : 'bg-slate-900/50 text-slate-300 hover:bg-slate-700'}">📄 ${item.name}</button>`; 
-                }); 
-            } else { 
-                html += `<p class="text-slate-600 text-[10px] italic px-2 py-1">ยังไม่มีบทเรียน</p>`; 
-            }
-        } 
-        else if (sidebarMode === 'quiz') {
-            const qCount = sys.quiz ? sys.quiz.length : 0;
-            const activeCount = sys.quiz ? sys.quiz.filter(q => q.active !== false).length : 0; 
-            const badgeText = qCount > 0 ? `เปิดใช้ ${activeCount}/${qCount}` : `0 ข้อ`;
-            const badgeBg = (activeCount === 0 && qCount > 0) ? 'bg-slate-700 text-slate-300' : 'bg-emerald-600 text-white';
 
-            const isActive = (editingMode === 'quiz' && currentSysIndex === sIdx);
-            
-            html += `<button onclick="editSystemQuiz(${sIdx})" class="sidebar-quiz text-left px-3 py-2 rounded-lg text-xs transition border border-transparent flex justify-between items-center ${isActive ? 'active' : 'bg-rose-900/30 text-rose-300 hover:bg-rose-800/50 border-rose-900/40'}">
+          if (sidebarMode === "content") {
+            if (sys.items && sys.items.length > 0) {
+              sys.items.forEach((item, iIdx) => {
+                const isActive =
+                  editingMode === "item" &&
+                  currentSysIndex === sIdx &&
+                  currentItemIndex === iIdx;
+                html += `<button onclick="editItem(${sIdx}, ${iIdx})" class="sidebar-item text-left px-3 py-2 rounded-lg text-xs transition border border-transparent ${isActive ? "active" : "bg-slate-900/50 text-slate-300 hover:bg-slate-700"}">📄 ${item.name}</button>`;
+              });
+            } else {
+              html += `<p class="text-slate-600 text-[10px] italic px-2 py-1">ยังไม่มีบทเรียน</p>`;
+            }
+          } else if (sidebarMode === "quiz") {
+            const qCount = sys.quiz ? sys.quiz.length : 0;
+            const activeCount = sys.quiz
+              ? sys.quiz.filter((q) => q.active !== false).length
+              : 0;
+            const badgeText =
+              qCount > 0 ? `เปิดใช้ ${activeCount}/${qCount}` : `0 ข้อ`;
+            const badgeBg =
+              activeCount === 0 && qCount > 0
+                ? "bg-slate-700 text-slate-300"
+                : "bg-emerald-600 text-white";
+
+            const isActive = editingMode === "quiz" && currentSysIndex === sIdx;
+
+            html += `<button onclick="editSystemQuiz(${sIdx})" class="sidebar-quiz text-left px-3 py-2 rounded-lg text-xs transition border border-transparent flex justify-between items-center ${isActive ? "active" : "bg-rose-900/30 text-rose-300 hover:bg-rose-800/50 border-rose-900/40"}">
                         <span>📝 คลังข้อสอบชุดนี้</span>
                         <span class="${badgeBg} px-1.5 py-0.5 rounded text-[9px] shadow-sm tracking-wide font-medium">${badgeText}</span>
                     </button>`;
-        }
-        
-        html += `</div></div>`; menu.innerHTML += html;
-    });
-}
+          }
 
-// 🌟 เพิ่มฟังก์ชันสำหรับเปิดหน้าจอการตั้งค่า 🌟
-function editGlobalSettings() {
-    editingMode = 'settings';
-    currentSysIndex = null;
-    currentItemIndex = null;
+          html += `</div></div>`;
+          menu.innerHTML += html;
+        });
+      }
 
-    document.getElementById('welcomeScreen').classList.add('hidden');
-    document.getElementById('adminContentSection').classList.add('hidden');
-    document.getElementById('adminQuizSection').classList.add('hidden');
-    
-    document.getElementById('editorHeader').classList.remove('hidden');
-    document.getElementById('adminSettingsSection').classList.remove('hidden');
+      // 🌟 เพิ่มฟังก์ชันสำหรับเปิดหน้าจอการตั้งค่า 🌟
+      function editGlobalSettings() {
+        editingMode = "settings";
+        currentSysIndex = null;
+        currentItemIndex = null;
 
-    document.getElementById('editingTitle').textContent = `⚙️ การตั้งค่าระบบประเมินผล`;
-    document.getElementById('btnDeleteTarget').classList.add('hidden'); 
-    
-    document.getElementById('frmGlobalQuizLimit').value = globalDatabase.settings?.global_quiz_limit || 15;
-    document.getElementById('frmGlobalPassing').value = globalDatabase.settings?.passing_percentage || 50;
-    document.getElementById('frmTimerEnabled').checked = globalDatabase.settings?.timer_enabled !== false;
-    document.getElementById('frmGlobalTimeLimit').value = globalDatabase.settings?.time_limit || 30;
+        document.getElementById("welcomeScreen").classList.add("hidden");
+        document.getElementById("adminContentSection").classList.add("hidden");
+        document.getElementById("adminQuizSection").classList.add("hidden");
 
-    renderSidebar();
-}
-function editItem(sIdx, iIdx) {
-    editingMode = 'item';
-    currentSysIndex = sIdx; 
-    currentItemIndex = iIdx;
-    
-    currentItemData = JSON.parse(JSON.stringify(globalDatabase.systems[sIdx].items[iIdx]));
-    if (!currentItemData.click_parts) currentItemData.click_parts = [];
+        document.getElementById("editorHeader").classList.remove("hidden");
+        document
+          .getElementById("adminSettingsSection")
+          .classList.remove("hidden");
 
-    document.getElementById('welcomeScreen').classList.add('hidden');
-    document.getElementById('adminQuizSection').classList.add('hidden');
-    document.getElementById('adminSettingsSection').classList.add('hidden'); // ซ่อนส่วนตั้งค่า
-    
-    document.getElementById('editorHeader').classList.remove('hidden');
-    document.getElementById('adminContentSection').classList.remove('hidden');
+        document.getElementById("editingTitle").textContent =
+          `⚙️ การตั้งค่าระบบประเมินผล`;
+        document.getElementById("btnDeleteTarget").classList.add("hidden");
 
-    document.getElementById('editingTitle').textContent = `แก้ไขบทเรียน: ${currentItemData.name}`;
-    document.getElementById('frmName').value = currentItemData.name;
-    document.getElementById('frmModelPath').value = currentItemData.model_file || ''; 
-    document.getElementById('frmDesc').innerHTML = currentItemData.description || '';
-    document.getElementById('uploadStatus').classList.add('hidden');
-    
-    const btnDel = document.getElementById('btnDeleteTarget');
-    btnDel.innerText = "🗑️ ลบบทเรียนนี้ทิ้ง";
-    btnDel.classList.remove('hidden');
-    
-    updateLiveModel(); 
-    renderSidebar(); renderParts();
-}
+        document.getElementById("frmGlobalQuizLimit").value =
+          globalDatabase.settings?.global_quiz_limit || 15;
+        document.getElementById("frmGlobalPassing").value =
+          globalDatabase.settings?.passing_percentage || 50;
+        document.getElementById("frmTimerEnabled").checked =
+          globalDatabase.settings?.timer_enabled !== false;
+        document.getElementById("frmGlobalTimeLimit").value =
+          globalDatabase.settings?.time_limit || 30;
 
-function editSystemQuiz(sIdx) {
-    editingMode = 'quiz';
-    currentSysIndex = sIdx;
-    currentItemIndex = null;
-    
-    if (!globalDatabase.systems[sIdx].quiz) globalDatabase.systems[sIdx].quiz = [];
-    currentQuizDataRef = globalDatabase.systems[sIdx].quiz;
+        renderSidebar();
+      }
+      function editItem(sIdx, iIdx) {
+        editingMode = "item";
+        currentSysIndex = sIdx;
+        currentItemIndex = iIdx;
 
-    document.getElementById('welcomeScreen').classList.add('hidden');
-    document.getElementById('adminContentSection').classList.add('hidden');
-    document.getElementById('adminSettingsSection').classList.add('hidden'); // ซ่อนส่วนตั้งค่า
-    
-    document.getElementById('editorHeader').classList.remove('hidden');
-    document.getElementById('adminQuizSection').classList.remove('hidden');
+        currentItemData = JSON.parse(
+          JSON.stringify(globalDatabase.systems[sIdx].items[iIdx]),
+        );
+        if (!currentItemData.click_parts) currentItemData.click_parts = [];
 
-    const catName = globalDatabase.systems[sIdx].category;
-    document.getElementById('editingTitle').textContent = `แฟ้มคลังข้อสอบ: ${catName}`;
-    document.getElementById('quizSectionTitle').textContent = `📝 คลังแบบทดสอบ: ${catName}`;
-    
-    const btnDel = document.getElementById('btnDeleteTarget');
-    btnDel.innerText = "🧹 ล้างข้อสอบทั้งหมด";
-    btnDel.classList.remove('hidden');
+        document.getElementById("welcomeScreen").classList.add("hidden");
+        document.getElementById("adminQuizSection").classList.add("hidden");
+        document.getElementById("adminSettingsSection").classList.add("hidden"); // ซ่อนส่วนตั้งค่า
 
-    renderSidebar(); renderQuiz();
-}
+        document.getElementById("editorHeader").classList.remove("hidden");
+        document
+          .getElementById("adminContentSection")
+          .classList.remove("hidden");
 
-function addClickPart() { currentItemData.click_parts.push({material_name:'', name:'', info:''}); renderParts(); }
+        document.getElementById("editingTitle").textContent =
+          `แก้ไขบทเรียน: ${currentItemData.name}`;
+        document.getElementById("frmName").value = currentItemData.name;
+        document.getElementById("frmModelPath").value =
+          currentItemData.model_file || "";
+        document.getElementById("frmDesc").innerHTML =
+          currentItemData.description || "";
+        document.getElementById("uploadStatus").classList.add("hidden");
 
-function renderParts() {
-    const container = document.getElementById('clickPartsContainer'); container.innerHTML = '';
-    const parts = currentItemData.click_parts || [];
-    parts.forEach((p, idx) => {
-        container.innerHTML += `<div class="bg-slate-900/50 p-4 rounded-xl border border-slate-700 relative pr-12 flex flex-col md:flex-row gap-4 items-start">
+        const btnDel = document.getElementById("btnDeleteTarget");
+        btnDel.innerText = "🗑️ ลบบทเรียนนี้ทิ้ง";
+        btnDel.classList.remove("hidden");
+
+        updateLiveModel();
+        renderSidebar();
+        renderParts();
+      }
+
+      function editSystemQuiz(sIdx) {
+        editingMode = "quiz";
+        currentSysIndex = sIdx;
+        currentItemIndex = null;
+
+        if (!globalDatabase.systems[sIdx].quiz)
+          globalDatabase.systems[sIdx].quiz = [];
+        currentQuizDataRef = globalDatabase.systems[sIdx].quiz;
+
+        document.getElementById("welcomeScreen").classList.add("hidden");
+        document.getElementById("adminContentSection").classList.add("hidden");
+        document.getElementById("adminSettingsSection").classList.add("hidden"); // ซ่อนส่วนตั้งค่า
+
+        document.getElementById("editorHeader").classList.remove("hidden");
+        document.getElementById("adminQuizSection").classList.remove("hidden");
+
+        const catName = globalDatabase.systems[sIdx].category;
+        document.getElementById("editingTitle").textContent =
+          `แฟ้มคลังข้อสอบ: ${catName}`;
+        document.getElementById("quizSectionTitle").textContent =
+          `📝 คลังแบบทดสอบ: ${catName}`;
+
+        const btnDel = document.getElementById("btnDeleteTarget");
+        btnDel.innerText = "🧹 ล้างข้อสอบทั้งหมด";
+        btnDel.classList.remove("hidden");
+
+        renderSidebar();
+        renderQuiz();
+      }
+
+      function addClickPart() {
+        currentItemData.click_parts.push({
+          material_name: "",
+          name: "",
+          info: "",
+        });
+        renderParts();
+      }
+
+      function renderParts() {
+        const container = document.getElementById("clickPartsContainer");
+        container.innerHTML = "";
+        const parts = currentItemData.click_parts || [];
+        parts.forEach((p, idx) => {
+          container.innerHTML += `<div class="bg-slate-900/50 p-4 rounded-xl border border-slate-700 relative pr-12 flex flex-col md:flex-row gap-4 items-start">
             <button onclick="deleteClickPart(${idx})" class="delete-btn-sm dev-only">✕</button>
             <div class="w-full md:w-1/3">
                 <label class="text-[10px] text-slate-300 mb-1 block uppercase">ID ในโมเดล</label>
@@ -735,7 +1503,7 @@ function renderParts() {
                 <div class="mt-3 p-2 bg-slate-800/80 rounded-lg border border-slate-700">
                     <label class="text-[9px] text-emerald-400 mb-1 block uppercase">📍 พิกัดโฟกัส (X Y Z)</label>
                     <div class="flex flex-col gap-2">
-                        <input type="text" class="input-box text-[10px] font-mono px-2 py-1.5 bg-slate-900 text-emerald-300" value="${p.position || ''}" oninput="currentItemData.click_parts[${idx}].position=this.value" placeholder="เว้นว่างได้" disabled>
+                        <input type="text" class="input-box text-[10px] font-mono px-2 py-1.5 bg-slate-900 text-emerald-300" value="${p.position || ""}" oninput="currentItemData.click_parts[${idx}].position=this.value" placeholder="เว้นว่างได้" disabled>
                         <button onclick="if(window.lastHitPosition){ currentItemData.click_parts[${idx}].position = window.lastHitPosition; renderParts(); showToast('ดูดพิกัดสำเร็จ!', 'success'); } else { alert('กรุณาไปคลิกอวัยวะบนโมเดล 3D ด้านซ้ายก่อน 1 ครั้ง เพื่อคัดลอกพิกัดครับ!'); }" class="bg-emerald-600 hover:bg-emerald-500 text-white px-2 py-1.5 rounded text-[10px] font-bold w-full transition shadow-sm flex justify-center items-center gap-1">ดูดพิกัดล่าสุดจาก 3D</button>
                     </div>
                 </div>
@@ -745,275 +1513,440 @@ function renderParts() {
                     <label class="text-[10px] text-slate-300 block uppercase mb-1">ชื่อที่แสดง</label>
                     <div class="border border-slate-700 rounded-lg overflow-hidden">
                         <div class="bg-slate-900 p-1.5 border-b border-slate-700 flex gap-2"><button type="button" onmousedown="event.preventDefault(); document.execCommand('bold', false, null);" class="bg-slate-700 text-white text-[10px] px-2 py-1 rounded"><b>B</b> ตัวหนา</button></div>
-                        <div class="rich-editor-content border-none text-xs min-h-[40px] p-2" contenteditable="true" placeholder="ระบุชื่อ..." oninput="currentItemData.click_parts[${idx}].name=this.innerHTML; if(activePreviewMaterial === currentItemData.click_parts[${idx}].material_name) updatePartPreview(this.innerHTML, currentItemData.click_parts[${idx}].info);">${p.name || ''}</div>
+                        <div class="rich-editor-content border-none text-xs min-h-[40px] p-2" contenteditable="true" placeholder="ระบุชื่อ..." oninput="currentItemData.click_parts[${idx}].name=this.innerHTML; if(activePreviewMaterial === currentItemData.click_parts[${idx}].material_name) updatePartPreview(this.innerHTML, currentItemData.click_parts[${idx}].info);">${p.name || ""}</div>
                     </div>
                 </div>
                 <div>
                     <label class="text-[10px] text-slate-300 block uppercase mb-1">รายละเอียดเพิ่มเติม</label>
                     <div class="border border-slate-700 rounded-lg overflow-hidden">
                         <div class="bg-slate-900 p-1.5 border-b border-slate-700 flex gap-2"><button type="button" onmousedown="event.preventDefault(); document.execCommand('bold', false, null);" class="bg-slate-700 text-white text-[10px] px-2 py-1 rounded"><b>B</b> ตัวหนา</button></div>
-                        <div class="rich-editor-content border-none text-xs min-h-[60px] p-2" contenteditable="true" placeholder="ระบุรายละเอียด..." oninput="currentItemData.click_parts[${idx}].info=this.innerHTML; if(activePreviewMaterial === currentItemData.click_parts[${idx}].material_name) updatePartPreview(currentItemData.click_parts[${idx}].name, this.innerHTML);">${p.info || ''}</div>
+                        <div class="rich-editor-content border-none text-xs min-h-[60px] p-2" contenteditable="true" placeholder="ระบุรายละเอียด..." oninput="currentItemData.click_parts[${idx}].info=this.innerHTML; if(activePreviewMaterial === currentItemData.click_parts[${idx}].material_name) updatePartPreview(currentItemData.click_parts[${idx}].name, this.innerHTML);">${p.info || ""}</div>
                     </div>
                 </div>
             </div>
         </div>`;
-    });
-}
+        });
+      }
 
-function addQuiz() { currentQuizDataRef.push({question:'', choices:['','','',''], answer:0, points: 1, explanation: '', active: true}); renderQuiz(); renderSidebar(); }
+      function addQuiz() {
+        currentQuizDataRef.push({
+          question: "",
+          choices: ["", "", "", ""],
+          answer: 0,
+          points: 1,
+          explanation: "",
+          active: true,
+        });
+        renderQuiz();
+        renderSidebar();
+      }
 
-// 🌟 ระบบเรียงลำดับและล็อกช่องพิมพ์สำหรับข้อที่ถูกปิดใช้งาน 🌟
-function renderQuiz() {
-    const container = document.getElementById('quizContainer'); container.innerHTML = '';
-    const msg = document.getElementById('emptyQuizMsg');
-    
-    // เรียงลำดับข้อสอบ: เปิดใช้ (true) อยู่บน, เก็บในคลัง (false) อยู่ล่าง
-    currentQuizDataRef.sort((a, b) => {
-        const aActive = a.active !== false;
-        const bActive = b.active !== false;
-        if (aActive === bActive) return 0;
-        return aActive ? -1 : 1; 
-    });
+      // 🌟 ระบบเรียงลำดับและล็อกช่องพิมพ์สำหรับข้อที่ถูกปิดใช้งาน 🌟
+      function renderQuiz() {
+        const container = document.getElementById("quizContainer");
+        container.innerHTML = "";
+        const msg = document.getElementById("emptyQuizMsg");
 
-    if(currentQuizDataRef.length === 0) {
-        msg.classList.remove('hidden');
-    } else {
-        msg.classList.add('hidden');
-        currentQuizDataRef.forEach((q, idx) => {
-            const isActive = q.active !== false; 
-            
+        // เรียงลำดับข้อสอบ: เปิดใช้ (true) อยู่บน, เก็บในคลัง (false) อยู่ล่าง
+        currentQuizDataRef.sort((a, b) => {
+          const aActive = a.active !== false;
+          const bActive = b.active !== false;
+          if (aActive === bActive) return 0;
+          return aActive ? -1 : 1;
+        });
+
+        if (currentQuizDataRef.length === 0) {
+          msg.classList.remove("hidden");
+        } else {
+          msg.classList.add("hidden");
+          currentQuizDataRef.forEach((q, idx) => {
+            const isActive = q.active !== false;
+
             // กำหนด Style ให้กล่องข้อสอบที่ปิดใช้งานเป็นเส้นประสีเทา
-            const boxStyle = isActive ? 'bg-slate-900/50 border-indigo-500' : 'bg-slate-900/20 border-slate-600 border-dashed opacity-75';
-            
+            const boxStyle = isActive
+              ? "bg-slate-900/50 border-indigo-500"
+              : "bg-slate-900/20 border-slate-600 border-dashed opacity-75";
+
             // แอตทริบิวต์ล็อกไม่ให้พิมพ์ (disabled) และเปลี่ยนสีกล่องเป็นเทาเพื่อกันพลาด
-            const lockAttr = isActive ? '' : 'disabled';
-            const inputClass = isActive ? 'input-box' : 'input-box bg-slate-800/50 text-slate-400 cursor-not-allowed border-transparent';
-            const textClass = isActive ? 'text-white' : 'text-slate-400 cursor-not-allowed';
+            const lockAttr = isActive ? "" : "disabled";
+            const inputClass = isActive
+              ? "input-box"
+              : "input-box bg-slate-800/50 text-slate-400 cursor-not-allowed border-transparent";
+            const textClass = isActive
+              ? "text-white"
+              : "text-slate-400 cursor-not-allowed";
 
             container.innerHTML += `<div class="${boxStyle} p-4 rounded-xl border relative pr-12 transition-all duration-300">
                 <button onclick="deleteQuizPart(${idx})" class="delete-btn-sm">✕</button>
                 
                 <div class="flex items-center gap-3 mb-4 border-b border-slate-700/50 pb-3">
                     <label class="flex items-center gap-2 cursor-pointer group">
-                        <input type="checkbox" ${isActive ? 'checked' : ''} 
+                        <input type="checkbox" ${isActive ? "checked" : ""} 
                                onchange="currentQuizDataRef[${idx}].active=this.checked; renderQuiz(); renderSidebar();"
                                class="w-4 h-4 rounded border-slate-700 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
-                        <span class="text-xs ${isActive ? 'text-indigo-400 font-bold' : 'text-slate-400'} uppercase">
-                            ${isActive ? '✅ ใช้งานข้อนี้' : '🔒 เก็บในคลัง (ติ๊กเปิดใช้เพื่อแก้ไข)'}
+                        <span class="text-xs ${isActive ? "text-indigo-400 font-bold" : "text-slate-400"} uppercase">
+                            ${isActive ? "✅ ใช้งานข้อนี้" : "🔒 เก็บในคลัง (ติ๊กเปิดใช้เพื่อแก้ไข)"}
                         </span>
                     </label>
                 </div>
 
                 <div class="flex gap-2 mb-3">
                     <input type="text" class="${inputClass} font-medium text-sm flex-grow" value="${q.question}" oninput="currentQuizDataRef[${idx}].question=this.value" placeholder="โจทย์คำถาม" ${lockAttr}>
-                    <input type="number" class="${inputClass} font-bold text-sm w-24 text-center ${isActive ? 'text-amber-400' : ''}" value="${q.points || 1}" oninput="currentQuizDataRef[${idx}].points=Number(this.value)" placeholder="คะแนน" min="1" title="คะแนนสำหรับข้อนี้" ${lockAttr}>
+                    <input type="number" class="${inputClass} font-bold text-sm w-24 text-center ${isActive ? "text-amber-400" : ""}" value="${q.points || 1}" oninput="currentQuizDataRef[${idx}].points=Number(this.value)" placeholder="คะแนน" min="1" title="คะแนนสำหรับข้อนี้" ${lockAttr}>
                 </div>
 
                 <div class="grid grid-cols-2 gap-2 mb-3">
-                    ${q.choices.map((c, cIdx) => `<div class="flex gap-2 items-center bg-slate-800 p-1.5 rounded-lg border ${q.answer===cIdx && isActive ? 'border-emerald-500' : 'border-transparent'} ${!isActive ? 'opacity-60' : ''}">
-                        <input type="radio" name="ans-${idx}" ${q.answer===cIdx?'checked':''} onchange="currentQuizDataRef[${idx}].answer=${cIdx}" class="ml-1 ${isActive?'cursor-pointer':'cursor-not-allowed'}" ${lockAttr}>
+                    ${q.choices
+                      .map(
+                        (
+                          c,
+                          cIdx,
+                        ) => `<div class="flex gap-2 items-center bg-slate-800 p-1.5 rounded-lg border ${q.answer === cIdx && isActive ? "border-emerald-500" : "border-transparent"} ${!isActive ? "opacity-60" : ""}">
+                        <input type="radio" name="ans-${idx}" ${q.answer === cIdx ? "checked" : ""} onchange="currentQuizDataRef[${idx}].answer=${cIdx}" class="ml-1 ${isActive ? "cursor-pointer" : "cursor-not-allowed"}" ${lockAttr}>
                         <input type="text" class="bg-transparent text-xs ${textClass} w-full outline-none" value="${c}" oninput="currentQuizDataRef[${idx}].choices[${cIdx}]=this.value" placeholder="ตัวเลือก" ${lockAttr}>
-                    </div>`).join('')}
+                    </div>`,
+                      )
+                      .join("")}
                 </div>
                 
-                <div class="bg-slate-800/50 p-2 rounded-lg border border-slate-700 mt-2 ${!isActive ? 'opacity-60' : ''}">
+                <div class="bg-slate-800/50 p-2 rounded-lg border border-slate-700 mt-2 ${!isActive ? "opacity-60" : ""}">
                     <label class="text-[10px] text-slate-300 block uppercase mb-1">💡 คำอธิบายเฉลย (แสดงให้นักเรียนเห็นตอนดูสรุปผล)</label>
-                    <input type="text" class="${inputClass} text-xs ${isActive ? 'text-indigo-300' : ''}" value="${q.explanation || ''}" oninput="currentQuizDataRef[${idx}].explanation=this.value" placeholder="อธิบายเหตุผลของคำตอบที่ถูกต้อง..." ${lockAttr}>
+                    <input type="text" class="${inputClass} text-xs ${isActive ? "text-indigo-300" : ""}" value="${q.explanation || ""}" oninput="currentQuizDataRef[${idx}].explanation=this.value" placeholder="อธิบายเหตุผลของคำตอบที่ถูกต้อง..." ${lockAttr}>
                 </div>
             </div>`;
-        });
-    }
-}
+          });
+        }
+      }
 
-// 🌟 ฟังก์ชันใหม่: เรียกป๊อปอัปยืนยันก่อนทำการเซฟข้อมูล 🌟
-function confirmSaveData() {
-    openCustomConfirm(
-        "คุณต้องการบันทึกการเปลี่ยนแปลงทั้งหมดขึ้นระบบ Cloud ใช่หรือไม่?", 
-        "💾 ยืนยันการบันทึกข้อมูล", 
-        () => {
+      // 🌟 ฟังก์ชันใหม่: เรียกป๊อปอัปยืนยันก่อนทำการเซฟข้อมูล 🌟
+      function confirmSaveData() {
+        openCustomConfirm(
+          "คุณต้องการบันทึกการเปลี่ยนแปลงทั้งหมดขึ้นระบบ Cloud ใช่หรือไม่?",
+          "💾 ยืนยันการบันทึกข้อมูล",
+          () => {
             saveData(); // ถ้าผู้ใช้กดยืนยัน ค่อยเรียกใช้คำสั่งเซฟข้อมูลของจริง
-        }, 
-        false // ใส่ false เพื่อให้ปุ่มยืนยันเป็น "สีน้ำเงิน" (ถ้า true จะเป็นสีแดงแบบตอนลบข้อมูล)
-    );
-}
+          },
+          false, // ใส่ false เพื่อให้ปุ่มยืนยันเป็น "สีน้ำเงิน" (ถ้า true จะเป็นสีแดงแบบตอนลบข้อมูล)
+        );
+      }
 
-function saveData() { 
-    // ถ้ายืนยันการเซฟจากหน้า "ตั้งค่าประเมินผล"
-    if (editingMode === 'settings') {
-        if(!globalDatabase.settings) globalDatabase.settings = {};
-        
-        let limit = parseInt(document.getElementById('frmGlobalQuizLimit').value);
-        let pass = parseInt(document.getElementById('frmGlobalPassing').value);
-        let timerEnabled = document.getElementById('frmTimerEnabled').checked;
-        let timeLimit = parseInt(document.getElementById('frmGlobalTimeLimit').value);
-        
-        if(isNaN(limit) || limit < 1) limit = 15;
-        if(isNaN(pass) || pass < 1 || pass > 100) pass = 50;
-        if(isNaN(timeLimit) || timeLimit < 5) timeLimit = 30; // ขั้นต่ำ 5 วินาที
-        if(timeLimit > 300) timeLimit = 300; // 🌟 เพิ่มล็อกเวลาสูงสุด 300 วินาที (5 นาที)
-        
-        globalDatabase.settings.global_quiz_limit = limit;
-        globalDatabase.settings.passing_percentage = pass;
-        globalDatabase.settings.timer_enabled = timerEnabled;
-        globalDatabase.settings.time_limit = timeLimit;
-        
-        db.collection("database").doc("anatomy").set(globalDatabase).then(() => { 
-            showToast("บันทึกการตั้งค่าระบบเรียบร้อยแล้ว!", "success");
-            renderSidebar(); 
+      function saveData() {
+        // ถ้ายืนยันการเซฟจากหน้า "ตั้งค่าประเมินผล"
+        if (editingMode === "settings") {
+          if (!globalDatabase.settings) globalDatabase.settings = {};
+
+          let limit = parseInt(
+            document.getElementById("frmGlobalQuizLimit").value,
+          );
+          let pass = parseInt(
+            document.getElementById("frmGlobalPassing").value,
+          );
+          let timerEnabled = document.getElementById("frmTimerEnabled").checked;
+          let timeLimit = parseInt(
+            document.getElementById("frmGlobalTimeLimit").value,
+          );
+
+          if (isNaN(limit) || limit < 1) limit = 15;
+          if (isNaN(pass) || pass < 1 || pass > 100) pass = 50;
+          if (isNaN(timeLimit) || timeLimit < 5) timeLimit = 30; // ขั้นต่ำ 5 วินาที
+          if (timeLimit > 300) timeLimit = 300; // 🌟 เพิ่มล็อกเวลาสูงสุด 300 วินาที (5 นาที)
+
+          globalDatabase.settings.global_quiz_limit = limit;
+          globalDatabase.settings.passing_percentage = pass;
+          globalDatabase.settings.timer_enabled = timerEnabled;
+          globalDatabase.settings.time_limit = timeLimit;
+
+          db.collection("database")
+            .doc("anatomy")
+            .set(globalDatabase)
+            .then(() => {
+              showToast("บันทึกการตั้งค่าระบบเรียบร้อยแล้ว!", "success");
+              renderSidebar();
+            });
+          return;
+        }
+
+        if (currentSysIndex === null) return;
+
+        if (editingMode === "item") {
+          currentItemData.name = document.getElementById("frmName").value;
+          currentItemData.model_file =
+            document.getElementById("frmModelPath").value;
+          currentItemData.description =
+            document.getElementById("frmDesc").innerHTML;
+          globalDatabase.systems[currentSysIndex].items[currentItemIndex] =
+            currentItemData;
+        }
+
+        // 🌟 ส่วนที่หายไป: คำสั่งเซฟข้อสอบเมื่อแก้ไขหน้าคลังข้อสอบ
+        if (editingMode === "quiz") {
+          globalDatabase.systems[currentSysIndex].quiz = currentQuizDataRef;
+        }
+
+        db.collection("database")
+          .doc("anatomy")
+          .set(globalDatabase)
+          .then(() => {
+            showToast("บันทึกข้อมูลเรียบร้อยแล้ว!", "success");
+            renderSidebar();
+          });
+      }
+      // 🌟 ฟังก์ชันแจ้งเตือนแบบ Toast (เด้งจากตรงกลางด้านบน) 🌟
+      function showToast(message, type = "success") {
+        const container = document.getElementById("toastContainer");
+        const toast = document.createElement("div");
+
+        // เปลี่ยนแอนิเมชันเป็น -translate-y-10 (ซ่อนอยู่ด้านบน แล้วค่อยๆ เด้งลงมา)
+        toast.className = `px-6 py-3 rounded-xl shadow-2xl text-sm font-bold flex items-center gap-3 transform transition-all duration-300 -translate-y-10 opacity-0 pointer-events-auto`;
+
+        // เลือกสีและไอคอนตามประเภท (success หรือ error)
+        if (type === "success") {
+          toast.classList.add(
+            "bg-emerald-600",
+            "text-white",
+            "border",
+            "border-emerald-500",
+          );
+          toast.innerHTML = `<span class="text-xl">✅</span> <span>${message}</span>`;
+        } else if (type === "error") {
+          toast.classList.add(
+            "bg-rose-600",
+            "text-white",
+            "border",
+            "border-rose-500",
+          );
+          toast.innerHTML = `<span class="text-xl">❌</span> <span>${message}</span>`;
+        }
+
+        container.appendChild(toast);
+
+        // สั่งให้แสดงเด้งลงมา
+        requestAnimationFrame(() => {
+          toast.classList.remove("-translate-y-10", "opacity-0");
         });
-        return;
-    }
 
-    if(currentSysIndex === null) return; 
-    
-    if (editingMode === 'item') {
-        currentItemData.name = document.getElementById('frmName').value; 
-        currentItemData.model_file = document.getElementById('frmModelPath').value; 
-        currentItemData.description = document.getElementById('frmDesc').innerHTML; 
-        globalDatabase.systems[currentSysIndex].items[currentItemIndex] = currentItemData; 
-    } 
-    
-    // 🌟 ส่วนที่หายไป: คำสั่งเซฟข้อสอบเมื่อแก้ไขหน้าคลังข้อสอบ
-    if (editingMode === 'quiz') {
-        globalDatabase.systems[currentSysIndex].quiz = currentQuizDataRef;
-    }
-    
-    db.collection("database").doc("anatomy").set(globalDatabase).then(() => { 
-        showToast("บันทึกข้อมูลเรียบร้อยแล้ว!", "success"); 
-        renderSidebar(); 
-    }); 
-}
-// 🌟 ฟังก์ชันแจ้งเตือนแบบ Toast (เด้งจากตรงกลางด้านบน) 🌟
-function showToast(message, type = 'success') {
-    const container = document.getElementById('toastContainer');
-    const toast = document.createElement('div');
-    
-    // เปลี่ยนแอนิเมชันเป็น -translate-y-10 (ซ่อนอยู่ด้านบน แล้วค่อยๆ เด้งลงมา)
-    toast.className = `px-6 py-3 rounded-xl shadow-2xl text-sm font-bold flex items-center gap-3 transform transition-all duration-300 -translate-y-10 opacity-0 pointer-events-auto`;
-    
-    // เลือกสีและไอคอนตามประเภท (success หรือ error)
-    if (type === 'success') {
-        toast.classList.add('bg-emerald-600', 'text-white', 'border', 'border-emerald-500');
-        toast.innerHTML = `<span class="text-xl">✅</span> <span>${message}</span>`;
-    } else if (type === 'error') {
-        toast.classList.add('bg-rose-600', 'text-white', 'border', 'border-rose-500');
-        toast.innerHTML = `<span class="text-xl">❌</span> <span>${message}</span>`;
-    }
-    
-    container.appendChild(toast);
-    
-    // สั่งให้แสดงเด้งลงมา
-    requestAnimationFrame(() => {
-        toast.classList.remove('-translate-y-10', 'opacity-0');
-    });
-    
-    // สั่งให้ค่อยๆ จางและเด้งกลับขึ้นไปเมื่อผ่านไป 3 วินาที
-    setTimeout(() => {
-        toast.classList.add('-translate-y-10', 'opacity-0');
-        setTimeout(() => toast.remove(), 300); // ลบออกจากระบบหลังภาพหายไป
-    }, 3000);
-}
+        // สั่งให้ค่อยๆ จางและเด้งกลับขึ้นไปเมื่อผ่านไป 3 วินาที
+        setTimeout(() => {
+          toast.classList.add("-translate-y-10", "opacity-0");
+          setTimeout(() => toast.remove(), 300); // ลบออกจากระบบหลังภาพหายไป
+        }, 3000);
+      }
 
-function deleteClickPart(idx) { openCustomConfirm("ลบ <b>'จุดคลิก'</b> ใช่หรือไม่?", "ลบจุดคลิก", () => { currentItemData.click_parts.splice(idx, 1); renderParts(); }); }
+      function deleteClickPart(idx) {
+        openCustomConfirm(
+          "ลบ <b>'จุดคลิก'</b> ใช่หรือไม่?",
+          "ลบจุดคลิก",
+          () => {
+            currentItemData.click_parts.splice(idx, 1);
+            renderParts();
+          },
+        );
+      }
 
-function deleteQuizPart(idx) { 
-    openCustomConfirm("ลบ <b>'ข้อสอบ'</b> ข้อนี้ทิ้งใช่หรือไม่?", "ลบข้อสอบ", () => { 
-        currentQuizDataRef.splice(idx, 1); 
-        renderQuiz(); 
-        renderSidebar(); 
-    }); 
-}
+      function deleteQuizPart(idx) {
+        openCustomConfirm(
+          "ลบ <b>'ข้อสอบ'</b> ข้อนี้ทิ้งใช่หรือไม่?",
+          "ลบข้อสอบ",
+          () => {
+            currentQuizDataRef.splice(idx, 1);
+            renderQuiz();
+            renderSidebar();
+          },
+        );
+      }
 
-function deleteCurrentTarget() { 
-    if (editingMode === 'item') {
-        openCustomConfirm(`ลบอวัยวะ <b class="text-rose-400">[${currentItemData.name}]</b> แน่ใจหรือไม่?`, "ลบหน้านี้ทิ้ง", () => { 
-            globalDatabase.systems[currentSysIndex].items.splice(currentItemIndex, 1); 
-            db.collection("database").doc("anatomy").set(globalDatabase).then(() => { 
-                currentItemData=null; currentSysIndex=null; currentItemIndex=null;
-                setSidebarMode('content'); 
-            }); 
+      function deleteCurrentTarget() {
+        if (editingMode === "item") {
+          openCustomConfirm(
+            `ลบอวัยวะ <b class="text-rose-400">[${currentItemData.name}]</b> แน่ใจหรือไม่?`,
+            "ลบหน้านี้ทิ้ง",
+            () => {
+              globalDatabase.systems[currentSysIndex].items.splice(
+                currentItemIndex,
+                1,
+              );
+              db.collection("database")
+                .doc("anatomy")
+                .set(globalDatabase)
+                .then(() => {
+                  currentItemData = null;
+                  currentSysIndex = null;
+                  currentItemIndex = null;
+                  setSidebarMode("content");
+                });
+            },
+          );
+        } else if (editingMode === "quiz") {
+          openCustomConfirm(
+            `ล้าง <b>'ข้อสอบทั้งหมด'</b> ในหมวดนี้แน่ใจหรือไม่?`,
+            "ล้างคลังข้อสอบ",
+            () => {
+              globalDatabase.systems[currentSysIndex].quiz = [];
+              currentQuizDataRef = globalDatabase.systems[currentSysIndex].quiz;
+              db.collection("database")
+                .doc("anatomy")
+                .set(globalDatabase)
+                .then(() => {
+                  renderSidebar();
+                  renderQuiz();
+                });
+            },
+          );
+        }
+      }
+
+      function deleteSystem(idx) {
+        const sysName = globalDatabase.systems[idx].category;
+        openCustomPrompt(
+          "⚠️ ลบหมวดหมู่",
+          `พิมพ์: ${sysName}`,
+          `<span class="text-rose-400">ระวัง! บทเรียนและข้อสอบในหมวดนี้หายหมด</span><br>พิมพ์ <b>${sysName}</b> เพื่อยืนยัน:`,
+          (conf) => {
+            if (conf === sysName) {
+              globalDatabase.systems.splice(idx, 1);
+              db.collection("database")
+                .doc("anatomy")
+                .set(globalDatabase)
+                .then(() => renderSidebar());
+            } else if (conf !== null && conf.trim() !== "") {
+              alert("พิมพ์ชื่อไม่ถูกต้อง");
+            }
+          },
+        );
+      }
+      function clearAllData() {
+        openCustomPrompt(
+          "🔥 ล้าง Cloud",
+          "พิมพ์ CONFIRM DELETE",
+          `พิมพ์ <b>CONFIRM DELETE</b>`,
+          (conf) => {
+            if (conf === "CONFIRM DELETE") {
+              db.collection("database")
+                .doc("anatomy")
+                .delete()
+                .then(() => location.reload());
+            }
+          },
+        );
+      }
+      function addNewSystem() {
+        openCustomPrompt("✨ เพิ่มหมวดหมู่", "ชื่อหมวดหมู่...", null, (n) => {
+          if (n && n.trim() !== "") {
+            if (!globalDatabase) globalDatabase = { systems: [] };
+            globalDatabase.systems.push({
+              category: n.trim(),
+              items: [],
+              quiz: [],
+            });
+            db.collection("database")
+              .doc("anatomy")
+              .set(globalDatabase)
+              .then(() => renderSidebar());
+          }
         });
-    } else if (editingMode === 'quiz') {
-        openCustomConfirm(`ล้าง <b>'ข้อสอบทั้งหมด'</b> ในหมวดนี้แน่ใจหรือไม่?`, "ล้างคลังข้อสอบ", () => { 
-            globalDatabase.systems[currentSysIndex].quiz = []; 
-            currentQuizDataRef = globalDatabase.systems[currentSysIndex].quiz;
-            db.collection("database").doc("anatomy").set(globalDatabase).then(() => { 
-                renderSidebar(); renderQuiz();
-            }); 
+      }
+      function addNewItemToSys(sysIdx) {
+        if (!globalDatabase.systems[sysIdx].items)
+          globalDatabase.systems[sysIdx].items = [];
+        globalDatabase.systems[sysIdx].items.push({
+          name: "บทเรียนใหม่",
+          model_file: "",
+          description: "รายละเอียดบทเรียน...",
+          click_parts: [],
         });
-    }
-}
+        db.collection("database")
+          .doc("anatomy")
+          .set(globalDatabase)
+          .then(() => {
+            setSidebarMode("content");
+            editItem(sysIdx, globalDatabase.systems[sysIdx].items.length - 1);
+          });
+      }
 
-function deleteSystem(idx) { const sysName=globalDatabase.systems[idx].category; openCustomPrompt("⚠️ ลบหมวดหมู่", `พิมพ์: ${sysName}`, `<span class="text-rose-400">ระวัง! บทเรียนและข้อสอบในหมวดนี้หายหมด</span><br>พิมพ์ <b>${sysName}</b> เพื่อยืนยัน:`, (conf) => { if(conf===sysName) { globalDatabase.systems.splice(idx, 1); db.collection("database").doc("anatomy").set(globalDatabase).then(() => renderSidebar()); } else if(conf!==null&&conf.trim()!==""){alert("พิมพ์ชื่อไม่ถูกต้อง");} }); }
-function clearAllData() { openCustomPrompt("🔥 ล้าง Cloud", "พิมพ์ CONFIRM DELETE", `พิมพ์ <b>CONFIRM DELETE</b>`, (conf) => { if(conf==="CONFIRM DELETE"){ db.collection("database").doc("anatomy").delete().then(()=>location.reload()); } }); }
-function addNewSystem() { openCustomPrompt("✨ เพิ่มหมวดหมู่", "ชื่อหมวดหมู่...", null, (n) => { if(n&&n.trim()!==""){ if(!globalDatabase) globalDatabase={systems:[]}; globalDatabase.systems.push({category: n.trim(), items: [], quiz: []}); db.collection("database").doc("anatomy").set(globalDatabase).then(()=>renderSidebar()); } }); }
-function addNewItemToSys(sysIdx) { if(!globalDatabase.systems[sysIdx].items) globalDatabase.systems[sysIdx].items=[]; globalDatabase.systems[sysIdx].items.push({name: "บทเรียนใหม่", model_file: "", description: "รายละเอียดบทเรียน...", click_parts: []}); db.collection("database").doc("anatomy").set(globalDatabase).then(()=>{ setSidebarMode('content'); editItem(sysIdx, globalDatabase.systems[sysIdx].items.length-1); }); }
+      document.addEventListener("paste", function (e) {
+        if (e.target.isContentEditable) {
+          e.preventDefault();
+          let text = (e.originalEvent || e).clipboardData.getData("text/plain");
+          document.execCommand("insertText", false, text);
+        }
+      });
+      function exportBackup() {
+        if (!globalDatabase) {
+          showToast("ไม่มีข้อมูลให้สำรองครับ", "error");
+          return;
+        }
+        // แปลงข้อมูลเป็นไฟล์ JSON
+        const dataStr =
+          "data:text/json;charset=utf-8," +
+          encodeURIComponent(JSON.stringify(globalDatabase, null, 2));
+        const dl = document.createElement("a");
+        dl.setAttribute("href", dataStr);
+        dl.setAttribute(
+          "download",
+          "biolens_backup_" + new Date().toISOString().split("T")[0] + ".json",
+        );
+        dl.click();
+        showToast("ดาวน์โหลดไฟล์สำรองข้อมูลสำเร็จ!", "success");
+      }
+      // 🌟 ฟังก์ชันนำเข้าข้อมูลจากไฟล์ JSON (Restore) 🌟
+      function handleImportBackup(event) {
+        const file = event.target.files[0];
+        if (!file) return;
 
-document.addEventListener('paste', function(e) { if(e.target.isContentEditable) { e.preventDefault(); let text=(e.originalEvent||e).clipboardData.getData('text/plain'); document.execCommand('insertText', false, text); } });
-function exportBackup() {
-    if (!globalDatabase) { showToast("ไม่มีข้อมูลให้สำรองครับ", "error"); return; }
-    // แปลงข้อมูลเป็นไฟล์ JSON
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(globalDatabase, null, 2));
-    const dl = document.createElement('a');
-    dl.setAttribute("href", dataStr);
-    dl.setAttribute("download", "biolens_backup_" + new Date().toISOString().split('T')[0] + ".json");
-    dl.click();
-    showToast("ดาวน์โหลดไฟล์สำรองข้อมูลสำเร็จ!", "success");
-}
-// 🌟 ฟังก์ชันนำเข้าข้อมูลจากไฟล์ JSON (Restore) 🌟
-function handleImportBackup(event) {
-    const file = event.target.files[0];
-    if (!file) return;
+        // 1. ตรวจสอบนามสกุลไฟล์
+        if (!file.name.toLowerCase().endsWith(".json")) {
+          showToast("❌ กรุณาอัปโหลดไฟล์นามสกุล .json เท่านั้น", "error");
+          event.target.value = ""; // รีเซ็ต input
+          return;
+        }
 
-    // 1. ตรวจสอบนามสกุลไฟล์
-    if (!file.name.toLowerCase().endsWith('.json')) {
-        showToast("❌ กรุณาอัปโหลดไฟล์นามสกุล .json เท่านั้น", "error");
-        event.target.value = ''; // รีเซ็ต input
-        return;
-    }
-
-    // 2. อ่านไฟล์ด้วย FileReader
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        try {
+        // 2. อ่านไฟล์ด้วย FileReader
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          try {
             // แปลงข้อความจากไฟล์ให้เป็น JSON Object
             const importedData = JSON.parse(e.target.result);
 
             // 3. ตรวจสอบโครงสร้างไฟล์เบื้องต้น ว่าใช่ข้อมูลของ BioLens ไหม
             if (!importedData.systems || !Array.isArray(importedData.systems)) {
-                throw new Error("โครงสร้างไฟล์ข้อมูลไม่ถูกต้อง");
+              throw new Error("โครงสร้างไฟล์ข้อมูลไม่ถูกต้อง");
             }
 
             // 4. เด้งป๊อปอัปยืนยันก่อนเขียนทับข้อมูลเดิม
             openCustomConfirm(
-                "<span class='text-rose-400'>คำเตือน: ข้อมูลบทเรียนและข้อสอบบน Cloud ทั้งหมดจะถูกแทนที่ด้วยข้อมูลจากไฟล์นี้!</span><br><br>คุณแน่ใจหรือไม่ที่จะนำเข้าข้อมูล?", 
-                "📂 ยืนยันการนำเข้าข้อมูล", 
-                () => {
-                    // ถ้ายืนยัน ให้บันทึกข้อมูลทับลง Firebase ทันที
-                    db.collection("database").doc("anatomy").set(importedData)
-                        .then(() => {
-                            showToast("นำเข้าข้อมูลสำเร็จ! ระบบกำลังรีโหลด...", "success");
-                            // รีเฟรชหน้าเว็บใหม่หลังจากผ่านไป 1.5 วินาที เพื่อแสดงข้อมูลใหม่
-                            setTimeout(() => location.reload(), 1500); 
-                        })
-                        .catch((error) => {
-                            showToast("❌ เกิดข้อผิดพลาดในการบันทึกลง Cloud", "error");
-                            console.error(error);
-                        });
-                }, 
-                true // ให้ปุ่มยืนยันเป็นสีแดง (แจ้งเตือนความเสี่ยง)
+              "<span class='text-rose-400'>คำเตือน: ข้อมูลบทเรียนและข้อสอบบน Cloud ทั้งหมดจะถูกแทนที่ด้วยข้อมูลจากไฟล์นี้!</span><br><br>คุณแน่ใจหรือไม่ที่จะนำเข้าข้อมูล?",
+              "📂 ยืนยันการนำเข้าข้อมูล",
+              () => {
+                // ถ้ายืนยัน ให้บันทึกข้อมูลทับลง Firebase ทันที
+                db.collection("database")
+                  .doc("anatomy")
+                  .set(importedData)
+                  .then(() => {
+                    showToast(
+                      "นำเข้าข้อมูลสำเร็จ! ระบบกำลังรีโหลด...",
+                      "success",
+                    );
+                    // รีเฟรชหน้าเว็บใหม่หลังจากผ่านไป 1.5 วินาที เพื่อแสดงข้อมูลใหม่
+                    setTimeout(() => location.reload(), 1500);
+                  })
+                  .catch((error) => {
+                    showToast("❌ เกิดข้อผิดพลาดในการบันทึกลง Cloud", "error");
+                    console.error(error);
+                  });
+              },
+              true, // ให้ปุ่มยืนยันเป็นสีแดง (แจ้งเตือนความเสี่ยง)
             );
-        } catch (error) {
+          } catch (error) {
             showToast("❌ ไฟล์ JSON ไม่ถูกต้อง หรือโครงสร้างพัง", "error");
             console.error(error);
-        }
-        
-        event.target.value = ''; // รีเซ็ต input ให้กดอัปโหลดไฟล์เดิมซ้ำได้ในอนาคต
-    };
-    
-    // เริ่มอ่านไฟล์เป็นข้อความ
-    reader.readAsText(file);
-}
-</script>
-</body>
+          }
+
+          event.target.value = ""; // รีเซ็ต input ให้กดอัปโหลดไฟล์เดิมซ้ำได้ในอนาคต
+        };
+
+        // เริ่มอ่านไฟล์เป็นข้อความ
+        reader.readAsText(file);
+      }
+    </script>
+  </body>
 </html>
