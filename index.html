@@ -1306,61 +1306,59 @@
         console.log("Firebase Cache Error: ", err);
       });
 
-      db.collection("database")
-        .doc("anatomy")
-        .get()
+      // 🌟 1. อ่านค่ารหัสครู (tid) จาก URL ที่นักเรียนสแกนมา
+      const urlParams = new URLSearchParams(window.location.search);
+      const tid = urlParams.get('tid');
+
+      // 🌟 2. เลือกว่าจะดึงฐานข้อมูลก้อนไหน
+      let docRef;
+      if (tid) {
+          // ถ้าสแกน QR Code ของครูมา ให้ดึงข้อมูลห้องเรียนของครูคนนั้น
+          docRef = db.collection("classrooms").doc(tid);
+      } else {
+          // ถ้าเข้าเว็บตรงๆ (ไม่มีรหัสครู) ให้ดึงข้อมูลดั้งเดิมป้องกันเว็บพัง
+          docRef = db.collection("database").doc("anatomy");
+      }
+
+      // 🌟 3. เริ่มดึงข้อมูล
+      docRef.get()
         .then((docSnap) => {
           if (docSnap.exists) {
             const dbData = docSnap.data();
             data = dbData.systems || [];
+            
+            // ... (โค้ดดึง settings และ loadSystem ปล่อยไว้เหมือนเดิมครับ) ...
 
             if (dbData.settings && dbData.settings.global_quiz_limit) {
               globalQuizLimit = parseInt(dbData.settings.global_quiz_limit);
             }
-
             if (dbData.settings && dbData.settings.passing_percentage) {
-              globalPassingPercentage = parseInt(
-                dbData.settings.passing_percentage,
-              );
+              globalPassingPercentage = parseInt(dbData.settings.passing_percentage);
             }
-
             if (dbData.settings) {
               timerEnabled = dbData.settings.timer_enabled !== false;
               globalTimeLimit = parseInt(dbData.settings.time_limit) || 30;
             }
+
             renderTabs();
             renderQuizMenu();
             if (data.length > 0) loadSystem(0);
 
-            document.getElementById("loadingText").textContent =
-              "ระบบพร้อมใช้งานแล้ว";
+            document.getElementById("loadingText").textContent = "ระบบพร้อมใช้งานแล้ว";
             document.getElementById("loadingText").style.color = "#4ade80";
             document.getElementById("btnLearn").disabled = false;
             document.getElementById("btnQuizMenu").disabled = false;
           } else {
-            throw new Error("ยังไม่มีข้อมูลใน Database");
+            // ถ้ารหัสครูผิด หรือครูยังไม่เคยบันทึกข้อมูล
+            throw new Error("ไม่พบข้อมูลห้องเรียนนี้ครับ");
           }
         })
         .catch((err) => {
           console.error("Error:", err);
-          document.getElementById("loadingText").textContent =
-            "ไม่สามารถเชื่อมต่อฐานข้อมูลได้ กรุณาลองใหม่อีกครั้ง";
+          document.getElementById("loadingText").textContent = "ไม่พบข้อมูลห้องเรียน หรือลิงก์ไม่ถูกต้อง กรุณาสแกน QR Code ใหม่อีกครั้ง";
           document.getElementById("loadingText").style.color = "#ef4444";
         });
-
-      const viewer = document.getElementById("viewer");
-      viewer.addEventListener("load", () => {
-        if (viewer.model && viewer.model.materials) {
-          originalColors.clear();
-          for (const mat of viewer.model.materials) {
-            originalColors.set(
-              mat.name,
-              mat.pbrMetallicRoughness.baseColorFactor.slice(),
-            );
-          }
-        }
-      });
-
+        
       function resetHighlight() {
         if (viewer && viewer.model && viewer.model.materials) {
           for (const mat of viewer.model.materials) {
@@ -1813,14 +1811,16 @@
 
       function showAppQRCode() {
         qrModal.style.display = "flex";
-        document.getElementById("qrModalTitle").innerHTML =
-          "📲 สแกนเพื่อเปิดแอปพลิเคชัน";
-        document.getElementById("qrModalDesc").innerHTML =
-          "ใช้กล้องมือถือสแกนเพื่อให้นักเรียนเข้าใช้งานบทเรียนในเครื่องของตนเอง";
+        document.getElementById("qrModalTitle").innerHTML = "📲 สแกนเพื่อเข้าห้องเรียน";
+        document.getElementById("qrModalDesc").innerHTML = "ให้นักเรียนสแกน QR Code นี้ เพื่อเข้าสู่เนื้อหาและข้อสอบของห้องเรียนคุณครูครับ";
 
         const qrcodeContainer = document.getElementById("qrcode");
         qrcodeContainer.innerHTML = "";
-        const appUrl = window.location.href.split("?")[0];
+        
+        // 🌟 สร้างลิงก์ไปหน้า index.html พร้อมแนบรหัสครู (?tid=...)
+        const baseUrl = window.location.href.split("?")[0].replace("admin.html", "index.html");
+        const appUrl = `${baseUrl}?tid=${currentUid}`; 
+        
         new QRCode(qrcodeContainer, {
           text: appUrl,
           width: 150,
