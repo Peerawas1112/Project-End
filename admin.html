@@ -1183,8 +1183,8 @@
       }
 
       function loadData() {
-        db.collection("database")
-          .doc("anatomy")
+        db.collection("classrooms")
+          .doc(currentUid)
           .get()
           .then((doc) => {
             if (doc.exists) {
@@ -1231,8 +1231,8 @@
         if (!globalDatabase.settings) globalDatabase.settings = {};
         globalDatabase.settings.global_quiz_limit = num;
 
-        db.collection("database")
-          .doc("anatomy")
+        db.collection("classrooms")
+          .doc(currentUid)
           .set(globalDatabase)
           .then(() => {
             const input = document.getElementById("globalQuizLimitInput");
@@ -1259,8 +1259,8 @@
         if (!globalDatabase.settings) globalDatabase.settings = {};
         globalDatabase.settings.passing_percentage = num;
 
-        db.collection("database")
-          .doc("anatomy")
+        db.collection("classrooms")
+          .doc(currentUid)
           .set(globalDatabase)
           .then(() => {
             const input = document.getElementById("globalPassingInput");
@@ -1283,8 +1283,8 @@
             fetch("anatomy_data.json")
               .then((r) => r.json())
               .then((data) => {
-                db.collection("database")
-                  .doc("anatomy")
+                db.collection("classrooms")
+                  .doc(currentUid)
                   .set(data)
                   .then(() => {
                     alert("สำเร็จ!");
@@ -1658,8 +1658,8 @@
           globalDatabase.settings.timer_enabled = timerEnabled;
           globalDatabase.settings.time_limit = timeLimit;
 
-          db.collection("database")
-            .doc("anatomy")
+          db.collection("classrooms")
+            .doc(currentUid)
             .set(globalDatabase)
             .then(() => {
               showToast("บันทึกการตั้งค่าระบบเรียบร้อยแล้ว!", "success");
@@ -1685,8 +1685,8 @@
           globalDatabase.systems[currentSysIndex].quiz = currentQuizDataRef;
         }
 
-        db.collection("database")
-          .doc("anatomy")
+        db.collection("classrooms")
+          .doc(currentUid)
           .set(globalDatabase)
           .then(() => {
             showToast("บันทึกข้อมูลเรียบร้อยแล้ว!", "success");
@@ -1767,8 +1767,8 @@
                 currentItemIndex,
                 1,
               );
-              db.collection("database")
-                .doc("anatomy")
+              db.collection("classrooms")
+                .doc(currentUid)
                 .set(globalDatabase)
                 .then(() => {
                   currentItemData = null;
@@ -1785,8 +1785,8 @@
             () => {
               globalDatabase.systems[currentSysIndex].quiz = [];
               currentQuizDataRef = globalDatabase.systems[currentSysIndex].quiz;
-              db.collection("database")
-                .doc("anatomy")
+              db.collection("classrooms")
+                .doc(currentUid)
                 .set(globalDatabase)
                 .then(() => {
                   renderSidebar();
@@ -1806,8 +1806,8 @@
           (conf) => {
             if (conf === sysName) {
               globalDatabase.systems.splice(idx, 1);
-              db.collection("database")
-                .doc("anatomy")
+              db.collection("classrooms")
+                .doc(currentUid)
                 .set(globalDatabase)
                 .then(() => renderSidebar());
             } else if (conf !== null && conf.trim() !== "") {
@@ -1823,8 +1823,8 @@
           `พิมพ์ <b>CONFIRM DELETE</b>`,
           (conf) => {
             if (conf === "CONFIRM DELETE") {
-              db.collection("database")
-                .doc("anatomy")
+              db.collection("classrooms")
+                .doc(currentUid)
                 .delete()
                 .then(() => location.reload());
             }
@@ -1840,8 +1840,8 @@
               items: [],
               quiz: [],
             });
-            db.collection("database")
-              .doc("anatomy")
+            db.collection("classrooms")
+              .doc(currentUid)
               .set(globalDatabase)
               .then(() => renderSidebar());
           }
@@ -1856,8 +1856,8 @@
           description: "รายละเอียดบทเรียน...",
           click_parts: [],
         });
-        db.collection("database")
-          .doc("anatomy")
+        db.collection("classrooms")
+          .doc(currentUid)
           .set(globalDatabase)
           .then(() => {
             setSidebarMode("content");
@@ -1920,8 +1920,8 @@
               "📂 ยืนยันการนำเข้าข้อมูล",
               () => {
                 // ถ้ายืนยัน ให้บันทึกข้อมูลทับลง Firebase ทันที
-                db.collection("database")
-                  .doc("anatomy")
+                db.collection("classrooms")
+                  .doc(currentUid)
                   .set(importedData)
                   .then(() => {
                     showToast(
