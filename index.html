@@ -1358,7 +1358,7 @@
           document.getElementById("loadingText").textContent = "ไม่พบข้อมูลห้องเรียน หรือลิงก์ไม่ถูกต้อง กรุณาสแกน QR Code ใหม่อีกครั้ง";
           document.getElementById("loadingText").style.color = "#ef4444";
         });
-        
+
       function resetHighlight() {
         if (viewer && viewer.model && viewer.model.materials) {
           for (const mat of viewer.model.materials) {
@@ -1811,15 +1811,14 @@
 
       function showAppQRCode() {
         qrModal.style.display = "flex";
-        document.getElementById("qrModalTitle").innerHTML = "📲 สแกนเพื่อเข้าห้องเรียน";
-        document.getElementById("qrModalDesc").innerHTML = "ให้นักเรียนสแกน QR Code นี้ เพื่อเข้าสู่เนื้อหาและข้อสอบของห้องเรียนคุณครูครับ";
+        document.getElementById("qrModalTitle").innerHTML = "📲 แชร์แอปให้เพื่อน";
+        document.getElementById("qrModalDesc").innerHTML = "ให้เพื่อนสแกน QR Code นี้ เพื่อเข้าสู่เนื้อหาห้องเรียนเดียวกันครับ";
 
         const qrcodeContainer = document.getElementById("qrcode");
         qrcodeContainer.innerHTML = "";
         
-        // 🌟 สร้างลิงก์ไปหน้า index.html พร้อมแนบรหัสครู (?tid=...)
-        const baseUrl = window.location.href.split("?")[0].replace("admin.html", "index.html");
-        const appUrl = `${baseUrl}?tid=${currentUid}`; 
+        // 🌟 แก้ไขตรงนี้: ใช้ URL ปัจจุบันของหน้าเว็บนักเรียนได้เลย (เพราะมี ?tid ติดมาด้วยแล้ว)
+        const appUrl = window.location.href; 
         
         new QRCode(qrcodeContainer, {
           text: appUrl,
