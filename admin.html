@@ -986,7 +986,10 @@
         const passInput = document.getElementById("devPassInput");
         const errorText = document.getElementById("devPassError");
 
-        if (passInput.value === "122026") {
+        // 🌟 แก้ไขตรงนี้: เปลี่ยนจากการตรวจเช็กค่าคงที่ "122026" ให้มาดึงรหัสผ่าน PIN ล่าสุดของครูคนนี้บนระบบคลาวด์มาตรวจสอบ
+        const correctPass = globalDatabase?.settings?.admin_pin || "122026";
+
+        if (passInput.value === correctPass) {
           isDevMode = true;
           document.body.classList.add("dev-mode");
           const btn = document.getElementById("btnDevMode");
