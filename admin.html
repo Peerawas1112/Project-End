@@ -680,13 +680,8 @@
                   </p>
                 </div>
 
-                <div
-                  class="bg-slate-900/40 p-5 rounded-xl border border-slate-700"
-                >
-                  <label
-                    class="text-xs text-slate-300 mb-3 block uppercase font-bold"
-                    >⏳ เวลาต่อข้อ (วินาที)</label
-                  >
+                <div class="bg-slate-900/40 p-5 rounded-xl border border-slate-700">
+                  <label class="text-xs text-slate-300 mb-3 block uppercase font-bold">⏳ เวลาต่อข้อ (วินาที)</label>
                   <input
                     type="number"
                     id="frmGlobalTimeLimit"
@@ -697,6 +692,19 @@
                   <p class="text-[10px] text-slate-500 mt-3 text-center">
                     กำหนดเวลาถอยหลังในแต่ละข้อ (วินาที)
                   </p>
+                </div> <div class="bg-slate-900/40 p-5 rounded-xl border border-slate-700 md:col-span-2">
+                  <label class="text-xs text-slate-300 mb-3 block uppercase font-bold">🔑 รหัสผ่านล็อกเครื่องมือขั้นสูง (PIN)</label>
+                  <input
+                    type="password"
+                    id="frmAdminPin"
+                    class="input-box text-indigo-400 font-bold text-xl text-center py-3 tracking-[0.2em]"
+                    placeholder="122026"
+                    maxlength="10"
+                  />
+                  <p class="text-[10px] text-slate-500 mt-2 text-center">
+                    กำหนดรหัสผ่านส่วนตัวสำหรับปลดล็อกโหมดแอดมิน/นักพัฒนา เพื่อป้องกันนักเรียนแอบมากดปุ่มแก้ไขระบบ
+                  </p>
+                </div>
                   <div class="bg-slate-900/40 p-5 rounded-xl border border-slate-700 md:col-span-2">
                   <label class="text-xs text-slate-300 mb-3 block uppercase font-bold">🔑 รหัสผ่านล็อกเครื่องมือขั้นสูง (PIN)</label>
                   <input
