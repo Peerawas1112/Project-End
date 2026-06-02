@@ -694,6 +694,19 @@
                   <p class="text-[10px] text-slate-500 mt-3 text-center">
                     กำหนดเวลาถอยหลังในแต่ละข้อ (วินาที)
                   </p>
+                  <div class="bg-slate-900/40 p-5 rounded-xl border border-slate-700 md:col-span-2">
+                  <label class="text-xs text-slate-300 mb-3 block uppercase font-bold">🔑 รหัสผ่านล็อกเครื่องมือขั้นสูง (PIN)</label>
+                  <input
+                    type="password"
+                    id="frmAdminPin"
+                    class="input-box text-indigo-400 font-bold text-xl text-center py-3 tracking-[0.2em]"
+                    placeholder="122026"
+                    maxlength="10"
+                  />
+                  <p class="text-[10px] text-slate-500 mt-2 text-center">
+                    กำหนดรหัสผ่านส่วนตัวสำหรับปลดล็อกโหมดแอดมิน/นักพัฒนา เพื่อป้องกันนักเรียนแอบมากดปุ่มแก้ไขระบบ
+                  </p>
+                </div>
                 </div>
               </div>
             </div>
@@ -966,7 +979,12 @@
         document.getElementById("devPassModal").classList.add("hidden");
       }
       function confirmDevPass() {
-        if (document.getElementById("devPassInput").value === "122026") {
+        const inputPass = document.getElementById("devPassInput").value;
+        
+        // 🌟 ดึงรหัสผ่านส่วนตัวของครูคนนี้ที่เซฟไว้ในฐานข้อมูล (ถ้าไม่มีให้ใช้ 122026 เป็นค่าเริ่มต้น)
+        const correctPass = globalDatabase?.settings?.admin_pin || "122026";
+
+        if (inputPass === correctPass) {
           isDevMode = true;
           document.body.classList.add("dev-mode");
           const btn = document.getElementById("btnDevMode");
@@ -974,6 +992,7 @@
           btn.className =
             "bg-emerald-600/20 hover:bg-emerald-600 text-emerald-400 hover:text-white px-3 py-1.5 rounded-lg text-xs border border-emerald-600/30 flex items-center gap-1 shadow-md";
           closeDevPassModal();
+          showToast("ปลดล็อกสิทธิ์เครื่องมือขั้นสูงสำเร็จ", "success");
         } else {
           alert("❌ รหัสผ่านไม่ถูกต้อง!");
           document.getElementById("devPassInput").value = "";
@@ -1452,7 +1471,7 @@
           globalDatabase.settings?.timer_enabled !== false;
         document.getElementById("frmGlobalTimeLimit").value =
           globalDatabase.settings?.time_limit || 30;
-
+        document.getElementById("frmAdminPin").value = globalDatabase.settings?.admin_pin || "122026";
         renderSidebar();
       }
       function editItem(sIdx, iIdx) {
@@ -1683,20 +1702,19 @@
           let pass = parseInt(
             document.getElementById("frmGlobalPassing").value,
           );
-          let timerEnabled = document.getElementById("frmTimerEnabled").checked;
-          let timeLimit = parseInt(
-            document.getElementById("frmGlobalTimeLimit").value,
-          );
+          let timeLimit = parseInt(document.getElementById("frmGlobalTimeLimit").value);
+          let adminPin = document.getElementById("frmAdminPin").value.trim() || "122026"; // 🌟 ดึงค่ารหัส PIN ใหม่
 
           if (isNaN(limit) || limit < 1) limit = 15;
           if (isNaN(pass) || pass < 1 || pass > 100) pass = 50;
-          if (isNaN(timeLimit) || timeLimit < 5) timeLimit = 30; // ขั้นต่ำ 5 วินาที
-          if (timeLimit > 300) timeLimit = 300; // 🌟 เพิ่มล็อกเวลาสูงสุด 300 วินาที (5 นาที)
+          if (isNaN(timeLimit) || timeLimit < 5) timeLimit = 30;
+          if (timeLimit > 300) timeLimit = 300;
 
           globalDatabase.settings.global_quiz_limit = limit;
           globalDatabase.settings.passing_percentage = pass;
           globalDatabase.settings.timer_enabled = timerEnabled;
           globalDatabase.settings.time_limit = timeLimit;
+          globalDatabase.settings.admin_pin = adminPin;
 
           db.collection("classrooms")
             .doc(currentUid)
