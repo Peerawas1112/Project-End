@@ -16,6 +16,7 @@
       type="module"
       src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"
     ></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
       html,
       body {
@@ -293,6 +294,12 @@
           id="btnSync"
         >
           📥 โหลดข้อมูลเริ่มต้น
+        </button>
+        <button
+          onclick="showAppQRCode()"
+          class="bg-sky-600 hover:bg-sky-500 px-3 py-1.5 rounded-lg text-xs text-white font-bold transition shadow-md flex items-center gap-1"
+        >
+          📲 QR ห้องเรียน
         </button>
         <button
           onclick="addNewSystem()"
@@ -734,6 +741,26 @@
         </div>
       </div>
     </div>
+    <div id="qrModalAdmin" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] flex justify-center items-center p-4 transition-opacity">
+      <div class="bg-slate-900 border border-slate-700 p-6 rounded-2xl shadow-2xl w-full max-w-sm transform scale-100 text-center">
+        <h3 class="text-white text-lg font-bold mb-2">📲 ช่องทางเข้าห้องเรียน</h3>
+        <p class="text-slate-300 text-xs mb-4">ให้นักเรียนสแกน QR Code หรือใช้ลิงก์ด้านล่างเพื่อเข้าสู่ห้องเรียนของคุณครูครับ</p>
+        
+        <div id="qrcodeAdmin" class="flex justify-center bg-white p-4 rounded-xl mx-auto w-max mb-4"></div>
+        
+        <div class="mb-6 bg-slate-950 p-2 rounded-xl border border-slate-800 text-left">
+          <label class="text-[10px] text-slate-400 block mb-1 uppercase font-bold">🔗 ลิงก์สำหรับส่งในแชทเรียนบนคอม</label>
+          <div class="flex gap-2">
+            <input type="text" id="classroomLinkInput" class="input-box text-xs bg-slate-900 border-slate-700 text-slate-300 select-all truncate flex-grow" readonly>
+            <button onclick="copyClassroomLink()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-md whitespace-nowrap">
+              📋 คัดลอก
+            </button>
+          </div>
+        </div>
+
+        <button onclick="closeQrModalAdmin()" class="bg-slate-700 hover:bg-slate-600 px-6 py-2 rounded-lg text-sm text-white transition w-full">ปิดหน้าต่าง</button>
+      </div>
+    </div>
     <div
       id="toastContainer"
       class="fixed top-10 left-1/2 transform -translate-x-1/2 z-[9999] flex flex-col gap-3 pointer-events-none items-center"
@@ -907,13 +934,26 @@
 
       function toggleDevMode() {
         if (isDevMode) {
-          isDevMode = false;
-          document.body.classList.remove("dev-mode");
-          const btn = document.getElementById("btnDevMode");
-          btn.innerHTML = "🔒 โหมดปกติ";
-          btn.className =
-            "bg-slate-600/20 hover:bg-slate-600 text-slate-300 hover:text-white px-3 py-1.5 rounded-lg text-xs border border-slate-600/30 flex items-center gap-1";
+          // 🌟 ครอบด้วยหน้าต่างยืนยันการออกจากโหมดนักพัฒนา เพื่อป้องกันการเผลอกดโดน
+          openCustomConfirm(
+            "คุณต้องการออกจากโหมดนักพัฒนาและกลับสู่โหมดปกติใช่หรือไม่?<br><span class='text-slate-400 text-xs'>(หากกลับไปแล้ว คุณต้องกรอกรหัสผ่านใหม่อีกครั้งเพื่อเข้าโหมดนี้)</span>",
+            "🔒 กลับสู่โหมดปกติ",
+            () => {
+              // ลอจิกการปิดโหมดเดิมของคุณ ย้ายมาทำงานใน Callback นี้แทน
+              isDevMode = false;
+              document.body.classList.remove("dev-mode");
+              const btn = document.getElementById("btnDevMode");
+              btn.innerHTML = "🔒 โหมดปกติ";
+              btn.className =
+                "bg-slate-600/20 hover:bg-slate-600 text-slate-300 hover:text-white px-3 py-1.5 rounded-lg text-xs border border-slate-600/30 flex items-center gap-1";
+              
+              // แจ้งเตือนสั้นๆ ให้ผู้ใช้รู้สถานะ
+              showToast("กลับสู่โหมดปกติเรียบร้อยแล้ว", "success");
+            },
+            false // ใส่ false เพื่อให้ปุ่มยืนยันเป็นสีน้ำเงิน/ปกติ ไม่ใช่สีแดงทำลายล้าง
+          );
         } else {
+          // ส่วนของการเปิดโหมดและกรอกรหัสผ่าน ปล่อยไว้เหมือนเดิมครับ
           document.getElementById("devPassModal").classList.remove("hidden");
           document.getElementById("devPassInput").value = "";
           setTimeout(
@@ -1948,6 +1988,45 @@
 
         // เริ่มอ่านไฟล์เป็นข้อความ
         reader.readAsText(file);
+      }
+     function showAppQRCode() {
+        const qrContainer = document.getElementById("qrcodeAdmin");
+        qrContainer.innerHTML = "";
+        
+        // สร้าง URL สำหรับให้นักเรียนเข้าเรียน พร้อมแนบรหัสครู (?tid=...)
+        const baseUrl = window.location.href.split("?")[0].replace("admin.html", "index.html");
+        const appUrl = `${baseUrl}?tid=${currentUid}`; 
+        
+        // 1. วาด QR Code สำหรับนักเรียนใช้มือถือ
+        new QRCode(qrContainer, {
+          text: appUrl,
+          width: 150,
+          height: 150,
+          colorDark: "#0f172a",
+          colorLight: "#ffffff",
+          correctLevel: QRCode.CorrectLevel.H,
+        });
+        
+        // 2. ส่งลิงก์ URL ไปแสดงในช่อง Input สำหรับนักเรียนใช้คอมพิวเตอร์
+        document.getElementById("classroomLinkInput").value = appUrl;
+        
+        document.getElementById("qrModalAdmin").classList.remove("hidden");
+      }
+
+      // 🌟 ฟังก์ชันใหม่: คัดลอกลิงก์เข้าคลิปบอร์ดอัตโนมัติเมื่อกดปุ่ม
+      function copyClassroomLink() {
+        const linkInput = document.getElementById("classroomLinkInput");
+        navigator.clipboard.writeText(linkInput.value)
+          .then(() => {
+            showToast("คัดลอกลิงก์ห้องเรียนสำเร็จ! นำไปส่งในแชทได้เลย", "success");
+          })
+          .catch(() => {
+            alert("ไม่สามารถคัดลอกอัตโนมัติได้ กรุณาคลิกขวาคัดลอกในช่องข้อความแทนครับ");
+          });
+      }
+
+      function closeQrModalAdmin() {
+        document.getElementById("qrModalAdmin").classList.add("hidden");
       }
     </script>
   </body>
