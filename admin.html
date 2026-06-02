@@ -1692,7 +1692,7 @@
       }
 
       function saveData() {
-        // ถ้ายืนยันการเซฟจากหน้า "ตั้งค่าประเมินผล"
+       // ถ้ายืนยันการเซฟจากหน้า "ตั้งค่าประเมินผล"
         if (editingMode === "settings") {
           if (!globalDatabase.settings) globalDatabase.settings = {};
 
@@ -1702,19 +1702,29 @@
           let pass = parseInt(
             document.getElementById("frmGlobalPassing").value,
           );
-          let timeLimit = parseInt(document.getElementById("frmGlobalTimeLimit").value);
-          let adminPin = document.getElementById("frmAdminPin").value.trim() || "122026"; // 🌟 ดึงค่ารหัส PIN ใหม่
+          
+          // 🛡️ ดึงค่าตัวจับเวลาอย่างปลอดภัย เช็กก่อนว่ามี Element บนจอไหม กันโค้ดพัง
+          let timerEl = document.getElementById("frmTimerEnabled");
+          let timerEnabled = timerEl ? timerEl.checked : true;
+
+          let timeLimit = parseInt(
+            document.getElementById("frmGlobalTimeLimit").value,
+          );
+          
+          // 🛡️ ดึงค่ารหัส PIN ใหม่ของคุณครูอย่างปลอดภัย (ถ้ายังไม่ได้ทำช่องกรอก HTML จะดึงค่าเดิมมาใช้แทน)
+          let adminPinInput = document.getElementById("frmAdminPin");
+          let adminPin = adminPinInput ? adminPinInput.value.trim() : (globalDatabase.settings.admin_pin || "122026");
 
           if (isNaN(limit) || limit < 1) limit = 15;
           if (isNaN(pass) || pass < 1 || pass > 100) pass = 50;
-          if (isNaN(timeLimit) || timeLimit < 5) timeLimit = 30;
-          if (timeLimit > 300) timeLimit = 300;
+          if (isNaN(timeLimit) || timeLimit < 5) timeLimit = 30; // ขั้นต่ำ 5 วินาที
+          if (timeLimit > 300) timeLimit = 300; // ล็อกเวลาสูงสุด 5 นาที
 
           globalDatabase.settings.global_quiz_limit = limit;
           globalDatabase.settings.passing_percentage = pass;
           globalDatabase.settings.timer_enabled = timerEnabled;
           globalDatabase.settings.time_limit = timeLimit;
-          globalDatabase.settings.admin_pin = adminPin;
+          globalDatabase.settings.admin_pin = adminPin; // บันทึกรหัสล็อกแยกประจำห้องเรียนของคุณครู
 
           db.collection("classrooms")
             .doc(currentUid)
@@ -1722,6 +1732,10 @@
             .then(() => {
               showToast("บันทึกการตั้งค่าระบบเรียบร้อยแล้ว!", "success");
               renderSidebar();
+            })
+            .catch((error) => {
+              showToast("❌ เกิดข้อผิดพลาดในการบันทึก", "error");
+              console.error(error);
             });
           return;
         }
