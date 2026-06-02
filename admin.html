@@ -143,7 +143,10 @@
           class="input-box mb-4 text-center text-lg tracking-[0.3em]"
           placeholder="••••"
         />
-        <div class="flex justify-end gap-2">
+        
+        <p id="devPassError" class="text-rose-500 text-xs text-center mb-4 hidden animate-pulse font-medium">
+          ❌ รหัสผ่านไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง
+        </p>
           <button
             onclick="closeDevPassModal()"
             class="px-4 py-2 rounded-lg text-xs text-slate-300 hover:text-white hover:bg-slate-800 transition"
@@ -977,26 +980,30 @@
       }
       function closeDevPassModal() {
         document.getElementById("devPassModal").classList.add("hidden");
+        document.getElementById("devPassError").classList.add("hidden"); // ซ่อนตัวหนังสือแดงเมื่อปิดหน้าต่าง
       }
       function confirmDevPass() {
-        const inputPass = document.getElementById("devPassInput").value;
-        
-        // 🌟 ดึงรหัสผ่านส่วนตัวของครูคนนี้ที่เซฟไว้ในฐานข้อมูล (ถ้าไม่มีให้ใช้ 122026 เป็นค่าเริ่มต้น)
-        const correctPass = globalDatabase?.settings?.admin_pin || "122026";
+        const passInput = document.getElementById("devPassInput");
+        const errorText = document.getElementById("devPassError");
 
-        if (inputPass === correctPass) {
+        if (passInput.value === "122026") {
           isDevMode = true;
           document.body.classList.add("dev-mode");
           const btn = document.getElementById("btnDevMode");
           btn.innerHTML = "🔓 โหมดนักพัฒนา";
           btn.className =
             "bg-emerald-600/20 hover:bg-emerald-600 text-emerald-400 hover:text-white px-3 py-1.5 rounded-lg text-xs border border-emerald-600/30 flex items-center gap-1 shadow-md";
+          
+          errorText.classList.add("hidden"); // ซ่อนเออร์เรอร์ถ้ากรอกถูก
           closeDevPassModal();
-          showToast("ปลดล็อกสิทธิ์เครื่องมือขั้นสูงสำเร็จ", "success");
+          showToast("ปลดล็อกสิทธิ์นักพัฒนาสำเร็จ", "success"); // แจ้งเตือนสำเร็จสีเขียวด้านบน
         } else {
-          alert("❌ รหัสผ่านไม่ถูกต้อง!");
-          document.getElementById("devPassInput").value = "";
-          document.getElementById("devPassInput").focus();
+          // ❌ แทนที่คำสั่ง alert() ดั้งเดิมด้วยระบบดีไซน์ของเรา
+          errorText.classList.remove("hidden"); // สั่งโชว์ตัวหนังสือสีแดงในหน้าต่าง
+          showToast("รหัสผ่านไม่ถูกต้อง!", "error"); // ยิงแถบแจ้งเตือนสีแดงเรืองแสงลงมาจากขอบจอบน
+          
+          passInput.value = "";
+          passInput.focus();
         }
       }
       document
