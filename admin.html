@@ -1417,7 +1417,11 @@
                   editingMode === "item" &&
                   currentSysIndex === sIdx &&
                   currentItemIndex === iIdx;
-                html += `<button onclick="editItem(${sIdx}, ${iIdx})" class="sidebar-item text-left px-3 py-2 rounded-lg text-xs transition border border-transparent ${isActive ? "active" : "bg-slate-900/50 text-slate-300 hover:bg-slate-700"}">📄 ${item.name}</button>`;
+                
+                // 🔴 ข้อ 1: เช็กสถานะถ้าเป็นบทเรียนใหม่ ให้แสดงป้ายกำกับสีเขียวเล็กๆ ด้านหลังชื่อบทเรียน
+                let itemBadgeHtml = item.isNew ? `<span class="bg-emerald-500 text-white px-1 py-0.5 rounded-full ml-1 text-[8px] font-bold shadow-sm">ใหม่ ✨</span>` : "";
+
+                html += `<button onclick="editItem(${sIdx}, ${iIdx})" class="sidebar-item text-left px-3 py-2 rounded-lg text-xs transition border border-transparent ${isActive ? "active" : "bg-slate-900/50 text-slate-300 hover:bg-slate-700"}">📄 ${item.name} ${itemBadgeHtml}</button>`;
               });
             } else {
               html += `<p class="text-slate-600 text-[10px] italic px-2 py-1">ยังไม่มีบทเรียน</p>`;
@@ -1601,8 +1605,16 @@
           explanation: "",
           active: true,
         });
-        renderQuiz();
-        renderSidebar();
+
+        // บันทึกลง Cloud ทันทีหลังจากเพิ่มข้อสอบใหม่ เข้าเงื่อนไขข้อ 2
+        db.collection("classrooms")
+          .doc(currentUid)
+          .set(globalDatabase)
+          .then(() => {
+            showToast("➕ เพิ่มข้อสอบใหม่เรียบร้อยแล้ว!", "success"); // แจ้งเตือนสีเขียวด้านบน
+            renderQuiz();
+            renderSidebar();
+          });
       }
 
       // 🌟 ระบบเรียงลำดับและล็อกช่องพิมพ์สำหรับข้อที่ถูกปิดใช้งาน 🌟
@@ -1746,13 +1758,28 @@
         if (currentSysIndex === null) return;
 
         if (editingMode === "item") {
-          currentItemData.name = document.getElementById("frmName").value;
-          currentItemData.model_file =
-            document.getElementById("frmModelPath").value;
-          currentItemData.description =
-            document.getElementById("frmDesc").innerHTML;
-          globalDatabase.systems[currentSysIndex].items[currentItemIndex] =
-            currentItemData;
+          const inputName = document.getElementById("frmName").value.trim();
+
+          // 🔴 ข้อ 4: กันบันทึกข้อมูลว่าง
+          if (inputName === "") {
+            showToast("ชื่อบทเรียนห้ามเว้นว่าง!", "error");
+            document.getElementById("frmName").focus();
+            return; // หยุดการเซฟ
+          }
+
+          // 🔴 ข้อ 3: เช็กชื่อบทเรียนซ้ำในหมวดเดียวกัน (โดยไม่นับตัวเอง)
+          const isDuplicate = globalDatabase.systems[currentSysIndex].items.some(
+            (item, idx) => item.name === inputName && idx !== currentItemIndex
+          );
+          if (isDuplicate) {
+            showToast("ชื่อบทเรียนซ้ำกับที่มีอยู่แล้วในหมวดนี้!", "error");
+            return; // หยุดการเซฟ
+          }
+
+          currentItemData.name = inputName;
+          currentItemData.model_file = document.getElementById("frmModelPath").value;
+          currentItemData.description = document.getElementById("frmDesc").innerHTML;
+          globalDatabase.systems[currentSysIndex].items[currentItemIndex] = currentItemData;
         }
 
         // 🌟 ส่วนที่หายไป: คำสั่งเซฟข้อสอบเมื่อแก้ไขหน้าคลังข้อสอบ
@@ -1820,14 +1847,22 @@
         );
       }
 
-      function deleteQuizPart(idx) {
+     function deleteQuizPart(idx) {
         openCustomConfirm(
           "ลบ <b>'ข้อสอบ'</b> ข้อนี้ทิ้งใช่หรือไม่?",
           "ลบข้อสอบ",
           () => {
             currentQuizDataRef.splice(idx, 1);
-            renderQuiz();
-            renderSidebar();
+            
+            // บันทึกลง Cloud ทันทีหลังกดยืนยันการลบ เข้าเงื่อนไขข้อ 2
+            db.collection("classrooms")
+              .doc(currentUid)
+              .set(globalDatabase)
+              .then(() => {
+                showToast("🗑️ ลบข้อสอบข้อนี้เรียบร้อยแล้ว!", "error"); // แจ้งเตือนสีแดงด้านบน
+                renderQuiz();
+                renderSidebar();
+              });
           },
         );
       }
@@ -1846,6 +1881,7 @@
                 .doc(currentUid)
                 .set(globalDatabase)
                 .then(() => {
+                  showToast("🗑️ ลบบทเรียนเรียบร้อยแล้ว!", "error"); // 🔴 ข้อ 2: เพิ่มแจ้งเตือนสีแดงเมื่อลบสำเร็จ
                   currentItemData = null;
                   currentSysIndex = null;
                   currentItemIndex = null;
@@ -1864,6 +1900,7 @@
                 .doc(currentUid)
                 .set(globalDatabase)
                 .then(() => {
+                  showToast("🗑️ ล้างคลังข้อสอบทั้งหมดเรียบร้อยแล้ว!", "error"); // 🔴 เพิ่มแจ้งเตือนเมื่อล้างข้อสอบสำเร็จ
                   renderSidebar();
                   renderQuiz();
                 });
@@ -1884,9 +1921,12 @@
               db.collection("classrooms")
                 .doc(currentUid)
                 .set(globalDatabase)
-                .then(() => renderSidebar());
+                .then(() => {
+                  showToast("ลบหมวดหมู่เรียบร้อยแล้ว!", "error"); // 🔴 เพิ่มบรรทัดนี้ (ใช้สีแดงให้รู้ว่าลบ)
+                  renderSidebar();
+                });
             } else if (conf !== null && conf.trim() !== "") {
-              alert("พิมพ์ชื่อไม่ถูกต้อง");
+              showToast("พิมพ์ชื่อไม่ถูกต้อง ยกเลิกการลบ", "warning");
             }
           },
         );
@@ -1908,38 +1948,62 @@
       }
       function addNewSystem() {
         openCustomPrompt("✨ เพิ่มหมวดหมู่", "ชื่อหมวดหมู่...", null, (n) => {
-          if (n && n.trim() !== "") {
-            if (!globalDatabase) globalDatabase = { systems: [] };
-            globalDatabase.systems.push({
-              category: n.trim(),
-              items: [],
-              quiz: [],
-            });
-            db.collection("classrooms")
-              .doc(currentUid)
-              .set(globalDatabase)
-              .then(() => renderSidebar());
+          const newName = n ? n.trim() : "";
+
+          // 🔴 ข้อ 4: กันข้อมูลว่าง
+          if (newName === "") {
+            showToast("กรุณากรอกชื่อหมวดหมู่ ห้ามเว้นว่าง!", "error");
+            return;
           }
+
+          if (!globalDatabase) globalDatabase = { systems: [] };
+
+          // 🔴 ข้อ 3: เช็กชื่อหมวดหมู่ซ้ำ
+          const isDuplicate = globalDatabase.systems.some(sys => sys.category === newName);
+          if (isDuplicate) {
+            showToast("ชื่อหมวดหมู่นี้มีอยู่แล้ว กรุณาใช้ชื่ออื่น!", "error");
+            return;
+          }
+
+          // 🔴 ข้อ 1: ติดสถานะ isNew = true สำหรับของที่เพิ่งเพิ่มใหม่
+          globalDatabase.systems.push({
+            category: newName,
+            items: [],
+            quiz: [],
+            isNew: true 
+          });
+
+          db.collection("classrooms")
+            .doc(currentUid)
+            .set(globalDatabase)
+            .then(() => {
+              showToast("เพิ่มหมวดหมู่ใหม่สำเร็จ!", "success"); // 🔴 ข้อ 2: แจ้งเตือนเมื่อเพิ่มสำเร็จ
+              renderSidebar();
+            });
         });
       }
       function addNewItemToSys(sysIdx) {
         if (!globalDatabase.systems[sysIdx].items)
           globalDatabase.systems[sysIdx].items = [];
+        
+        // 🔴 ข้อ 1: ใส่สถานะ isNew: true ให้กับบทเรียนที่สร้างใหม่
         globalDatabase.systems[sysIdx].items.push({
           name: "บทเรียนใหม่",
           model_file: "",
           description: "รายละเอียดบทเรียน...",
           click_parts: [],
+          isNew: true 
         });
+        
         db.collection("classrooms")
           .doc(currentUid)
           .set(globalDatabase)
           .then(() => {
+            showToast("เพิ่มบทเรียนใหม่เรียบร้อยแล้ว!", "success"); // 🔴 ข้อ 2: แจ้งเตือนเมื่อเพิ่มบทเรียนสำเร็จ
             setSidebarMode("content");
             editItem(sysIdx, globalDatabase.systems[sysIdx].items.length - 1);
           });
       }
-
       document.addEventListener("paste", function (e) {
         if (e.target.isContentEditable) {
           e.preventDefault();
