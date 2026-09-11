@@ -1320,51 +1320,69 @@
         docRef = db.collection("database").doc("anatomy");
       }
 
-      // 🌟 3. เริ่มดึงข้อมูล
-      docRef
-        .get()
-        .then((docSnap) => {
-          if (docSnap.exists) {
-            const dbData = docSnap.data();
-            data = dbData.systems || [];
+      // 🌟 3. เริ่มดึงข้อมูล (พร้อมระบบโหลดซ้ำอัตโนมัติ)
+      let retryCount = 0;
+      const maxRetries = 3;
 
-            // ... (โค้ดดึง settings และ loadSystem ปล่อยไว้เหมือนเดิมครับ) ...
+      function fetchClassroomData() {
+        docRef
+          .get()
+          .then((docSnap) => {
+            if (docSnap.exists) {
+              const dbData = docSnap.data();
+              data = dbData.systems || [];
 
-            if (dbData.settings && dbData.settings.global_quiz_limit) {
-              globalQuizLimit = parseInt(dbData.settings.global_quiz_limit);
+              if (dbData.settings && dbData.settings.global_quiz_limit) {
+                globalQuizLimit = parseInt(dbData.settings.global_quiz_limit);
+              }
+              if (dbData.settings && dbData.settings.passing_percentage) {
+                globalPassingPercentage = parseInt(
+                  dbData.settings.passing_percentage,
+                );
+              }
+              if (dbData.settings) {
+                timerEnabled = dbData.settings.timer_enabled !== false;
+                globalTimeLimit = parseInt(dbData.settings.time_limit) || 30;
+              }
+
+              renderTabs();
+              renderQuizMenu();
+              if (data.length > 0) loadSystem(0);
+
+              document.getElementById("loadingText").textContent =
+                "ระบบพร้อมใช้งานแล้ว";
+              document.getElementById("loadingText").style.color = "#4ade80";
+              document.getElementById("btnLearn").disabled = false;
+              document.getElementById("btnQuizMenu").disabled = false;
+            } else {
+              // ถ้ารหัสครูผิด หรือครูยังไม่เคยบันทึกข้อมูล
+              throw new Error("ไม่พบข้อมูลห้องเรียนนี้ครับ");
             }
-            if (dbData.settings && dbData.settings.passing_percentage) {
-              globalPassingPercentage = parseInt(
-                dbData.settings.passing_percentage,
-              );
+          })
+          .catch((err) => {
+            console.error("Error:", err);
+            
+            // ถ้ายอดการลองซ้ำยังไม่เกินที่กำหนด ให้ลองใหม่
+            if (retryCount < maxRetries) {
+              retryCount++;
+              document.getElementById("loadingText").innerHTML = 
+                `กำลังเชื่อมต่อข้อมูล... (ลองครั้งที่ ${retryCount}/${maxRetries})<br>` +
+                `<span style="font-size: 0.8rem; color: #94a3b8;">หากอินเทอร์เน็ตช้า ระบบจะพยายามเชื่อมต่ออัตโนมัติ</span>`;
+              
+              // หน่วงเวลา 1.5 วินาทีแล้วเรียกฟังก์ชันตัวเองซ้ำ
+              setTimeout(fetchClassroomData, 1500); 
+            } else {
+              // หมดโควต้าลองซ้ำแล้ว ค่อยโชว์ปุ่มให้ผู้ใช้กดเอง
+              document.getElementById("loadingText").innerHTML =
+                "การเชื่อมต่อเครือข่ายล่าช้า หรือลิงก์ไม่ถูกต้อง<br>" + 
+                "<button onclick='window.location.reload()' style='margin-top: 15px; background: #ef4444; color: white; border: none; border-radius: 12px; padding: 10px 20px; font-family: Kanit; cursor: pointer; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);'>🔄 โหลดข้อมูลใหม่อีกครั้ง</button>";
+              document.getElementById("loadingText").style.color = "#ef4444";
             }
-            if (dbData.settings) {
-              timerEnabled = dbData.settings.timer_enabled !== false;
-              globalTimeLimit = parseInt(dbData.settings.time_limit) || 30;
-            }
+          });
+      }
 
-            renderTabs();
-            renderQuizMenu();
-            if (data.length > 0) loadSystem(0);
-
-            document.getElementById("loadingText").textContent =
-              "ระบบพร้อมใช้งานแล้ว";
-            document.getElementById("loadingText").style.color = "#4ade80";
-            document.getElementById("btnLearn").disabled = false;
-            document.getElementById("btnQuizMenu").disabled = false;
-          } else {
-            // ถ้ารหัสครูผิด หรือครูยังไม่เคยบันทึกข้อมูล
-            throw new Error("ไม่พบข้อมูลห้องเรียนนี้ครับ");
-          }
-        })
-        .catch((err) => {
-  console.error("Error:", err);
-  // เปลี่ยน textContent เป็น innerHTML เพื่อให้ใส่ปุ่ม HTML ลงไปได้
-  document.getElementById("loadingText").innerHTML =
-    "การเชื่อมต่อเครือข่ายล่าช้า หรือลิงก์ไม่ถูกต้อง<br>" + 
-    "<button onclick='window.location.reload()' style='margin-top: 15px; background: #ef4444; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);'>🔄 โหลดข้อมูลใหม่อีกครั้ง</button>";
-  document.getElementById("loadingText").style.color = "#ef4444";
-});
+      // เรียกใช้งานฟังก์ชันครั้งแรกทันทีที่เปิดเว็บ
+      fetchClassroomData();
 
       function resetHighlight() {
         if (viewer && viewer.model && viewer.model.materials) {
