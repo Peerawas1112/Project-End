@@ -232,15 +232,12 @@
         background: rgba(255, 255, 255, 0.15);
       }
 
-      /* 🌟 แอนิเมชันคลื่นแสงเบาๆ เพื่อบอกให้รู้ว่ายังไม่ได้เปิดข้อมูล */
-      .info-unopened {
-        border-color: rgba(255, 255, 255, 0.5) !important;
-        animation: soft-pulse 2.5s infinite;
-      }
-      @keyframes soft-pulse {
-        0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.25); }
-        70% { box-shadow: 0 0 0 6px rgba(255, 255, 255, 0); }
-        100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+      /* 🌟 ไฮไลต์ปุ่มเมื่อกดเปิดกล่องข้อมูลเนื้อหาอยู่ */
+      .info-active {
+        background: var(--primary) !important;
+        border-color: var(--primary) !important;
+        color: white !important;
+        box-shadow: 0 4px 15px rgba(255, 71, 87, 0.4);
       }
 
       .tabs {
@@ -1477,21 +1474,21 @@
         });
       }
 
-      // 🌟 แก้ไขฟังก์ชัน toggleInfoBox เพื่อควบคุมคลาส info-unopened
+      // 🌟 แก้ไขฟังก์ชัน toggleInfoBox เพื่อควบคุมคลาส info-active (ไฮไลต์)
       function toggleInfoBox() {
         const panel = document.getElementById("mainInfoPanel");
         const btnInfo = document.getElementById("btnInfo");
         
-        if (panel.style.display === "none") {
+        if (panel.style.display === "none" || panel.style.display === "") {
           panel.style.display = "block";
-          if(btnInfo) btnInfo.classList.remove("info-unopened");
+          if(btnInfo) btnInfo.classList.add("info-active");
         } else {
           panel.style.display = "none";
-          if(btnInfo) btnInfo.classList.add("info-unopened");
+          if(btnInfo) btnInfo.classList.remove("info-active");
         }
       }
 
-      // 🌟 เพิ่มฟังก์ชันนี้: สั่งให้แอป "จดจำสีต้นฉบับ" ทันทีที่โหลดโมเดล 3D เสร็จ
+      // 🌟 สั่งให้แอป "จดจำสีต้นฉบับ" ทันทีที่โหลดโมเดล 3D เสร็จ
       viewer.addEventListener("load", () => {
         originalColors.clear();
         if (viewer.model && viewer.model.materials) {
@@ -1670,7 +1667,7 @@
       }
 
       function loadModelData(dataObj) {
-        // 🌟 เพิ่มโค้ดส่วนนี้: สั่งตัดเสียงทันทีเมื่อมีการกดเปลี่ยนบทเรียน
+        // สั่งตัดเสียงทันทีเมื่อมีการกดเปลี่ยนบทเรียน
         if ("speechSynthesis" in window) {
           speechSynthesis.cancel();
         }
@@ -1681,15 +1678,14 @@
           if (btn.dataset.originalText)
             btn.innerHTML = btn.dataset.originalText;
         });
-        // 🌟 สิ้นสุดโค้ดที่เพิ่ม
 
         resetHighlight();
         resetCamera();
         
-        // 🌟 ตั้งค่าให้กล่องข้อมูลเปิดอัตโนมัติ และปิดแอนิเมชันปุ่ม
+        // 🌟 ตั้งค่าให้กล่องข้อมูลเปิดอัตโนมัติ และแสดงไฮไลต์ปุ่มทันทีที่โหลดโมเดลใหม่
         document.getElementById("mainInfoPanel").style.display = "block";
         const btnInfo = document.getElementById("btnInfo");
-        if(btnInfo) btnInfo.classList.remove("info-unopened");
+        if(btnInfo) btnInfo.classList.add("info-active");
         
         loadShell.style.display = "block";
         loadBar.style.width = "10%";
