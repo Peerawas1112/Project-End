@@ -1328,14 +1328,15 @@
       const urlParams = new URLSearchParams(window.location.search);
       const tid = urlParams.get("tid");
 
-      // 🌟 2. เลือกว่าจะดึงฐานข้อมูลก้อนไหน
+      // 🌟 2. เลือกว่าจะดึงฐานข้อมูลก้อนไหน (ล็อกเป้าเป็นข้อมูลของคุณเสมอ)
+      const myUID = "ts5ccrZysnfHpjedg8knvcyDdnt1"; // รหัสของคุณ
       let docRef;
       if (tid) {
         // ถ้าสแกน QR Code ของครูมา ให้ดึงข้อมูลห้องเรียนของครูคนนั้น
         docRef = db.collection("classrooms").doc(tid);
       } else {
-        // ถ้าเข้าเว็บตรงๆ (ไม่มีรหัสครู) ให้ดึงข้อมูลดั้งเดิมป้องกันเว็บพัง
-        docRef = db.collection("database").doc("anatomy");
+        // ถ้าเข้าเว็บตรงๆ (ไม่มีรหัสครู) ให้บังคับดึงข้อมูลจาก UID ของคุณโดยตรง!
+        docRef = db.collection("classrooms").doc(myUID);
       }
 
       // 🌟 3. เริ่มดึงข้อมูล (พร้อมระบบโหลดซ้ำอัตโนมัติ)
@@ -1862,6 +1863,7 @@
         }
       });
 
+      // 🌟 สร้างฟังก์ชันให้ดึง URL ปัจจุบันและบังคับห้อย ?tid= ของอาจารย์เสมอ
       function showQRCode() {
         qrModal.style.display = "flex";
         document.getElementById("qrModalTitle").innerHTML =
@@ -1896,8 +1898,12 @@
         const qrcodeContainer = document.getElementById("qrcode");
         qrcodeContainer.innerHTML = "";
 
-        // 🌟 แก้ไขตรงนี้: ใช้ URL ปัจจุบันของหน้าเว็บนักเรียนได้เลย (เพราะมี ?tid ติดมาด้วยแล้ว)
-        const appUrl = window.location.href;
+        // 🌟 แก้ไขตรงนี้: บังคับยัด ?tid=ts5ccrZysnfHpjedg8knvcyDdnt1 ลงใน URL ที่จะเอาไปสร้าง QR Code ทันที
+        let currentUrl = new URL(window.location.href);
+        if (!currentUrl.searchParams.has("tid")) {
+          currentUrl.searchParams.set("tid", "ts5ccrZysnfHpjedg8knvcyDdnt1");
+        }
+        const appUrl = currentUrl.toString();
 
         new QRCode(qrcodeContainer, {
           text: appUrl,
