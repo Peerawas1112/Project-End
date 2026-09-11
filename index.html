@@ -1358,11 +1358,13 @@
           }
         })
         .catch((err) => {
-          console.error("Error:", err);
-          document.getElementById("loadingText").textContent =
-            "ไม่พบข้อมูลห้องเรียน หรือลิงก์ไม่ถูกต้อง กรุณาสแกน QR Code ใหม่อีกครั้ง";
-          document.getElementById("loadingText").style.color = "#ef4444";
-        });
+  console.error("Error:", err);
+  // เปลี่ยน textContent เป็น innerHTML เพื่อให้ใส่ปุ่ม HTML ลงไปได้
+  document.getElementById("loadingText").innerHTML =
+    "การเชื่อมต่อเครือข่ายล่าช้า หรือลิงก์ไม่ถูกต้อง<br>" + 
+    "<button onclick='window.location.reload()' style='margin-top: 15px; background: #ef4444; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);'>🔄 โหลดข้อมูลใหม่อีกครั้ง</button>";
+  document.getElementById("loadingText").style.color = "#ef4444";
+});
 
       function resetHighlight() {
         if (viewer && viewer.model && viewer.model.materials) {
