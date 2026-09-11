@@ -232,6 +232,17 @@
         background: rgba(255, 255, 255, 0.15);
       }
 
+      /* 🌟 แอนิเมชันคลื่นแสงเบาๆ เพื่อบอกให้รู้ว่ายังไม่ได้เปิดข้อมูล */
+      .info-unopened {
+        border-color: rgba(255, 255, 255, 0.5) !important;
+        animation: soft-pulse 2.5s infinite;
+      }
+      @keyframes soft-pulse {
+        0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.25); }
+        70% { box-shadow: 0 0 0 6px rgba(255, 255, 255, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+      }
+
       .tabs {
         top: 80px;
         left: 50%;
@@ -581,21 +592,6 @@
           font-size: 1.2rem;
           background: rgba(15, 23, 42, 0.8);
         }
-        
-        /* 🌟 ปุ่มข้อมูลกระพริบให้เห็นชัดเจน */
-        .header-btn:first-child {
-          background: rgba(59, 130, 246, 0.5); /* พื้นหลังสีฟ้าอ่อนๆ */
-          border: 1px solid #3b82f6;
-          animation: pulse-hint 2s infinite;
-        }
-        @keyframes pulse-hint {
-          0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.6); }
-          70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
-          100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
-        }
-        .header-btn:hover {
-          background: rgba(255, 255, 255, 0.15);
-        }
 
         .btn-text {
           display: none;
@@ -632,7 +628,6 @@
           justify-content: flex-start;
         }
         
-        /* 🌟 แก้ไขตรงนี้: เปิดโชว์ Scrollbar ใต้เมนูให้รู้ว่าปัดได้ */
         .menu::-webkit-scrollbar {
           height: 4px; /* เปิดให้เห็นแถบเลื่อนบางๆ */
         }
@@ -1178,7 +1173,8 @@
         >BioLens AR</span
       >
       <div class="header-buttons">
-        <button onclick="toggleInfoBox()" class="header-btn">
+        <!-- 🌟 เพิ่ม id="btnInfo" ลงในปุ่มข้อมูล -->
+        <button id="btnInfo" onclick="toggleInfoBox()" class="header-btn">
           ℹ️<span class="btn-text">ข้อมูล</span>
         </button>
         <button onclick="resetCamera()" class="header-btn">
@@ -1481,9 +1477,18 @@
         });
       }
 
+      // 🌟 แก้ไขฟังก์ชัน toggleInfoBox เพื่อควบคุมคลาส info-unopened
       function toggleInfoBox() {
         const panel = document.getElementById("mainInfoPanel");
-        panel.style.display = panel.style.display === "none" ? "block" : "none";
+        const btnInfo = document.getElementById("btnInfo");
+        
+        if (panel.style.display === "none") {
+          panel.style.display = "block";
+          if(btnInfo) btnInfo.classList.remove("info-unopened");
+        } else {
+          panel.style.display = "none";
+          if(btnInfo) btnInfo.classList.add("info-unopened");
+        }
       }
 
       // 🌟 เพิ่มฟังก์ชันนี้: สั่งให้แอป "จดจำสีต้นฉบับ" ทันทีที่โหลดโมเดล 3D เสร็จ
@@ -1680,7 +1685,12 @@
 
         resetHighlight();
         resetCamera();
+        
+        // 🌟 ตั้งค่าให้กล่องข้อมูลเปิดอัตโนมัติ และปิดแอนิเมชันปุ่ม
         document.getElementById("mainInfoPanel").style.display = "block";
+        const btnInfo = document.getElementById("btnInfo");
+        if(btnInfo) btnInfo.classList.remove("info-unopened");
+        
         loadShell.style.display = "block";
         loadBar.style.width = "10%";
         viewer.src = "";
