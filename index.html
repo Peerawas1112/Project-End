@@ -232,6 +232,7 @@
         background: rgba(255, 255, 255, 0.15);
       }
 
+      /* 🌟 ไฮไลต์ปุ่มเหมือนปุ่ม "แสดง UI" (ขอบแดง ตัวหนังสือแดง พื้นหลังคงเดิม) */
       .info-active {
         border-color: var(--primary) !important;
         color: var(--primary) !important;
@@ -623,7 +624,7 @@
         }
         
         .menu::-webkit-scrollbar {
-          height: 4px; 
+          height: 4px; /* เปิดให้เห็นแถบเลื่อนบางๆ */
         }
         .menu::-webkit-scrollbar-track {
           background: rgba(255, 255, 255, 0.05);
@@ -1167,6 +1168,7 @@
         >BioLens AR</span
       >
       <div class="header-buttons">
+        <!-- 🌟 เพิ่ม id="btnInfo" ลงในปุ่มข้อมูล -->
         <button id="btnInfo" onclick="toggleInfoBox()" class="header-btn">
           ℹ️<span class="btn-text">ข้อมูล</span>
         </button>
@@ -1318,25 +1320,32 @@
       firebase.initializeApp(firebaseConfig);
       const db = firebase.firestore();
 
-      // 🌟 ปิดการจำข้อมูลออฟไลน์ เพื่อแก้ปัญหาเบราว์เซอร์ LINE บน iOS ค้างหน้าโหลดสีเหลือง 🌟
-      // db.enablePersistence().catch(function (err) {
-      //   console.log("Firebase Cache Error: ", err);
-      // });
+      db.enablePersistence().catch(function (err) {
+        console.log("Firebase Cache Error: ", err);
+      });
 
-      // 🌟 1. บังคับล็อกเป้าฐานข้อมูลเป็นของคุณคนเดียวแบบตายตัว!
-      const myUID = "ts5ccrZysnfHpjedg8knvcyDdnt1";
+      // 🌟 1. อ่านค่ารหัสครู (tid) จาก URL ที่นักเรียนสแกนมา
+      const urlParams = new URLSearchParams(window.location.search);
+      const tid = urlParams.get("tid");
 
-      // 🌟 2. ดึงข้อมูลจากรหัสนี้เสมอ (ไม่ต้องสนใจว่าลิงก์จะมี ?tid หรือไม่)
-      const docRef = db.collection("classrooms").doc(myUID);
+      // 🌟 2. เลือกว่าจะดึงฐานข้อมูลก้อนไหน (ล็อกเป้าเป็นข้อมูลของคุณเสมอ)
+      const myUID = "ts5ccrZysnfHpjedg8knvcyDdnt1"; // รหัสของคุณ
+      let docRef;
+      if (tid) {
+        // ถ้าสแกน QR Code ของครูมา ให้ดึงข้อมูลห้องเรียนของครูคนนั้น
+        docRef = db.collection("classrooms").doc(tid);
+      } else {
+        // ถ้าเข้าเว็บตรงๆ (ไม่มีรหัสครู) ให้บังคับดึงข้อมูลจาก UID ของคุณโดยตรง!
+        docRef = db.collection("classrooms").doc(myUID);
+      }
 
       // 🌟 3. เริ่มดึงข้อมูล (พร้อมระบบโหลดซ้ำอัตโนมัติ)
       let retryCount = 0;
       const maxRetries = 3;
 
       function fetchClassroomData() {
-        // 🌟 บังคับดึงข้อมูลจากเซิร์ฟเวอร์โดยตรง (ข้าม Cache) เพื่อแก้ปัญหา iOS ค้างหน้าสีเหลือง
         docRef
-          .get({ source: 'server' })
+          .get()
           .then((docSnap) => {
             if (docSnap.exists) {
               const dbData = docSnap.data();
@@ -1365,6 +1374,7 @@
               document.getElementById("btnLearn").disabled = false;
               document.getElementById("btnQuizMenu").disabled = false;
             } else {
+              // ถ้ารหัสครูผิด หรือครูยังไม่เคยบันทึกข้อมูล
               throw new Error("ไม่พบข้อมูลห้องเรียนนี้ครับ");
             }
           })
@@ -1378,6 +1388,7 @@
                 `กำลังเชื่อมต่อข้อมูล... (ลองครั้งที่ ${retryCount}/${maxRetries})<br>` +
                 `<span style="font-size: 0.8rem; color: #94a3b8;">หากอินเทอร์เน็ตช้า ระบบจะพยายามเชื่อมต่ออัตโนมัติ</span>`;
               
+              // หน่วงเวลา 1.5 วินาทีแล้วเรียกฟังก์ชันตัวเองซ้ำ
               setTimeout(fetchClassroomData, 1500); 
             } else {
               // หมดโควต้าลองซ้ำแล้ว ค่อยโชว์ปุ่มให้ผู้ใช้กดเอง
@@ -1462,6 +1473,7 @@
         });
       }
 
+      // 🌟 แก้ไขฟังก์ชัน toggleInfoBox เพื่อควบคุมคลาส info-active (ไฮไลต์)
       function toggleInfoBox() {
         const panel = document.getElementById("mainInfoPanel");
         const btnInfo = document.getElementById("btnInfo");
@@ -1475,23 +1487,26 @@
         }
       }
 
+      // 🌟 สั่งให้แอป "จดจำสีต้นฉบับ" ทันทีที่โหลดโมเดล 3D เสร็จ
       viewer.addEventListener("load", () => {
         originalColors.clear();
         if (viewer.model && viewer.model.materials) {
           viewer.model.materials.forEach((mat) => {
+            // เช็กว่ามี Material และมีค่าสี Base Color อยู่
             if (
               mat.pbrMetallicRoughness &&
               mat.pbrMetallicRoughness.baseColorFactor
             ) {
               originalColors.set(
                 mat.name,
-                mat.pbrMetallicRoughness.baseColorFactor.slice(), 
+                mat.pbrMetallicRoughness.baseColorFactor.slice(), // คัดลอกสีดั้งเดิมเก็บไว้
               );
             }
           });
         }
       });
 
+      // (ของเดิม) โค้ดโหลดหลอดสีแดง
       viewer.addEventListener("progress", (e) => {
         loadShell.style.display = "block";
         loadBar.style.width = e.detail.totalProgress * 100 + "%";
@@ -1651,10 +1666,12 @@
       }
 
       function loadModelData(dataObj) {
+        // สั่งตัดเสียงทันทีเมื่อมีการกดเปลี่ยนบทเรียน
         if ("speechSynthesis" in window) {
           speechSynthesis.cancel();
         }
         isSpeaking = false;
+        // รีเซ็ตข้อความปุ่มเสียงให้กลับเป็นค่าเริ่มต้น
         const voiceBtns = document.querySelectorAll('[onclick^="speakText"]');
         voiceBtns.forEach((btn) => {
           if (btn.dataset.originalText)
@@ -1664,6 +1681,7 @@
         resetHighlight();
         resetCamera();
         
+        // 🌟 ตั้งค่าให้กล่องข้อมูลเปิดอัตโนมัติ และแสดงไฮไลต์ปุ่มทันทีที่โหลดโมเดลใหม่
         document.getElementById("mainInfoPanel").style.display = "block";
         const btnInfo = document.getElementById("btnInfo");
         if(btnInfo) btnInfo.classList.add("info-active");
@@ -1845,6 +1863,7 @@
         }
       });
 
+      // 🌟 สร้างฟังก์ชันให้ดึง URL ปัจจุบันและบังคับห้อย ?tid= ของอาจารย์เสมอ
       function showQRCode() {
         qrModal.style.display = "flex";
         document.getElementById("qrModalTitle").innerHTML =
@@ -1879,9 +1898,11 @@
         const qrcodeContainer = document.getElementById("qrcode");
         qrcodeContainer.innerHTML = "";
 
-        // 🌟 บังคับใส่ ?tid= ของคุณเสมอเวลาแชร์ QR Code ให้เพื่อน
+        // 🌟 แก้ไขตรงนี้: บังคับยัด ?tid=ts5ccrZysnfHpjedg8knvcyDdnt1 ลงใน URL ที่จะเอาไปสร้าง QR Code ทันที
         let currentUrl = new URL(window.location.href);
-        currentUrl.searchParams.set("tid", "ts5ccrZysnfHpjedg8knvcyDdnt1");
+        if (!currentUrl.searchParams.has("tid")) {
+          currentUrl.searchParams.set("tid", "ts5ccrZysnfHpjedg8knvcyDdnt1");
+        }
         const appUrl = currentUrl.toString();
 
         new QRCode(qrcodeContainer, {
@@ -1902,11 +1923,13 @@
         menu.style.display = "flex";
       }
       function backToHome() {
+        // 1. สั่งตัดเสียง AI ก่อน
         if ("speechSynthesis" in window) {
           speechSynthesis.cancel();
         }
         isSpeaking = false;
 
+        // 2. ปิดหน้าจอ AR และกลับหน้า Home
         document.getElementById("appHeader").style.display = "none";
         document.getElementById("mainArea").style.display = "none";
         tabs.style.display = "none";
@@ -2014,6 +2037,7 @@
         showQuestion();
       }
 
+      // 🌟 อัปเกรดหน้าตาเฉลยแบบพรีเมียมการ์ด (Premium Card Layout) 🌟
       function showResult() {
         clearInterval(timerInterval);
         document.getElementById("quizTimer").style.display = "none";
