@@ -1320,9 +1320,10 @@
       firebase.initializeApp(firebaseConfig);
       const db = firebase.firestore();
 
-      db.enablePersistence().catch(function (err) {
-        console.log("Firebase Cache Error: ", err);
-      });
+      // 🌟 ปิดการจำข้อมูลออฟไลน์ เพื่อแก้ปัญหาเบราว์เซอร์ LINE บน iOS ค้างหน้าโหลดสีเหลือง 🌟
+      // db.enablePersistence().catch(function (err) {
+      //   console.log("Firebase Cache Error: ", err);
+      // });
 
       // 🌟 1. อ่านค่ารหัสครู (tid) จาก URL ที่นักเรียนสแกนมา
       const urlParams = new URLSearchParams(window.location.search);
@@ -1863,7 +1864,6 @@
         }
       });
 
-      // 🌟 สร้างฟังก์ชันให้ดึง URL ปัจจุบันและบังคับห้อย ?tid= ของอาจารย์เสมอ
       function showQRCode() {
         qrModal.style.display = "flex";
         document.getElementById("qrModalTitle").innerHTML =
@@ -1898,12 +1898,8 @@
         const qrcodeContainer = document.getElementById("qrcode");
         qrcodeContainer.innerHTML = "";
 
-        // 🌟 แก้ไขตรงนี้: บังคับยัด ?tid=ts5ccrZysnfHpjedg8knvcyDdnt1 ลงใน URL ที่จะเอาไปสร้าง QR Code ทันที
-        let currentUrl = new URL(window.location.href);
-        if (!currentUrl.searchParams.has("tid")) {
-          currentUrl.searchParams.set("tid", "ts5ccrZysnfHpjedg8knvcyDdnt1");
-        }
-        const appUrl = currentUrl.toString();
+        // 🌟 แก้ไขตรงนี้: ใช้ URL ปัจจุบันของหน้าเว็บนักเรียนได้เลย (เพราะมี ?tid ติดมาด้วยแล้ว)
+        const appUrl = window.location.href;
 
         new QRCode(qrcodeContainer, {
           text: appUrl,
