@@ -232,7 +232,7 @@
         background: rgba(255, 255, 255, 0.15);
       }
 
-      /* 🌟 ไฮไลต์ปุ่มเหมือนปุ่ม "แสดง UI" (ขอบแดง ตัวหนังสือแดง พื้นหลังคงเดิม) */
+      /* 🌟 ไฮไลต์ปุ่มเหมือนปุ่ม "แสดง UI" */
       .info-active {
         border-color: var(--primary) !important;
         color: var(--primary) !important;
@@ -1319,23 +1319,17 @@
       firebase.initializeApp(firebaseConfig);
       const db = firebase.firestore();
 
-      // 🌟 แก้ปัญหาที่ 1: ปิดระบบออฟไลน์ แก้หน้าค้างสีเหลืองใน iOS (iPhone)
-      // db.enablePersistence().catch(function (err) {
-      //   console.log("Firebase Cache Error: ", err);
-      // });
-
-      // 🌟 แก้ปัญหาที่ 2: บังคับล็อกเป้าฐานข้อมูลของคุณเสมอ แก้ปัญหาจอแดง
+      // 🌟 บังคับล็อกเป้าฐานข้อมูลเป็นของคุณคนเดียวแบบตายตัว!
       const myUID = "ts5ccrZysnfHpjedg8knvcyDdnt1";
       const docRef = db.collection("classrooms").doc(myUID);
 
-      // 🌟 3. เริ่มดึงข้อมูล
+      // 🌟 2. เริ่มดึงข้อมูล (พร้อมระบบโหลดซ้ำอัตโนมัติแบบเงียบๆ)
       let retryCount = 0;
       const maxRetries = 3;
 
       function fetchClassroomData() {
-        // 🌟 บังคับดึงข้อมูลจากเซิร์ฟเวอร์โดยตรง (ข้าม Cache)
         docRef
-          .get({ source: 'server' })
+          .get()
           .then((docSnap) => {
             if (docSnap.exists) {
               const dbData = docSnap.data();
@@ -1370,16 +1364,13 @@
           .catch((err) => {
             console.error("Error:", err);
             
-            // ถ้ายอดการลองซ้ำยังไม่เกินที่กำหนด ให้ลองใหม่
+            // ถ้ายอดการลองซ้ำยังไม่เกิน ให้ลองใหม่เงียบๆ
             if (retryCount < maxRetries) {
               retryCount++;
-              document.getElementById("loadingText").innerHTML = 
-                `กำลังเชื่อมต่อข้อมูล... (ลองครั้งที่ ${retryCount}/${maxRetries})<br>` +
-                `<span style="font-size: 0.8rem; color: #94a3b8;">หากอินเทอร์เน็ตช้า ระบบจะพยายามเชื่อมต่ออัตโนมัติ</span>`;
-              
+              // ❌ ลบคำสั่งแสดงข้อความ "ลองครั้งที่..." ออกไปแล้ว
               setTimeout(fetchClassroomData, 1500); 
             } else {
-              // หมดโควต้าลองซ้ำแล้ว ค่อยโชว์ปุ่มให้ผู้ใช้กดเอง
+              // ถ้าพังเกิน 3 ครั้งจริงๆ ค่อยโชว์ปุ่มแดง
               document.getElementById("loadingText").innerHTML =
                 "การเชื่อมต่อเครือข่ายล่าช้า หรือลิงก์ไม่ถูกต้อง<br>" + 
                 "<button onclick='window.location.reload()' style='margin-top: 15px; background: #ef4444; color: white; border: none; border-radius: 12px; padding: 10px 20px; font-family: Kanit; cursor: pointer; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);'>🔄 โหลดข้อมูลใหม่อีกครั้ง</button>";
