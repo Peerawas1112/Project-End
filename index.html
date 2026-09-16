@@ -1328,7 +1328,6 @@
       const maxRetries = 3;
 
       function fetchClassroomData() {
-        // ใช้ .get() ธรรมดา เพื่อให้ Firebase จัดการเน็ต 4G ที่แกว่งได้ดีขึ้น
         docRef
           .get()
           .then((docSnap) => {
@@ -1370,11 +1369,15 @@
               retryCount++;
               setTimeout(fetchClassroomData, 1500); 
             } else {
-              // ถ้าพังเกิน 3 ครั้งจริงๆ ค่อยโชว์ปุ่มแดง
-              document.getElementById("loadingText").innerHTML =
-                "การเชื่อมต่อเครือข่ายล่าช้า หรือลิงก์ไม่ถูกต้อง<br>" + 
-                "<button onclick='window.location.reload()' style='margin-top: 15px; background: #ef4444; color: white; border: none; border-radius: 12px; padding: 10px 20px; font-family: Kanit; cursor: pointer; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);'>🔄 โหลดข้อมูลใหม่อีกครั้ง</button>";
-              document.getElementById("loadingText").style.color = "#ef4444";
+              // ถ้าพังเกิน 3 ครั้งจริงๆ ให้รีเฟรชหน้าเว็บอัตโนมัติแบบเงียบๆ
+              document.getElementById("loadingText").innerHTML = "กำลังรีสตาร์ทระบบ... 🔄";
+              document.getElementById("loadingText").style.color = "#fbbf24";
+              
+              setTimeout(() => {
+                let currentUrl = new URL(window.location.href);
+                currentUrl.searchParams.set("v", new Date().getTime());
+                window.location.href = currentUrl.toString();
+              }, 1500);
             }
           });
       }
@@ -2283,4 +2286,4 @@
       }
     </script>
   </body>
-</html>
+</html> 
