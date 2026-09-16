@@ -1323,11 +1323,12 @@
       const myUID = "ts5ccrZysnfHpjedg8knvcyDdnt1";
       const docRef = db.collection("classrooms").doc(myUID);
 
-      // 🌟 2. เริ่มดึงข้อมูล (พร้อมระบบโหลดซ้ำอัตโนมัติแบบเงียบๆ)
+      // 🌟 เริ่มดึงข้อมูล (แบบเสถียรสำหรับ 4G และลองใหม่เงียบๆ)
       let retryCount = 0;
       const maxRetries = 3;
 
       function fetchClassroomData() {
+        // ใช้ .get() ธรรมดา เพื่อให้ Firebase จัดการเน็ต 4G ที่แกว่งได้ดีขึ้น
         docRef
           .get()
           .then((docSnap) => {
@@ -1364,10 +1365,9 @@
           .catch((err) => {
             console.error("Error:", err);
             
-            // ถ้ายอดการลองซ้ำยังไม่เกิน ให้ลองใหม่เงียบๆ
+            // ถ้ายอดการลองซ้ำยังไม่เกิน ให้ลองใหม่เงียบๆ โดยหน้าจอไม่กระพริบ
             if (retryCount < maxRetries) {
               retryCount++;
-              // ❌ ลบคำสั่งแสดงข้อความ "ลองครั้งที่..." ออกไปแล้ว
               setTimeout(fetchClassroomData, 1500); 
             } else {
               // ถ้าพังเกิน 3 ครั้งจริงๆ ค่อยโชว์ปุ่มแดง
