@@ -598,6 +598,10 @@
           overflow-x: auto;
           justify-content: flex-start;
           padding-bottom: 10px;
+          /* 🌟 แก้ปัญหา iOS Scroll ด้านบน */
+          pointer-events: auto;
+          -webkit-overflow-scrolling: touch;
+          touch-action: pan-x;
         }
         .tabs::-webkit-scrollbar {
           display: none;
@@ -621,6 +625,9 @@
           padding: 8px;
           border-radius: 16px;
           justify-content: flex-start;
+          /* 🌟 แก้ปัญหา iOS Scroll ด้านล่าง */
+          -webkit-overflow-scrolling: touch;
+          touch-action: pan-x;
         }
         
         .menu::-webkit-scrollbar {
@@ -1323,7 +1330,7 @@
       const myUID = "ts5ccrZysnfHpjedg8knvcyDdnt1";
       const docRef = db.collection("classrooms").doc(myUID);
 
-      // 🌟 เริ่มดึงข้อมูล (แบบเสถียรสำหรับ 4G และลองใหม่เงียบๆ)
+      // 🌟 2. เริ่มดึงข้อมูล (พร้อมระบบโหลดซ้ำอัตโนมัติแบบเงียบๆ)
       let retryCount = 0;
       const maxRetries = 3;
 
@@ -1364,7 +1371,7 @@
           .catch((err) => {
             console.error("Error:", err);
             
-            // ถ้ายอดการลองซ้ำยังไม่เกิน ให้ลองใหม่เงียบๆ โดยหน้าจอไม่กระพริบ
+            // ถ้ายอดการลองซ้ำยังไม่เกิน ให้ลองใหม่เงียบๆ
             if (retryCount < maxRetries) {
               retryCount++;
               setTimeout(fetchClassroomData, 1500); 
@@ -2286,4 +2293,4 @@
       }
     </script>
   </body>
-</html> 
+</html>
